@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../modules/calendar/calendar_screen.dart';
+import '../profiles/profiles_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -28,6 +29,17 @@ class DashboardScreen extends StatelessWidget {
                 );
               },
               child: const Text('Open Calendar'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilesScreen(),
+                  ),
+                );
+              },
+              child: const Text('View Profiles'),
             ),
           ],
         ),
