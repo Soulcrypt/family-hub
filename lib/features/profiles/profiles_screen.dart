@@ -7,7 +7,7 @@ class ProfilesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final service = ProfileService();
-    final profiles = service.getAllProfiles();
+    final profiles = service.allProfiles;
 
     return Scaffold(
       appBar: AppBar(
@@ -19,9 +19,9 @@ class ProfilesScreen extends StatelessWidget {
           final profile = profiles[index];
           return ListTile(
             leading: const Icon(Icons.person),
-            title: Text(profile.id),
+            title: Text(profile.name),
             subtitle: Text(profile.role.name),
-            trailing: Text(profile.visibleModules.join(', ')),
+            trailing: Text(profile.allowedModules.join(', ')),
           );
         },
       ),

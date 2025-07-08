@@ -1,33 +1,53 @@
+import 'package:flutter/foundation.dart';
+
 import '../models/profile.dart';
 
-class ProfileService {
-  ProfileService();
+class ProfileService extends ChangeNotifier {
+  ProfileService()
+      : _currentProfileNotifier =
+            ValueNotifier<UserProfile>(_mockProfiles.first);
 
-  final List<UserProfile> _mockProfiles = const [
+  // Mock profiles available in the app.
+  static const List<UserProfile> _mockProfiles = [
     UserProfile(
       id: 'parent1',
+      name: 'Alice',
       role: UserRole.parent,
-      visibleModules: ['calendar', 'chores', 'shopping'],
+      allowedModules: ['calendar', 'chores', 'shopping'],
     ),
     UserProfile(
       id: 'kid1',
+      name: 'Bobby',
       role: UserRole.kid,
-      visibleModules: ['calendar', 'games'],
+      allowedModules: ['calendar', 'games'],
     ),
     UserProfile(
       id: 'admin1',
+      name: 'Admin',
       role: UserRole.admin,
-      visibleModules: ['calendar', 'chores', 'shopping', 'settings'],
+      allowedModules: ['calendar', 'chores', 'shopping', 'settings'],
     ),
   ];
 
-  List<UserProfile> getAllProfiles() => List.unmodifiable(_mockProfiles);
+  /// Notifies listeners whenever the current profile changes.
+  final ValueNotifier<UserProfile> _currentProfileNotifier;
 
-  UserProfile? getProfileById(String id) {
-    try {
-      return _mockProfiles.firstWhere((p) => p.id == id);
-    } catch (_) {
-      return null;
+  /// All mock profiles.
+  List<UserProfile> get allProfiles => List.unmodifiable(_mockProfiles);
+
+  /// Current active profile notifier.
+  ValueNotifier<UserProfile> get currentProfileNotifier => _currentProfileNotifier;
+
+  /// Convenience getter for the current profile.
+  UserProfile get currentProfile => _currentProfileNotifier.value;
+
+  /// Switch to a different profile by its [id].
+  void switchProfile(String id) {
+    final profile =
+        _mockProfiles.firstWhere((p) => p.id == id, orElse: () => currentProfile);
+    if (profile.id != _currentProfileNotifier.value.id) {
+      _currentProfileNotifier.value = profile;
+      notifyListeners();
     }
   }
 }
