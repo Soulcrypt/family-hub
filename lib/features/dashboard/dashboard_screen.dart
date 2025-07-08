@@ -20,26 +20,31 @@ class DashboardScreen extends StatelessWidget {
               style: TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 16),
-            const ModuleTile(
-              moduleName: 'Calendar',
-              icon: Icons.event,
-            ),
-            const ModuleTile(
-              moduleName: 'Budgeting',
-              icon: Icons.attach_money,
-            ),
-            const ModuleTile(
-              moduleName: 'Chores',
-              icon: Icons.check_box,
-            ),
-            const ModuleTile(
-              moduleName: 'Settings',
-              icon: Icons.settings,
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () => context.go('/profiles'),
-              child: const Text('View Profiles'),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: const [
+                ModuleTile(
+                  title: 'Calendar',
+                  icon: Icons.event,
+                ),
+                ModuleTile(
+                  title: 'Budgeting',
+                  icon: Icons.attach_money,
+                ),
+                ModuleTile(
+                  title: 'Chores',
+                  icon: Icons.check_box,
+                ),
+                ModuleTile(
+                  title: 'Settings',
+                  icon: Icons.settings,
+                ),
+                ModuleTile(
+                  title: 'Profiles',
+                  icon: Icons.person,
+                ),
+              ],
             ),
           ],
         ),

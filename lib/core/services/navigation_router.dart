@@ -6,6 +6,7 @@ import '../../modules/calendar/calendar_screen.dart';
 import '../../modules/budgeting/budgeting_screen.dart';
 import '../../modules/chores/chores_screen.dart';
 import '../../modules/settings/settings_screen.dart';
+import '../../features/profiles/profiles_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/dashboard',
@@ -29,6 +30,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/profiles',
+      builder: (context, state) => const ProfilesScreen(),
     ),
   ],
 );
