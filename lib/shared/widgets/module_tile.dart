@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../modules/calendar/calendar_screen.dart';
+import 'package:go_router/go_router.dart';
 
 /// Tile widget for launching a module screen.
 class ModuleTile extends StatelessWidget {
@@ -12,10 +12,12 @@ class ModuleTile extends StatelessWidget {
     required this.icon,
   });
 
-  Widget? _screenForModule() {
+  String? _routeForModule() {
     switch (moduleName.toLowerCase()) {
       case 'calendar':
-        return const CalendarScreen();
+        return '/calendar';
+      case 'budgeting':
+        return '/budgeting';
       default:
         return null;
     }
@@ -23,18 +25,12 @@ class ModuleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screen = _screenForModule();
+    final route = _routeForModule();
 
     return ListTile(
       leading: Icon(icon),
       title: Text(moduleName),
-      onTap: screen == null
-          ? null
-          : () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => screen),
-              );
-            },
+      onTap: route == null ? null : () => context.go(route),
     );
   }
 }

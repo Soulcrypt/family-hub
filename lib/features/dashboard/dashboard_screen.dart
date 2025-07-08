@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../profiles/profiles_screen.dart';
 import '../../shared/widgets/module_tile.dart';
+import 'package:go_router/go_router.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -20,19 +20,17 @@ class DashboardScreen extends StatelessWidget {
               style: TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 16),
-            ModuleTile(
+            const ModuleTile(
               moduleName: 'Calendar',
               icon: Icons.event,
             ),
+            const ModuleTile(
+              moduleName: 'Budgeting',
+              icon: Icons.attach_money,
+            ),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ProfilesScreen(),
-                  ),
-                );
-              },
+              onPressed: () => context.go('/profiles'),
               child: const Text('View Profiles'),
             ),
           ],
