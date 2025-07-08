@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-class CalendarScreen extends StatelessWidget {
-  const CalendarScreen({super.key});
+/// Simple calendar module listing upcoming events.
+class CalendarModule extends StatelessWidget {
+  const CalendarModule({super.key});
 
   @override
   Widget build(BuildContext context) {
     const events = [
-      'Birthday Party',
       'Doctor Appointment',
-      'Family Dinner',
+      'Parent-Teacher Meeting',
+      'Dinner with Grandma',
     ];
 
     return Scaffold(

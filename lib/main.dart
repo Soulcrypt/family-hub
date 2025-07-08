@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'features/dashboard/dashboard_screen.dart';
+import 'core/services/navigation_router.dart';
 
 void main() {
   runApp(const FamilyHubApp());
@@ -10,7 +10,7 @@ class FamilyHubApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Family Hub',
       theme: ThemeData(
         useMaterial3: true,
@@ -18,7 +18,7 @@ class FamilyHubApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black,
         colorSchemeSeed: Colors.teal,
       ),
-      home: const DashboardScreen(),
+      routerConfig: appRouter,
     );
   }
 }
