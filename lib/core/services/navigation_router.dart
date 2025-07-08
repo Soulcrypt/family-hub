@@ -7,6 +7,7 @@ import '../../modules/budgeting/budgeting_screen.dart';
 import '../../modules/chores/chores_screen.dart';
 import '../../modules/settings/settings_screen.dart';
 import '../../features/profiles/profiles_screen.dart';
+import '../../features/settings/profile_switch_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/dashboard',
@@ -30,6 +31,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/switch-profile',
+      builder: (context, state) => const ProfileSwitchScreen(),
     ),
     GoRoute(
       path: '/profiles',
