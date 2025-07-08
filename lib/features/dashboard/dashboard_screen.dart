@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../modules/calendar/calendar_screen.dart';
 import '../profiles/profiles_screen.dart';
+import '../../shared/widgets/module_tile.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -20,15 +20,9 @@ class DashboardScreen extends StatelessWidget {
               style: TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const CalendarScreen(),
-                  ),
-                );
-              },
-              child: const Text('Open Calendar'),
+            ModuleTile(
+              moduleName: 'Calendar',
+              icon: Icons.event,
             ),
             const SizedBox(height: 8),
             ElevatedButton(
@@ -47,4 +41,3 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 }
-
