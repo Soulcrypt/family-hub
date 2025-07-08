@@ -51,3 +51,6 @@ class ProfileService extends ChangeNotifier {
     }
   }
 }
+
+/// Global instance of [ProfileService] used throughout the app.
+final ProfileService profileService = ProfileService();

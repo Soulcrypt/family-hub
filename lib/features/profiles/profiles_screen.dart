@@ -6,8 +6,7 @@ class ProfilesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final service = ProfileService();
-    final profiles = service.allProfiles;
+    final profiles = profileService.allProfiles;
 
     return Scaffold(
       appBar: AppBar(
