@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'router.dart';
+import 'core/services/navigation_router.dart';
 
 void main() {
   runApp(const FamilyHubApp());

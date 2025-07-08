@@ -17,7 +17,12 @@ class ModuleTile extends StatelessWidget {
       case 'calendar':
         return '/calendar';
       case 'budgeting':
-        return '/budgeting';
+      case 'budget':
+        return '/budget';
+      case 'chores':
+        return '/chores';
+      case 'settings':
+        return '/settings';
       default:
         return null;
     }

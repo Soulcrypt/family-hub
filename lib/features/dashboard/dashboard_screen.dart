@@ -28,6 +28,14 @@ class DashboardScreen extends StatelessWidget {
               moduleName: 'Budgeting',
               icon: Icons.attach_money,
             ),
+            const ModuleTile(
+              moduleName: 'Chores',
+              icon: Icons.check_box,
+            ),
+            const ModuleTile(
+              moduleName: 'Settings',
+              icon: Icons.settings,
+            ),
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () => context.go('/profiles'),
