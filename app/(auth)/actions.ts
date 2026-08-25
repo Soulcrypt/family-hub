@@ -8,6 +8,20 @@ import { signInSchema, signUpSchema } from "@/lib/validation/schemas";
 export type AuthState = { error: string | null };
 
 /**
+ * `next` lets `/invite/[token]` (Task 14) send a signed-out visitor to `/signup?next=/invite/<token>`
+ * (or `/login?next=...`) and land them back on the SAME invite after auth, instead of always at
+ * `/onboarding` / `/`. A bare, unvalidated `next` query param would otherwise be a classic
+ * open-redirect vector (`next=https://evil.example` or even `next=//evil.example`) -- this
+ * allowlists the one legitimate shape (an invite claim path, matching the exact token alphabet
+ * `randomBytes(24).toString("base64url")` produces) rather than trying to sanitize an
+ * arbitrary URL.
+ */
+function safeNextPath(value: FormDataEntryValue | null): string | null {
+  if (typeof value !== "string") return null;
+  return /^\/invite\/[A-Za-z0-9_-]+$/.test(value) ? value : null;
+}
+
+/**
  * Maps a `signUp()` failure to user-facing copy. Never passes Supabase's own `error.message`
  * through: those strings are written for a developer console, not this app's users, and can
  * actively contradict its own rules (GoTrue's weak-password message cites its OWN minimum,
@@ -50,7 +64,7 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   });
   if (error) return { error: mapSignUpError(error) };
 
-  redirect("/onboarding");
+  redirect(safeNextPath(formData.get("next")) ?? "/onboarding");
 }
 
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -66,5 +80,5 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: "Invalid email or password — check your details and try again." };
 
-  redirect("/");
+  redirect(safeNextPath(formData.get("next")) ?? "/");
 }
