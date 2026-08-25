@@ -295,6 +295,13 @@ async function lookupAccountMembership(): Promise<MembershipLookup> {
  * silently mapping them to `null` would send an affected account back through onboarding
  * instead of surfacing the problem. See `lookupAccountMembership()`'s comment on why
  * `.limit(1)` is not the fix.
+ *
+ * `null` ALSO covers a third case this doc's first paragraph doesn't spell out: `auth.getUser()`
+ * itself failing (a transient auth-service problem — `MembershipLookup`'s `"unavailable"`
+ * status), folded in here to keep this function's outcomes exactly as they were before that
+ * status existed. A caller that needs to tell a transient failure apart from a genuinely
+ * unauthenticated or not-yet-onboarded visitor — because, unlike here, guessing wrong matters —
+ * should call `getMembershipStatus()` instead and branch on its `"unavailable"` case explicitly.
  */
 export async function getAccountMembership(): Promise<AccountMembership | null> {
   const result = await lookupAccountMembership();
@@ -323,6 +330,13 @@ export async function getAccountMembership(): Promise<AccountMembership | null> 
  * that renders for a not-yet-onboarded account (like `/onboarding` itself) should call
  * `getAccountMembership()` instead: this function throwing there turns a normal "redirect to
  * onboarding" state into an unhandled error.
+ *
+ * `NotAuthenticatedError` ALSO covers a third case this doc's first paragraph doesn't spell
+ * out: `auth.getUser()` itself failing (a transient auth-service problem — `MembershipLookup`'s
+ * `"unavailable"` status), folded in here to keep this function's outcomes exactly as they were
+ * before that status existed. A caller that needs to tell a transient failure apart from a
+ * genuinely unauthenticated account — because, unlike here, guessing wrong matters — should
+ * call `getMembershipStatus()` instead and branch on its `"unavailable"` case explicitly.
  */
 export async function requireAccountMembership(): Promise<AccountMembership> {
   const result = await lookupAccountMembership();
