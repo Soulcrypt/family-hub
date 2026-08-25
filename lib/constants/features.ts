@@ -21,6 +21,20 @@ export type FeatureKey = (typeof FEATURES)[number]["key"];
 
 export type EnabledFeatures = Partial<Record<FeatureKey, boolean>>;
 
+const FEATURE_KEYS: ReadonlySet<string> = new Set(FEATURES.map((feature) => feature.key));
+
+/**
+ * Narrows an arbitrary string to `FeatureKey`. `saveFeaturesAction` (app/onboarding/actions.ts)
+ * uses this to filter `formData.getAll("features")` before writing — without it, a crafted
+ * POST could write an arbitrary key (e.g. `{ arbitraryJunk: true }`) into
+ * `household_settings.enabled_features`. Confined to the caller's own household by RLS, and
+ * `parseEnabledFeatures()` below already filters unknown keys back out on read, but validating
+ * on write is tighter than relying on every future reader to filter.
+ */
+export function isFeatureKey(value: string): value is FeatureKey {
+  return FEATURE_KEYS.has(value);
+}
+
 export function isFeatureEnabled(features: EnabledFeatures, key: FeatureKey): boolean {
   return features[key] === true;
 }

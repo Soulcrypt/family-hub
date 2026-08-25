@@ -7,9 +7,15 @@ import { createServerClient } from "@/lib/supabase/server";
 import { householdSchema, memberSchema } from "@/lib/validation/schemas";
 import { getAccountMembership, requireAccountMembership, setActiveMember } from "@/lib/auth/active-member";
 import { canManageMembers } from "@/lib/auth/permissions";
-import type { EnabledFeatures } from "@/lib/constants/features";
+import { isFeatureKey, type EnabledFeatures } from "@/lib/constants/features";
 
 export type ActionState = { error: string | null };
+
+// The exact message create_household() (supabase/migrations/0010_create_household_toctou_guard.sql)
+// raises when the caller already has an active household -- kept as one constant so the
+// comparison in createHouseholdAction below can't silently drift from what the database
+// actually raises.
+const DUPLICATE_HOUSEHOLD_MESSAGE = "you already have a household";
 
 export async function createHouseholdAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   // Resumability guard, checked BEFORE validating the submitted form: a second tab, a double
@@ -38,10 +44,27 @@ export async function createHouseholdAction(_prev: ActionState, formData: FormDa
     p_name: parsed.data.name,
     p_timezone: parsed.data.timezone,
   });
-  // create_household() itself validates name length and timezone and raises a clean 22023
-  // message (e.g. "invalid timezone") for either -- safe to surface directly rather than a
-  // generic fallback, unlike GoTrue's auth errors elsewhere in this app.
-  if (error) return { error: error.message };
+  if (error) {
+    // The getAccountMembership() guard above narrows this race but cannot fully close it:
+    // two genuinely concurrent submissions (two tabs, or a double-click landing inside the
+    // same event-loop tick before React disables the button) can both pass that read before
+    // either transaction commits. create_household() itself now closes the window with an
+    // advisory lock plus its own re-check (migration 0010) and raises this specific,
+    // distinguishable message when it loses that race against an earlier call from the same
+    // account. Treat it exactly like the pre-emptive guard above -- bounce forward, not an
+    // error -- since from the user's point of view they DO have a household now, just not
+    // the one this particular call tried to create; a double-click should land them on step
+    // 3, not show them an error. Every other error (bad name, bad timezone, not
+    // authenticated) falls through to the generic surface-the-message branch below --
+    // create_household()'s own messages for those are already clean enough to show directly,
+    // unlike GoTrue's auth errors elsewhere in this app.
+    if (error.message === DUPLICATE_HOUSEHOLD_MESSAGE) {
+      const membership = await requireAccountMembership();
+      await setActiveMember(membership.id);
+      redirect("/onboarding?step=members");
+    }
+    return { error: error.message };
+  }
 
   const membership = await requireAccountMembership();
   await setActiveMember(membership.id);
@@ -95,7 +118,10 @@ export async function saveFeaturesAction(_prev: ActionState, formData: FormData)
 
   const enabled: EnabledFeatures = { family: true, settings: true };
   for (const key of formData.getAll("features")) {
-    if (typeof key === "string") enabled[key as keyof EnabledFeatures] = true;
+    // isFeatureKey() rejects anything not in FEATURES itself -- a crafted POST naming an
+    // unknown key is dropped here rather than written into enabled_features and relying on
+    // parseEnabledFeatures() to filter out again on every future read.
+    if (typeof key === "string" && isFeatureKey(key)) enabled[key] = true;
   }
 
   const supabase = await createServerClient();

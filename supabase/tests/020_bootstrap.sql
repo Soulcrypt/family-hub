@@ -1,5 +1,5 @@
 begin;
-select plan(37);
+select plan(40);
 
 -- New Owner triggers the profile-creation trigger; New Teen claims Ivy's
 -- login-less row; Claim Attempt tries to claim an already-claimed row via
@@ -97,6 +97,30 @@ select is(
   'settings row is created alongside the household'
 );
 
+-- Task 10 fix round 1: create_household() itself (not just application
+-- code -- app/onboarding/actions.ts's own guard is a read-then-act race,
+-- not a guarantee) must refuse a second call from an account that
+-- already has an active household. Still New Owner's session from above.
+select throws_ok(
+  $$ select create_household('Second House', 'UTC') $$,
+  '22023',
+  'you already have a household',
+  'create_household refuses a second call from an account that already has an active household'
+);
+
+select is(
+  (select count(*)::int from households where name = 'Second House'),
+  0,
+  'the rejected second create_household call created no household row'
+);
+
+select is(
+  (select count(*)::int from household_members
+   where user_id = '44444444-4444-4444-8444-444444444444'),
+  1,
+  'the account still has exactly one household_members row after the rejected second call'
+);
+
 -- Bootstrap RPCs must still authenticate the caller themselves -- they
 -- bypass RLS entirely as SECURITY DEFINER, so this check is the only
 -- thing standing between an unauthenticated caller and a free household.
@@ -108,7 +132,23 @@ select throws_ok(
   'a caller with no auth.uid() cannot create a household'
 );
 
-set local request.jwt.claims = '{"sub":"44444444-4444-4444-8444-444444444444","role":"authenticated"}';
+-- Task 10 fix round 1: M-7 and M-6 below must run as an account with NO
+-- household yet. New Owner already has one by this point in the file
+-- (see above), so reusing that session here would hit the new "you
+-- already have a household" guard first -- it runs before name/timezone
+-- validation, by design (raising a real error is pointless work once the
+-- call is going to be rejected anyway) -- and these two tests would stop
+-- exercising the validation they're named for. Neither of the two calls
+-- below succeeds, so this one fresh user can safely serve both.
+--
+-- auth.users needs an elevated role to insert into (see the HINT this
+-- throws under plain `authenticated`), matching the reset-role/set-role
+-- pattern used elsewhere in this file for a late fixture insert/update.
+reset role;
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('10101010-1010-4101-8101-101010101010', 'validationprober@test.local', '{"display_name":"Validation Prober"}'::jsonb);
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"10101010-1010-4101-8101-101010101010","role":"authenticated"}';
 
 -- M-7: p_name was only checked for emptiness, not households.name's own
 -- 1-80 bound -- an over-long name raised a raw 23514 with a row dump.
