@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canEditSettings, canInvite, canManageMembers, isAdmin, requiresPin } from "@/lib/auth/permissions";
+import { canEditSettings, canInvite, canManageMembers, isAdmin, isAdminProfile, requiresPin } from "@/lib/auth/permissions";
 import { ROLES } from "@/lib/constants/roles";
 import type { AuthorityRole, MemberRole } from "@/lib/constants/roles";
 
@@ -38,6 +38,12 @@ describe("permissions", () => {
     expect(requiresPin("parent")).toBe(true);
     expect(requiresPin("teen")).toBe(false);
     expect(requiresPin("child")).toBe(false);
+  });
+
+  it("isAdminProfile agrees with requiresPin for every role -- a UI-only display check, not the security boundary", () => {
+    for (const role of ROLES) {
+      expect(isAdminProfile(role)).toBe(requiresPin(role));
+    }
   });
 
   it("covers every role with no gaps", () => {

@@ -48,3 +48,25 @@ export function canInvite(role: AuthorityRole): boolean {
 export function requiresPin(role: MemberRole): boolean {
   return isAdminRole(role);
 }
+
+/**
+ * UI-ONLY helper for a page that intentionally renders "as" whichever profile is currently
+ * ATTRIBUTED on a shared device -- e.g. Settings (Task 15), where a household switched (via
+ * lib/auth/active-member.ts's `getActiveMember()`) to a non-admin member's profile should show
+ * a read-only view even though the AUTHENTICATED account underneath might still be an
+ * owner/parent. This is deliberately NOT a security boundary: every mutating Server Action in
+ * this file's callers still gates on `requireAccountMembership()` + `canEditSettings()` /
+ * `canManageMembers()` alone, exactly as everywhere else in the codebase, regardless of what
+ * this function says. Pass it whichever profile the page wants to render as -- typically
+ * `getActiveMember()?.role ?? account.role`, so a session that has never switched (or whose
+ * cookie was cleared) falls back to rendering as the account's own row.
+ *
+ * Intentionally a separate function from `requiresPin` even though both currently reduce to
+ * the same `isAdminRole` check: `requiresPin` answers a switcher-specific question ("does
+ * entering this profile need a PIN?"); this answers a display question ("should THIS profile
+ * see admin controls?"). Keeping them distinct means a future divergence between "needs a PIN"
+ * and "is admin-like for display" doesn't require re-auditing every call site of the other.
+ */
+export function isAdminProfile(role: MemberRole): boolean {
+  return isAdminRole(role);
+}

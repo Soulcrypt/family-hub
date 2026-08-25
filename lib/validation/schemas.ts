@@ -14,7 +14,12 @@ export const roleSchema = z.enum(ROLES);
 // schema's own default value is "UTC", so it must be added back explicitly or the schema
 // would reject its own default. Verified live: `Intl.supportedValuesOf("timeZone").includes("UTC")`
 // is `false` on Node 20 here.
-const VALID_TIME_ZONES = new Set([...Intl.supportedValuesOf("timeZone"), "UTC"]);
+//
+// Exported (sorted) so `/settings/household` (Task 15) can render exactly the zones this
+// schema accepts as a picker's options, rather than maintaining a second list that could drift
+// out of step with what actually validates.
+export const TIME_ZONES: readonly string[] = [...Intl.supportedValuesOf("timeZone"), "UTC"].sort();
+const VALID_TIME_ZONES = new Set(TIME_ZONES);
 
 export const signUpSchema = z.object({
   displayName: z.string().trim().min(1, "Your name is required").max(40),
@@ -35,6 +40,15 @@ export const householdSchema = z.object({
     .min(1)
     .default("UTC")
     .refine((tz) => VALID_TIME_ZONES.has(tz), "Enter a valid time zone (e.g. America/New_York)"),
+  // Optional/defaulted so app/onboarding/actions.ts's createHouseholdAction (which never
+  // submits this field -- create_household() itself defaults it) keeps parsing unchanged;
+  // only app/(app)/settings/actions.ts's updateHouseholdAction (Task 15) actually reads it.
+  // Matches households.week_start's own check constraint (0-6, Sunday=0).
+  weekStart: z.coerce.number().int().min(0, "Pick a day of the week").max(6, "Pick a day of the week").default(0),
+});
+
+export const appearanceSchema = z.object({
+  accent: z.string().trim().regex(/^#[0-9A-Fa-f]{6}$/, "Pick a valid color"),
 });
 
 export const memberSchema = z.object({
@@ -54,3 +68,4 @@ export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type HouseholdInput = z.infer<typeof householdSchema>;
 export type MemberInput = z.infer<typeof memberSchema>;
+export type AppearanceInput = z.infer<typeof appearanceSchema>;
