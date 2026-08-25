@@ -75,6 +75,22 @@ test("a parent can rename the household, enable a feature, toggle the theme, and
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(mainContent.getByRole("alert")).not.toBeVisible();
 
+  // click() only dispatches the form submission -- it does not wait for
+  // updateHouseholdAction's round trip to finish, and the ".not.toBeVisible()" check above is
+  // a negative assertion that passes the instant it's evaluated (there was never an alert to
+  // begin with), so on its own it provides no synchronization either. Without an explicit wait
+  // here, the reload below can race ahead of the actual UPDATE committing -- invisible while
+  // that write stayed fast, but a real, reproducible failure once
+  // 0017_household_timezone_guard.sql's trigger added a genuine (if small) per-write cost:
+  // confirmed by reverting that migration alone and seeing this test's phone project go from
+  // failing every run to passing every run. The "aside" wait a few lines down happens to
+  // provide the same synchronization for md+ viewports (it can't resolve true until the
+  // server action's response has actually re-rendered the page), but phone renders no sidebar
+  // at all -- so wait on something every viewport has: the button itself. useActionState's
+  // `pending` flag (components/settings/household-settings-form.tsx) only flips back to
+  // false, re-enabling this button, once the action's promise has actually settled.
+  await expect(page.getByRole("button", { name: "Save changes" })).toBeEnabled();
+
   // The sidebar (where the household name is shown) only renders on md+ viewports --
   // components/shell/sidebar.tsx's <aside> is `hidden md:flex`, and the bottom nav (its phone
   // equivalent) never shows the household name at all. Verified there on wide viewports;
