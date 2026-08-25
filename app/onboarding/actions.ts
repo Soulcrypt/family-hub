@@ -12,23 +12,26 @@ import type { EnabledFeatures } from "@/lib/constants/features";
 export type ActionState = { error: string | null };
 
 export async function createHouseholdAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const parsed = householdSchema.safeParse({
-    name: formData.get("name"),
-    timezone: formData.get("timezone") || "UTC",
-  });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check your details" };
-
-  // Resumability guard: a second tab, a double submit, or a browser-back resubmission could
-  // reach here after this account already has a household. create_household() has no
-  // idempotency of its own -- calling it again would mint a SECOND household and leave the
-  // account with two active household_members rows, which every AuthorityRole lookup
-  // afterward treats as an unrecoverable ambiguity (MultipleHouseholdMembershipsError).
-  // Short-circuit instead of racing the RPC.
+  // Resumability guard, checked BEFORE validating the submitted form: a second tab, a double
+  // submit, or a browser-back resubmission of a stale form could reach here after this
+  // account already has a household. create_household() has no idempotency of its own --
+  // calling it again would mint a SECOND household and leave the account with two active
+  // household_members rows, which every AuthorityRole lookup afterward treats as an
+  // unrecoverable ambiguity (MultipleHouseholdMembershipsError). Checking this first (rather
+  // than after the zod parse below) means a stale/invalid resubmission from an already-
+  // onboarded account gets bounced forward immediately instead of surfacing a pointless
+  // validation error for data that's about to be discarded anyway.
   const existing = await getAccountMembership();
   if (existing) {
     await setActiveMember(existing.id);
     redirect("/onboarding?step=members");
   }
+
+  const parsed = householdSchema.safeParse({
+    name: formData.get("name"),
+    timezone: formData.get("timezone") || "UTC",
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check your details" };
 
   const supabase = await createServerClient();
   const { error } = await supabase.rpc("create_household", {
