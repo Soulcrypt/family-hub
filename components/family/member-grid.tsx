@@ -157,7 +157,7 @@ export function MemberGrid({ members, canManage }: { members: FamilyMember[]; ca
                   ariaHidden
                 />
                 <div className="flex min-w-0 w-full flex-col gap-0.5">
-                  <span className="line-clamp-2 w-full truncate break-words text-base font-medium text-ink">
+                  <span className="line-clamp-2 w-full break-words text-base font-medium text-ink">
                     {member.display_name}
                   </span>
                   <span className="text-sm text-muted-foreground">{ROLE_LABELS[member.role]}</span>
