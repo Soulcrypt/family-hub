@@ -28,6 +28,18 @@ export type SwitchState = { error: string | null };
  * pgcrypto (bcryptjs cannot verify a pgcrypto hash or vice versa -- they use incompatible
  * bcrypt variant tags) and collapses "wrong pin"/"no pin set"/"not your household" into the
  * same `false`, so this function never learns which case it hit.
+ *
+ * `requiresPin(target.role)` alone is NOT enough to decide whether to demand a PIN: onboarding
+ * never sets one for anyone, so a `parent`/`owner` who has never had a PIN set would be
+ * permanently unreachable if every switch into their profile required one (the P0 dead end the
+ * SP1 Foundation design review found -- Jamie Rivera in the seed is exactly this case). So this
+ * function additionally calls `member_has_pin` (SECURITY DEFINER,
+ * supabase/migrations/0019_member_pin_status_rpc.sql) to learn whether the TARGET profile
+ * genuinely has one, and only demands/verifies a PIN when it does -- never trusting the client
+ * on this either. The switcher UI (app/switch/page.tsx) mirrors this same check to decide
+ * whether to render `PinDialog` at all, but this server-side check is what actually matters:
+ * a client that posts no PIN (or any PIN) for a profile that genuinely has one is still
+ * refused, regardless of what UI it came from.
  */
 export async function switchToMemberAction(_prev: SwitchState, formData: FormData): Promise<SwitchState> {
   const memberId = String(formData.get("memberId") ?? "");
@@ -57,12 +69,19 @@ export async function switchToMemberAction(_prev: SwitchState, formData: FormDat
   const isOwnRow = target.user_id !== null && target.user_id === account.user_id;
 
   if (!isOwnRow && requiresPin(target.role)) {
-    if (!pin) return { error: "Enter this profile’s PIN to continue." };
-    const { data: verified, error } = await supabase.rpc("verify_member_pin", {
+    // Fail closed on an RPC error: treat it the same as "a pin is set" rather than silently
+    // letting the switch through, so a transient database hiccup can never bypass the gate.
+    const { data: hasPin, error: hasPinError } = await supabase.rpc("member_has_pin", {
       p_member_id: target.id,
-      p_pin: pin,
     });
-    if (error || !verified) return { error: "Incorrect PIN — try again." };
+    if (hasPinError || hasPin) {
+      if (!pin) return { error: "Enter this profile’s PIN to continue." };
+      const { data: verified, error } = await supabase.rpc("verify_member_pin", {
+        p_member_id: target.id,
+        p_pin: pin,
+      });
+      if (error || !verified) return { error: "Incorrect PIN — try again." };
+    }
   }
 
   await setActiveMember(target.id);

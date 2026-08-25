@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { Lock } from "lucide-react";
 import { switchToMemberAction, type SwitchState } from "@/app/switch/actions";
 import {
   Dialog,
@@ -27,11 +28,18 @@ export type PinDialogMember = {
 };
 
 /**
- * The switcher tile for a profile whose role `requiresPin()` -- clicking it opens a dialog
- * asking for a PIN instead of switching immediately. The PIN is a convenience lock (stops a
- * child wandering into a parent's view on the shared tablet), verified entirely server-side
- * by `switchToMemberAction`; this component only collects and submits it. A wrong PIN shows
- * the server's error message and leaves the active profile unchanged.
+ * The switcher tile for a profile the caller (app/switch/page.tsx) has determined is
+ * genuinely `gated` -- an admin role AND a PIN actually set, per `member_has_pin` (SECURITY
+ * DEFINER, supabase/migrations/0019_member_pin_status_rpc.sql) -- so clicking it opens a
+ * dialog asking for a PIN instead of switching immediately. The PIN is a convenience lock
+ * (stops a child wandering into a parent's view on the shared tablet), verified entirely
+ * server-side by `switchToMemberAction`; this component only collects and submits it. A wrong
+ * PIN shows the server's error message and leaves the active profile unchanged.
+ *
+ * The tile itself carries a small lock badge on the avatar so the fact a profile is
+ * PIN-protected is visible before tapping, not only after -- an sr-only "PIN protected" suffix
+ * on the tile's own text makes the same state part of its accessible name, not just a
+ * decorative icon nothing but sighted users can perceive.
  */
 export function PinDialog({ member }: { member: PinDialogMember }) {
   const [open, setOpen] = useState(false);
@@ -93,8 +101,23 @@ export function PinDialog({ member }: { member: PinDialogMember }) {
           type="button"
           className="flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-[18px] bg-surface px-4 py-6 text-center shadow-elevation ring-1 ring-[color:var(--color-muted)] transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          <MemberAvatar displayName={member.displayName} color={member.color} avatarUrl={member.avatarUrl} size="lg" ariaHidden />
-          <span className="line-clamp-2 w-full break-words text-base font-medium text-ink">{member.displayName}</span>
+          <span className="relative inline-flex">
+            <MemberAvatar displayName={member.displayName} color={member.color} avatarUrl={member.avatarUrl} size="lg" ariaHidden />
+            {/* Decorative -- the accessible name below (the sr-only "PIN protected" text) is
+                what actually tells assistive tech this tile is gated; this icon is a purely
+                visual affordance for sighted users so the lock is discoverable before tapping,
+                not only after a dialog opens. */}
+            <span
+              aria-hidden
+              className="absolute -right-1 -bottom-1 inline-flex size-6 items-center justify-center rounded-full bg-surface text-muted-foreground ring-1 ring-[color:var(--color-muted)]"
+            >
+              <Lock size={13} />
+            </span>
+          </span>
+          <span className="line-clamp-2 w-full break-words text-base font-medium text-ink">
+            {member.displayName}
+            <span className="sr-only"> — PIN protected</span>
+          </span>
         </button>
       </DialogTrigger>
       <DialogContent>
