@@ -1,16 +1,17 @@
 import { execFile } from "node:child_process";
 import { expect, test } from "@playwright/test";
-import { hashPin } from "@/lib/auth/pin";
 
 function unique(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 }
 
-const OWNER_PIN = "4821";
+const PARENT_PIN = "4821";
 
 // The local Supabase CLI's fixed default: `supabase start`/`supabase/config.toml`'s `[db]
-// port = 54322`, `postgres`/`postgres` superuser credentials. Never a deployed environment.
+// port = 54322`, `postgres`/`postgres` superuser credentials. Overridable via
+// SUPABASE_DB_URL for a differently-configured local stack; never a deployed environment.
 const LOCAL_DB_URL = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+const DB_URL = process.env.SUPABASE_DB_URL ?? LOCAL_DB_URL;
 
 /**
  * Runs one SQL statement against the LOCAL Supabase Postgres instance directly via `psql`, as
@@ -22,11 +23,15 @@ const LOCAL_DB_URL = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
  * (see this task's report, "For Task 21" section) -- nothing in the application uses it, and
  * granting it standing DML in the production migration path just to make one local test
  * fixture work would be exactly the kind of privilege creep this project's RLS work has spent
- * several rounds pushing back on elsewhere. `psql` needs no new dependency (it's already
- * load-bearing for this project's `supabase test db` workflow) and every value is passed as a
- * separate `-v` argument (no shell involved, so no injection surface), substituted into the
- * SQL via psql's `:'name'` syntax, which quotes/escapes it as a SQL string literal --
- * necessary here because a bcrypt hash contains `$`, `.`, and `/`.
+ * several rounds pushing back on elsewhere.
+ *
+ * This DOES introduce a genuinely new host-tool dependency for this suite: unlike `npx
+ * supabase test db`, which runs pgTAP INSIDE the Postgres container itself (no host `psql`
+ * involved), this test shells out to a `psql` binary that must be present on whatever machine
+ * runs `npm run test:e2e` -- worth knowing before wiring up CI for this project. Every value
+ * is passed as a separate `-v` argument (no shell involved, so no injection surface),
+ * substituted into the SQL via psql's `:'name'` syntax, which quotes/escapes it as a SQL
+ * string literal.
  *
  * `-t -A -F,` (tuples-only, unaligned, comma-separated) makes the stdout of a SELECT trivial
  * to parse; callers that only need side effects (the UPDATE below) ignore the return value.
@@ -37,7 +42,7 @@ const LOCAL_DB_URL = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
  * unexpanded and Postgres then rejects as a bare `:` syntax error.
  */
 function psql(sql: string, vars: Record<string, string> = {}): Promise<string> {
-  const args = [LOCAL_DB_URL, "-v", "ON_ERROR_STOP=1", "-t", "-A", "-F,"];
+  const args = [DB_URL, "-v", "ON_ERROR_STOP=1", "-t", "-A", "-F,"];
   for (const [name, value] of Object.entries(vars)) args.push("-v", `${name}=${value}`);
   return new Promise((resolve, reject) => {
     const child = execFile("psql", args, (error, stdout) => {
@@ -81,12 +86,18 @@ async function activeMemberId(page: import("@playwright/test").Page): Promise<st
   return dot > 0 ? cookie.value.slice(0, dot) : null;
 }
 
-test("switching profiles changes attribution, gated by PIN for admin profiles", async ({ page }) => {
+test("switching profiles changes attribution, gated by PIN for admin profiles other than your own", async ({
+  page,
+}) => {
   const householdName = unique("The Switchers");
   const ownerName = "Dana Owner";
   const childName = "Ivy";
+  const parentName = "Pat Parent";
 
-  // --- Onboard an owner with one PIN-less child member. ---
+  // --- Onboard an owner with a PIN-less child and a login-less parent (a SECOND admin
+  // profile distinct from the caller's own -- needed to exercise the PIN gate at all, since
+  // switching into the caller's OWN row never prompts; see switchToMemberAction's doc
+  // comment). ---
   await page.goto("/signup");
   await page.getByLabel("Your name").fill(ownerName);
   await page.getByLabel("Email").fill(`${unique("owner")}@test.local`);
@@ -106,6 +117,12 @@ test("switching profiles changes attribution, gated by PIN for admin profiles", 
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(childName)).toBeVisible();
 
+  await page.getByRole("button", { name: "Add a family member" }).click();
+  await page.getByLabel("Name").fill(parentName);
+  await page.getByLabel("Role").selectOption("parent");
+  await page.getByRole("button", { name: "Add member" }).click();
+  await expect(page.getByText(parentName)).toBeVisible();
+
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/step=features/);
   await page.getByRole("button", { name: "Continue" }).click();
@@ -115,34 +132,41 @@ test("switching profiles changes attribution, gated by PIN for admin profiles", 
   // tests/e2e/onboarding.spec.ts. Only the URL is asserted, never dashboard content.
   await expect(page).toHaveURL(/\/dashboard/);
 
-  // --- Seed the owner's PIN directly via psql, and capture both member ids. ---
-  // Task 13's setPinAction (a member setting their OWN pin) doesn't exist yet, so this test
-  // can't set one through the app -- the point here is to test the switcher's PIN GATE, not
-  // the (not-yet-built) PIN-setting flow.
+  // --- Seed Pat Parent's PIN directly via psql, hashed with pgcrypto (crypt()/gen_salt()) --
+  // pin_hash is verified exclusively through verify_member_pin (SECURITY DEFINER,
+  // supabase/migrations/0011_member_pin_verification.sql), which also uses pgcrypto, so the
+  // stored hash must be a pgcrypto one; a bcryptjs-produced hash is a DIFFERENT bcrypt variant
+  // tag ($2b$ vs pgcrypto's $2a$) and silently fails to verify against crypt(). Task 13's
+  // setPinAction (a member setting their OWN pin) doesn't exist yet, so this test can't set
+  // one through the app -- the point here is to test the switcher's PIN GATE, not the
+  // (not-yet-built) PIN-setting flow. ---
   const members = await membersOf(householdName);
   const ownerRow = members.find((m) => m.role === "owner");
   const childRow = members.find((m) => m.role === "child");
-  if (!ownerRow || !childRow) throw new Error("expected an owner and a child member fixture");
+  const parentRow = members.find((m) => m.role === "parent");
+  if (!ownerRow || !childRow || !parentRow) throw new Error("expected owner, child, and parent member fixtures");
 
-  await psql("update household_members set pin_hash = :'pin_hash' where id = :'member_id'", {
-    pin_hash: await hashPin(OWNER_PIN),
-    member_id: ownerRow.id,
-  });
+  await psql(
+    "update household_members set pin_hash = extensions.crypt(:'pin', extensions.gen_salt('bf', 10)) where id = :'member_id'",
+    { pin: PARENT_PIN, member_id: parentRow.id },
+  );
 
-  // --- Both members appear on the switcher. ---
+  // --- All three members appear on the switcher. ---
   await page.goto("/switch");
   await expect(page.getByRole("heading", { name: /who's this/i })).toBeVisible();
   await expect(page.getByText(ownerName, { exact: true })).toBeVisible();
   await expect(page.getByText(childName, { exact: true })).toBeVisible();
+  await expect(page.getByText(parentName, { exact: true })).toBeVisible();
 
   // --- The child's tile (no PIN required) switches attribution immediately. ---
   await page.getByRole("button", { name: childName }).click();
   await expect(page).toHaveURL(/\/dashboard/);
   await expect.poll(() => activeMemberId(page)).toBe(childRow.id);
 
-  // --- The owner's tile (PIN required) opens a dialog instead of switching directly. ---
+  // --- Pat Parent's tile (a DIFFERENT admin profile, PIN required) opens a dialog instead of
+  // switching directly. ---
   await page.goto("/switch");
-  await page.getByRole("button", { name: ownerName }).click();
+  await page.getByRole("button", { name: parentName }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await expect(page.getByLabel("PIN")).toBeVisible();
@@ -154,9 +178,39 @@ test("switching profiles changes attribution, gated by PIN for admin profiles", 
   await expect(page).toHaveURL(/\/switch/);
   expect(await activeMemberId(page)).toBe(childRow.id);
 
-  // --- The correct PIN switches attribution to the owner. ---
-  await page.getByLabel("PIN").fill(OWNER_PIN);
+  // --- The PIN field is cleared (and refocused) after a wrong guess -- maxLength={4}
+  // otherwise means a rejected 4-digit guess can never be typed over. ---
+  await expect(page.getByLabel("PIN")).toHaveValue("");
+  await expect(page.getByLabel("PIN")).toBeFocused();
+
+  // --- Closing the dialog on an error and reopening the SAME tile starts clean: the stale
+  // "Incorrect PIN" from the attempt above must not reappear before a new attempt is made.
+  // state.error lives on PinDialog, which stays mounted for the switcher's whole lifetime, so
+  // this only holds if PinDialog actively resets it on close. ---
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await page.getByRole("button", { name: parentName }).click();
+  await expect(dialog).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "Incorrect PIN" })).not.toBeVisible();
+  await expect(page.getByLabel("PIN")).toHaveValue("");
+
+  // --- The correct PIN switches attribution to Pat Parent. ---
+  await page.getByLabel("PIN").fill(PARENT_PIN);
   await page.getByRole("button", { name: "Unlock" }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
+  await expect.poll(() => activeMemberId(page)).toBe(parentRow.id);
+
+  // --- Dana Owner's own tile never prompts for a PIN, even though "owner" otherwise
+  // requiresPin() and Dana has never set one -- this is the fix for the lockout Important 2
+  // found (onboarding never sets a PIN, so without this every owner would be permanently
+  // unable to switch back to themselves after switching away). No dialog should even open. ---
+  await page.goto("/switch");
+  await page.getByRole("button", { name: ownerName }).click();
+  // Checked BEFORE the URL wait, not after: a direct-submit tile navigates on its own, so if
+  // a PinDialog had wrongly rendered instead, the URL would never reach /dashboard and this
+  // assertion (with its own short auto-retry window) catches that distinctly from a plain
+  // navigation timeout.
+  await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page).toHaveURL(/\/dashboard/);
   await expect.poll(() => activeMemberId(page)).toBe(ownerRow.id);
 });

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { MemberAvatar } from "@/components/family/member-avatar";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/components/shell/nav-items";
 import type { ActiveMember } from "@/lib/auth/active-member";
@@ -13,15 +13,6 @@ type SidebarProps = {
   householdName: string;
   activeMember: ActiveMember | null;
 };
-
-function initials(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-}
 
 export function Sidebar({ items, householdName, activeMember }: SidebarProps) {
   const pathname = usePathname();
@@ -59,15 +50,22 @@ export function Sidebar({ items, householdName, activeMember }: SidebarProps) {
           href="/switch"
           className="flex min-h-[44px] items-center gap-3 rounded-[12px] px-3 text-sm font-medium text-ink transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          <Avatar>
-            {activeMember?.avatar_url ? <AvatarImage src={activeMember.avatar_url} alt="" /> : null}
-            <AvatarFallback
-              style={activeMember ? { backgroundColor: activeMember.color } : undefined}
-              className={activeMember ? "text-on-accent" : undefined}
+          {activeMember ? (
+            <MemberAvatar
+              displayName={activeMember.display_name}
+              color={activeMember.color}
+              avatarUrl={activeMember.avatar_url}
+              size="sm"
+              ariaHidden
+            />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-sunken text-sm font-medium text-muted"
             >
-              {activeMember ? initials(activeMember.display_name) : "?"}
-            </AvatarFallback>
-          </Avatar>
+              ?
+            </span>
+          )}
           <span className="truncate">{activeMember ? activeMember.display_name : "Who's this?"}</span>
         </Link>
         <ThemeToggle />

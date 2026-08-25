@@ -7,6 +7,9 @@ import { PinDialog } from "@/components/switcher/pin-dialog";
 
 const INITIAL: SwitchState = { error: null };
 
+const TILE_CLASSNAME =
+  "flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-[18px] bg-surface px-4 py-6 text-center ring-1 ring-foreground/10 transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
 /**
  * The profile switcher -- a full-screen takeover (deliberately outside the `(app)` route
  * group, so no sidebar/shell wraps it) showing every active member of the household as a
@@ -14,10 +17,18 @@ const INITIAL: SwitchState = { error: null };
  * `switchToMemberAction`'s doc comment (app/switch/actions.ts) for the full split this
  * screen exists to preserve.
  *
- * Tiles whose role does not `requiresPin()` submit a plain form directly. Tiles that do open
- * `PinDialog`, which collects and submits the PIN client-side but never verifies it there --
- * verification happens entirely inside `switchToMemberAction`, server-side, against a hash
- * read fresh from the database.
+ * A tile opens `PinDialog` only when its role `requiresPin()` AND it isn't the caller's own
+ * row -- switching into your OWN profile never prompts, mirroring `switchToMemberAction`'s
+ * server-side skip (see its doc comment for why: requiring a PIN to become yourself would be
+ * asking you to prove you're the account you're already authenticated as, and would otherwise
+ * permanently lock an owner out of their own profile the moment they switched away from it,
+ * since onboarding never sets one). This is purely a UI-side mirror of that decision, kept in
+ * sync deliberately -- the server independently re-derives it from `account.user_id`, never
+ * trusting which component rendered a tile.
+ *
+ * Every other admin tile opens `PinDialog`, which collects and submits the PIN client-side
+ * but never verifies it there -- verification happens entirely inside `switchToMemberAction`,
+ * server-side, via the `verify_member_pin` SECURITY DEFINER function.
  *
  * Not in proxy.ts's PUBLIC_PATHS, so an unauthenticated visitor never reaches this render --
  * the proxy already redirected them to /welcome. `requireAccountMembership()` additionally
@@ -30,7 +41,7 @@ export default async function SwitchPage() {
 
   const { data: members } = await supabase
     .from("household_members")
-    .select("id, display_name, role, color, avatar_url")
+    .select("id, display_name, role, color, avatar_url, user_id")
     .eq("household_id", account.household_id)
     .eq("is_active", true)
     .order("created_at");
@@ -56,37 +67,37 @@ export default async function SwitchPage() {
       </div>
 
       <ul className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3">
-        {(members ?? []).map((member) => (
-          <li key={member.id}>
-            {requiresPin(member.role) ? (
-              <PinDialog
-                member={{
-                  id: member.id,
-                  displayName: member.display_name,
-                  color: member.color,
-                  avatarUrl: member.avatar_url,
-                }}
-              />
-            ) : (
-              <form action={directSwitch}>
-                <input type="hidden" name="memberId" value={member.id} />
-                <button
-                  type="submit"
-                  className="flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-[18px] bg-surface px-4 py-6 text-center ring-1 ring-foreground/10 transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                >
-                  <MemberAvatar
-                    displayName={member.display_name}
-                    color={member.color}
-                    avatarUrl={member.avatar_url}
-                    size="lg"
-                    ariaHidden
-                  />
-                  <span className="text-base font-medium text-ink">{member.display_name}</span>
-                </button>
-              </form>
-            )}
-          </li>
-        ))}
+        {(members ?? []).map((member) => {
+          const isOwnRow = member.user_id !== null && member.user_id === account.user_id;
+          return (
+            <li key={member.id}>
+              {requiresPin(member.role) && !isOwnRow ? (
+                <PinDialog
+                  member={{
+                    id: member.id,
+                    displayName: member.display_name,
+                    color: member.color,
+                    avatarUrl: member.avatar_url,
+                  }}
+                />
+              ) : (
+                <form action={directSwitch}>
+                  <input type="hidden" name="memberId" value={member.id} />
+                  <button type="submit" className={TILE_CLASSNAME}>
+                    <MemberAvatar
+                      displayName={member.display_name}
+                      color={member.color}
+                      avatarUrl={member.avatar_url}
+                      size="lg"
+                      ariaHidden
+                    />
+                    <span className="text-base font-medium text-ink">{member.display_name}</span>
+                  </button>
+                </form>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </main>
   );
