@@ -21,6 +21,10 @@ insert into auth.users (id, email) values
   ('77777777-7777-4777-8777-777777777777', 'membere@test.local'),
   ('99999999-9999-4999-8999-999999999999', 'ownere@test.local');
 
+-- Task 6 added a trigger that creates a profiles row on every auth.users
+-- insert above, so this upserts the specific display names this file's
+-- readability depends on rather than colliding with the trigger's own
+-- (email-derived) row.
 insert into profiles (id, display_name) values
   ('11111111-1111-4111-8111-111111111111', 'Owner A'),
   ('22222222-2222-4222-8222-222222222222', 'Owner B'),
@@ -28,7 +32,8 @@ insert into profiles (id, display_name) values
   ('55555555-5555-4555-8555-555555555555', 'Parent C'),
   ('66666666-6666-4666-8666-666666666666', 'Owner D'),
   ('77777777-7777-4777-8777-777777777777', 'Member E'),
-  ('99999999-9999-4999-8999-999999999999', 'Owner E');
+  ('99999999-9999-4999-8999-999999999999', 'Owner E')
+on conflict (id) do update set display_name = excluded.display_name;
 
 insert into households (id, name, created_by) values
   ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'House A', '11111111-1111-4111-8111-111111111111'),
