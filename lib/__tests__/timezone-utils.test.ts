@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { formatDateInTimeZone, hourInTimeZone } from "@/lib/utils";
 
 // A single fixed instant, deliberately chosen (like format-birthday.test.ts's UTC-pin
@@ -12,6 +12,14 @@ import { formatDateInTimeZone, hourInTimeZone } from "@/lib/utils";
 // timezone's answer, not the server's -- the same reasoning `formatBirthday`'s UTC pin
 // documents for a stored `date` column.
 const INSTANT = new Date("2026-08-25T02:30:00Z");
+
+// Each malformed-zone test uses a DISTINCT bad zone name on purpose: the report is deduped by
+// zone for the lifetime of the process (so a broken row cannot flood the logs on every render),
+// which means reusing one name here would make whichever test ran second silently see no call
+// and pass for the wrong reason.
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("hourInTimeZone", () => {
   it("returns the UTC hour when the zone is UTC", () => {
@@ -27,7 +35,20 @@ describe("hourInTimeZone", () => {
   });
 
   it("falls back to the server's local hour for a malformed timezone rather than throwing", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(hourInTimeZone(INSTANT, "Not/AZone")).toBe(INSTANT.getHours());
+    // The fallback must not be SILENT: a household whose stored zone has drifted from the
+    // validated set would otherwise see server-local time forever with no signal anywhere.
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(error.mock.calls[0]?.[0]).toContain("Not/AZone");
+  });
+
+  it("reports a given bad zone only once, so a broken row cannot flood the logs on every render", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    hourInTimeZone(INSTANT, "Repeat/BadZone");
+    hourInTimeZone(INSTANT, "Repeat/BadZone");
+    hourInTimeZone(INSTANT, "Repeat/BadZone");
+    expect(error).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -49,12 +70,15 @@ describe("formatDateInTimeZone", () => {
   });
 
   it("falls back to the server's local rendering for a malformed timezone rather than throwing", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const fallback = new Intl.DateTimeFormat("en-US", {
       weekday: "long",
       month: "long",
       day: "numeric",
       year: "numeric",
     }).format(INSTANT);
-    expect(formatDateInTimeZone(INSTANT, "Not/AZone")).toBe(fallback);
+    expect(formatDateInTimeZone(INSTANT, "Other/NotAZone")).toBe(fallback);
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(error.mock.calls[0]?.[0]).toContain("Other/NotAZone");
   });
 });

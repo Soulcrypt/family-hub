@@ -21,6 +21,24 @@ export function formatBirthday(birthday: string | null): string | null {
 }
 
 /**
+ * Both timezone helpers below degrade rather than throw, which is right -- one household's
+ * malformed row must not 500 the dashboard. But a silent degrade is invisible: the household
+ * would simply see the server's day and hour forever with nothing anywhere saying so. This
+ * emits one line per distinct bad zone (not per render -- the dashboard re-renders constantly,
+ * and a hot loop of identical errors is its own outage) so the invariant breaking is at least
+ * discoverable in the runtime logs.
+ */
+const reportedTimeZones = new Set<string>();
+
+function reportUnusableTimeZone(timeZone: string, helper: string): void {
+  if (reportedTimeZones.has(timeZone)) return;
+  reportedTimeZones.add(timeZone);
+  console.error(
+    `[timezone] ${helper} could not use stored timezone ${JSON.stringify(timeZone)}; falling back to server-local time. A households.timezone value has drifted from the validated set.`,
+  );
+}
+
+/**
  * The current wall-clock hour (0-23) IN a household's own timezone -- never the server's.
  * `households.timezone` is validated at write time against `Intl.supportedValuesOf("timeZone")`
  * plus "UTC" (lib/validation/schemas.ts's `TIME_ZONES`), so a bad zone name reaching here would
@@ -39,8 +57,13 @@ export function hourInTimeZone(date: Date, timeZone: string): number {
     );
     const hourPart = parts.find((part) => part.type === "hour")?.value;
     const hour = hourPart ? Number.parseInt(hourPart, 10) : Number.NaN;
-    return Number.isNaN(hour) ? date.getHours() : hour;
+    if (Number.isNaN(hour)) {
+      reportUnusableTimeZone(timeZone, "hourInTimeZone");
+      return date.getHours();
+    }
+    return hour;
   } catch {
+    reportUnusableTimeZone(timeZone, "hourInTimeZone");
     return date.getHours();
   }
 }
@@ -62,6 +85,7 @@ export function formatDateInTimeZone(date: Date, timeZone: string): string {
       timeZone,
     }).format(date);
   } catch {
+    reportUnusableTimeZone(timeZone, "formatDateInTimeZone");
     return new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(
       date,
     );
