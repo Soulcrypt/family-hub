@@ -31,16 +31,21 @@
   --secondary-foreground: var(--color-ink);
   --muted: var(--color-sunken);
   --muted-foreground: var(--color-muted-strong);
-  --accent: var(--color-accent);
-  --accent-foreground: #FFFFFF;
+  --accent: var(--color-accent-strong);
+  --accent-foreground: var(--color-on-accent);
   --destructive: #9B4A38;
   --border: var(--color-border);
   --input: var(--color-border);
   --ring: var(--color-accent);
-  /* WCAG-AA-legible derivatives of the pinned palette. --color-accent and
-     --color-muted stay exactly as specced (correct for icons, borders,
-     focus rings, indicators — non-text 3:1 uses); these are what
-     text-bearing surfaces use instead so normal text clears 4.5:1. */
+  /* WCAG-AA-legible derivatives of the pinned palette. --color-muted stays
+     exactly as specced (correct for icons, borders, indicators — non-text
+     3:1 uses). --color-accent also stays pinned and byte-identical, but no
+     longer backs the bg-accent/text-accent/outline-accent utility family
+     (see --color-accent's mapping above) — that family now resolves to
+     accent-strong everywhere, including non-text uses like Button's focus
+     ring and ThemeToggle's selected icon, since a single utility name
+     can't serve two different roles. Only --ring and the base
+     :focus-visible outline still read the pinned brand hex directly. */
   --color-accent-strong: #A9522F;
   --color-on-accent: #FFFFFF;
   --color-muted-strong: #6F6459;
@@ -80,8 +85,8 @@
   --secondary-foreground: var(--color-ink);
   --muted: var(--color-sunken);
   --muted-foreground: var(--color-muted-strong);
-  --accent: var(--color-accent);
-  --accent-foreground: #FFFFFF;
+  --accent: var(--color-accent-strong);
+  --accent-foreground: var(--color-on-accent);
   --destructive: #9B4A38;
   --border: var(--color-border);
   --input: var(--color-border);
@@ -116,7 +121,13 @@
      muted-foreground / muted-strong below — it no longer backs the bare
      "muted" utility name, to avoid two roles sharing one name. */
   --color-muted: var(--muted);
-  --color-accent: var(--color-accent);
+  /* the shadcn "accent" role (bg-accent/text-accent/outline-accent/etc.) is
+     now the AA-legible accent-strong fill, not the pinned brand hex — see
+     the --accent declarations above. --color-accent (the pinned brand
+     token, tested byte-identical) is still declared and still directly
+     referenced where a non-text 3:1 use needs the exact brand hue
+     (--ring, and body's base :focus-visible outline). */
+  --color-accent: var(--accent);
   --color-accent-strong: var(--color-accent-strong);
   --color-on-accent: var(--color-on-accent);
   --color-muted-strong: var(--color-muted-strong);
