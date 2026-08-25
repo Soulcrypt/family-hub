@@ -1,23 +1,53 @@
 begin;
-select plan(19);
+select plan(32);
 
 -- New Owner triggers the profile-creation trigger; New Teen claims Ivy's
 -- login-less row; Claim Attempt tries to claim an already-claimed row via
--- a second invite pointing at the same member row; Expired User exercises
+-- a second invite pointing at the same member row, then creates a rival
+-- household for the cross-household guard test; Expired User exercises
 -- the expiry guard; New Member exercises the member_id-is-null insert
--- path.
+-- path; Deactivated Claim attempts to claim a deactivated row; Long Name
+-- Claimer's profile is edited past 40 characters after signup, to
+-- exercise accept_invite's own defensive re-cap; Cross Attacker accepts
+-- a cross-household-mismatched invite.
 insert into auth.users (id, email, raw_user_meta_data) values
-  ('44444444-4444-4444-8444-444444444444', 'newowner@test.local',      '{"display_name":"New Owner"}'::jsonb),
-  ('55555555-5555-4555-8555-555555555555', 'newteen@test.local',       '{"display_name":"New Teen"}'::jsonb),
-  ('66666666-6666-4666-8666-666666666666', 'claimattempt@test.local',  '{"display_name":"Claim Attempt"}'::jsonb),
-  ('77777777-7777-4777-8777-777777777777', 'expireduser@test.local',   '{"display_name":"Expired User"}'::jsonb),
-  ('88888888-8888-4888-8888-888888888888', 'newmember@test.local',     '{"display_name":"New Member"}'::jsonb),
-  ('99999999-9999-4999-9999-999999999999', 'crossattacker@test.local', '{"display_name":"Cross Attacker"}'::jsonb);
+  ('44444444-4444-4444-8444-444444444444', 'newowner@test.local',         '{"display_name":"New Owner"}'::jsonb),
+  ('55555555-5555-4555-8555-555555555555', 'newteen@test.local',          '{"display_name":"New Teen"}'::jsonb),
+  ('66666666-6666-4666-8666-666666666666', 'claimattempt@test.local',     '{"display_name":"Claim Attempt"}'::jsonb),
+  ('77777777-7777-4777-8777-777777777777', 'expireduser@test.local',      '{"display_name":"Expired User"}'::jsonb),
+  ('88888888-8888-4888-8888-888888888888', 'newmember@test.local',        '{"display_name":"New Member"}'::jsonb),
+  ('99999999-9999-4999-9999-999999999999', 'crossattacker@test.local',    '{"display_name":"Cross Attacker"}'::jsonb),
+  ('c0c0c0c0-c0c0-4c0c-8c0c-c0c0c0c0c0c0', 'deactivatedclaim@test.local', '{"display_name":"Deactivated Claim"}'::jsonb),
+  ('b0b0b0b0-b0b0-4b0b-8b0b-b0b0b0b0b0b0', 'longnameclaimer@test.local',  '{"display_name":"Short Name For Now"}'::jsonb);
+
+-- I-1: a display_name over household_members' 40-char cap must not brick
+-- the account. jsonb_build_object is needed since repeat() can't sit
+-- inside a plain '...'::jsonb string literal.
+insert into auth.users (id, email, raw_user_meta_data)
+values ('a0a0a0a0-a0a0-4a0a-8a0a-a0a0a0a0a0a0', 'longnameowner@test.local',
+        jsonb_build_object('display_name', repeat('A', 50)));
+
+-- M-8: a null email (unreachable today -- anonymous/SMS signup are both
+-- disabled in config.toml -- but not guaranteed to stay that way) must
+-- not abort the auth.users insert itself.
+insert into auth.users (id, email) values
+  ('d0d0d0d0-d0d0-4d0d-8d0d-d0d0d0d0d0d0', null);
 
 select is(
   (select display_name from profiles where id = '44444444-4444-4444-8444-444444444444'),
   'New Owner',
   'trigger creates a profile row on auth.users insert'
+);
+
+select ok(
+  (select length(display_name) <= 40 from profiles where id = 'a0a0a0a0-a0a0-4a0a-8a0a-a0a0a0a0a0a0'),
+  'trigger caps an over-long display_name at 40 characters instead of storing it uncapped'
+);
+
+select is(
+  (select display_name from profiles where id = 'd0d0d0d0-d0d0-4d0d-8d0d-d0d0d0d0d0d0'),
+  'Member',
+  'trigger falls back to a literal default when email and metadata are both absent'
 );
 
 set local role authenticated;
@@ -55,8 +85,51 @@ set local request.jwt.claims = '{"role":"authenticated"}';
 select throws_ok(
   $$ select create_household('Should Fail', 'UTC') $$,
   '42501',
-  null,
+  'not authenticated',
   'a caller with no auth.uid() cannot create a household'
+);
+
+set local request.jwt.claims = '{"sub":"44444444-4444-4444-8444-444444444444","role":"authenticated"}';
+
+-- M-7: p_name was only checked for emptiness, not households.name's own
+-- 1-80 bound -- an over-long name raised a raw 23514 with a row dump.
+select throws_ok(
+  $$ select create_household(repeat('N', 81), 'UTC') $$,
+  '22023',
+  'household name must be between 1 and 80 characters',
+  'create_household rejects a name over 80 characters with a clean error'
+);
+
+-- M-6: p_timezone was not validated at all -- garbage would feed
+-- straight into Task 16+'s date math.
+select throws_ok(
+  $$ select create_household('Timezone Test', 'Mars/Olympus_Mons') $$,
+  '22023',
+  'invalid timezone',
+  'create_household rejects a timezone that is not a real IANA zone'
+);
+
+select is(
+  (select count(*)::int from households where name = 'Timezone Test'),
+  0,
+  'the rejected timezone attempt created no household row'
+);
+
+-- I-1 continued: create_household must succeed for a caller whose
+-- profile display_name is over 40 characters (proving the account is not
+-- bricked), and the resulting household_members row must be capped
+-- defensively at create_household's own copy site too.
+set local request.jwt.claims = '{"sub":"a0a0a0a0-a0a0-4a0a-8a0a-a0a0a0a0a0a0","role":"authenticated"}';
+
+select lives_ok(
+  $$ select create_household('Long Name House', 'UTC') $$,
+  'an over-long display_name no longer bricks the account -- create_household still succeeds'
+);
+
+select ok(
+  (select length(display_name) <= 40 from household_members
+   where user_id = 'a0a0a0a0-a0a0-4a0a-8a0a-a0a0a0a0a0a0'),
+  'create_household defensively re-caps display_name at its own copy site, independent of the trigger'
 );
 
 set local request.jwt.claims = '{"sub":"44444444-4444-4444-8444-444444444444","role":"authenticated"}';
@@ -87,6 +160,17 @@ select id, encode(digest('claim-token-expired', 'sha256'), 'hex'), 'teen',
        now() - interval '1 day', '44444444-4444-4444-8444-444444444444'
 from households where name = 'The Testers';
 
+-- I-2: a deactivated login-less member row must not be claimable.
+insert into household_members (id, household_id, display_name, role, is_active)
+select 'dea171ed-dea1-471e-8dea-171edea171ed', id, 'Deactivated Kid', 'child', false
+from households where name = 'The Testers';
+
+insert into household_invites (household_id, token_hash, role, member_id, expires_at, created_by)
+select id, encode(digest('claim-token-deactivated', 'sha256'), 'hex'), 'teen',
+       'dea171ed-dea1-471e-8dea-171edea171ed', now() + interval '7 days',
+       '44444444-4444-4444-8444-444444444444'
+from households where name = 'The Testers';
+
 set local request.jwt.claims = '{"sub":"55555555-5555-4555-8555-555555555555","role":"authenticated"}';
 
 select lives_ok(
@@ -108,10 +192,16 @@ select is(
   'claiming applies the invite''s role to the claimed row'
 );
 
+select is(
+  (select user_id from household_members where id = 'c1c1c1c1-c1c1-4c1c-8c1c-c1c1c1c1c1c1'),
+  '55555555-5555-4555-8555-555555555555'::uuid,
+  'claiming attaches the caller''s own uid to the row -- not just some uid'
+);
+
 select throws_ok(
   $$ select accept_invite('claim-token-abc') $$,
   '22023',
-  null,
+  'invitation already used',
   'reusing an already-accepted invitation token is rejected'
 );
 
@@ -120,22 +210,56 @@ set local request.jwt.claims = '{"sub":"66666666-6666-4666-8666-666666666666","r
 select throws_ok(
   $$ select accept_invite('claim-token-second') $$,
   '22023',
-  null,
+  'profile already claimed',
   'a second invite pointing at an already-claimed row is rejected'
 );
+
+set local request.jwt.claims = '{"sub":"c0c0c0c0-c0c0-4c0c-8c0c-c0c0c0c0c0c0","role":"authenticated"}';
+
+select throws_ok(
+  $$ select accept_invite('claim-token-deactivated') $$,
+  '22023',
+  'profile already claimed',
+  'claiming a deactivated member row is rejected rather than silently succeeding into an empty membership'
+);
+
+reset role;
+select is(
+  (select user_id from household_members where id = 'dea171ed-dea1-471e-8dea-171edea171ed'),
+  null,
+  'the deactivated row was never attached to the rejected caller'
+);
+set local role authenticated;
 
 set local request.jwt.claims = '{"sub":"77777777-7777-4777-8777-777777777777","role":"authenticated"}';
 
 select throws_ok(
   $$ select accept_invite('claim-token-expired') $$,
   '22023',
-  null,
+  'invitation expired',
   'an expired invitation is rejected'
+);
+
+-- M-4: a caller who already belongs to the invite's household must be
+-- rejected explicitly, not merely stopped by household_members_user_unique
+-- (0001_schema.sql's partial unique index on (household_id, user_id) --
+-- load-bearing here as the last-resort backstop, but accept_invite should
+-- not depend on it silently).
+set local request.jwt.claims = '{"sub":"44444444-4444-4444-8444-444444444444","role":"authenticated"}';
+insert into household_invites (household_id, token_hash, role, expires_at, created_by)
+select id, encode(digest('claim-token-already-member', 'sha256'), 'hex'), 'parent',
+       now() + interval '7 days', '44444444-4444-4444-8444-444444444444'
+from households where name = 'The Testers';
+
+select throws_ok(
+  $$ select accept_invite('claim-token-already-member') $$,
+  '22023',
+  'you are already a member of this household',
+  'a caller who is already a member of the invite''s household is rejected explicitly'
 );
 
 -- New-member path: member_id is null, so accept_invite inserts a fresh
 -- row instead of claiming an existing one.
-set local request.jwt.claims = '{"sub":"44444444-4444-4444-8444-444444444444","role":"authenticated"}';
 insert into household_invites (household_id, token_hash, role, expires_at, created_by)
 select id, encode(digest('claim-token-new', 'sha256'), 'hex'), 'parent',
        now() + interval '7 days', '44444444-4444-4444-8444-444444444444'
@@ -152,6 +276,33 @@ select is(
   (select role::text from household_members where user_id = '88888888-8888-4888-8888-888888888888'),
   'parent',
   'the new member row is created with the invite''s role'
+);
+
+-- I-1 continued: the new-member insert path must also cap display_name
+-- defensively -- exercised on a profile whose display_name was edited
+-- past 40 characters after signup (postgres bypasses RLS as table
+-- owner, simulating what profiles_update_self would otherwise allow).
+reset role;
+update profiles set display_name = repeat('B', 55) where id = 'b0b0b0b0-b0b0-4b0b-8b0b-b0b0b0b0b0b0';
+set local role authenticated;
+
+set local request.jwt.claims = '{"sub":"44444444-4444-4444-8444-444444444444","role":"authenticated"}';
+insert into household_invites (household_id, token_hash, role, expires_at, created_by)
+select id, encode(digest('claim-token-longname', 'sha256'), 'hex'), 'teen',
+       now() + interval '7 days', '44444444-4444-4444-8444-444444444444'
+from households where name = 'The Testers';
+
+set local request.jwt.claims = '{"sub":"b0b0b0b0-b0b0-4b0b-8b0b-b0b0b0b0b0b0","role":"authenticated"}';
+
+select lives_ok(
+  $$ select accept_invite('claim-token-longname') $$,
+  'the new-member insert path succeeds even when the profile display_name is over 40 characters'
+);
+
+select ok(
+  (select length(display_name) <= 40 from household_members
+   where user_id = 'b0b0b0b0-b0b0-4b0b-8b0b-b0b0b0b0b0b0'),
+  'accept_invite''s new-member path defensively re-caps display_name at its own copy site'
 );
 
 -- Cross-household guard: household_invites.household_id and the
@@ -191,8 +342,8 @@ set local request.jwt.claims = '{"sub":"99999999-9999-4999-9999-999999999999","r
 select throws_ok(
   $$ select accept_invite('claim-token-cross') $$,
   '22023',
-  null,
-  'accept_invite rejects an invite whose member_id belongs to a different household than its own household_id'
+  'invitation not found',
+  'accept_invite rejects an invite whose member_id belongs to a different household than its own household_id, without revealing the row exists'
 );
 
 reset role;
