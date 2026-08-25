@@ -53,7 +53,7 @@ function InviteLinkReveal({ token, memberName }: { token: string; memberName: st
   return (
     <div className="flex flex-col gap-3">
       <DialogDescription>
-        Send this link to {memberName}. For their security, it will only be shown here once -- if you lose it,
+        Send this link to {memberName}. For their security, it will only be shown here once — if you lose it,
         create a new invite.
       </DialogDescription>
       <div className="flex flex-col gap-2">
@@ -68,6 +68,12 @@ function InviteLinkReveal({ token, memberName }: { token: string; memberName: st
       <Button type="button" onClick={copyLink}>
         {copied ? "Copied!" : "Copy link"}
       </Button>
+      {/* Swapping a button's own label does not reliably reach a screen reader -- the accessible
+          name of the element you are still focused on changing under you is announced
+          inconsistently across combinations. A dedicated polite live region says it outright. */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {copied ? "Invitation link copied to the clipboard" : ""}
+      </span>
       <p className="text-sm text-muted-foreground">This link expires in 7 days and can only be used once.</p>
     </div>
   );

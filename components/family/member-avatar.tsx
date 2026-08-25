@@ -102,15 +102,15 @@ export function MemberAvatar({
           appearance, never an invisible empty circle. */}
       {avatarUrl ? (
         // A fixed-size circular portrait; next/image's responsive-sizing machinery buys nothing here.
+        //
+        // Deliberately NOT `loading="lazy"`. Every place this component renders puts it above the
+        // fold on first paint -- the profile switcher's tiles (app/switch/page.tsx), the
+        // dashboard's family strip, the sidebar's active member -- and the switcher is the
+        // primary screen of a wall-mounted kitchen tablet. Lazy-loading a handful of small
+        // circular images there buys no scroll savings and costs a visible pop-in on exactly the
+        // screen people glance at from across the room.
         // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={avatarUrl}
-          alt=""
-          width={px}
-          height={px}
-          loading="lazy"
-          className="h-full w-full object-cover"
-        />
+        <img src={avatarUrl} alt="" width={px} height={px} className="h-full w-full object-cover" />
       ) : (
         <span aria-hidden="true" className="font-medium">
           {initial}

@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Family Hub",
     short_name: "Family Hub",
-    description: "One home for your family's meals, plans, and days.",
+    description: "One home for your family’s meals, plans, and days.",
     start_url: "/",
     display: "standalone",
     background_color: "#FBF7F1",

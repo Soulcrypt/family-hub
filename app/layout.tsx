@@ -9,7 +9,7 @@ const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", dis
 
 export const metadata: Metadata = {
   title: "Family Hub",
-  description: "One home for your family's meals, plans, and days.",
+  description: "One home for your family’s meals, plans, and days.",
 };
 
 // Matches app/globals.css's --color-bg exactly (light :root / .dark) so the browser
