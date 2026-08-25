@@ -88,21 +88,30 @@ insert into household_settings (household_id, enabled_features) values (
 
 -- Four members: owner (has the one login above), parent, teen, and child -- the latter two
 -- (and the parent) are login-less rows, `user_id` null, exactly like a real household that
--- hasn't sent every member an invite yet. Colors are four distinct warm hues, each chosen for a
--- computed >= 4.5:1 contrast ratio against whichever foreground
--- components/family/member-avatar.tsx's foregroundFor() picks for it -- the schema's own
--- default, #C4643C, was deliberately NOT reused here because it only clears ~4.0:1 (see that
--- file's own comment on foregroundFor); every color below was checked against the same formula
--- before being picked. See this task's report for the four computed ratios.
+-- hasn't sent every member an invite yet.
+--
+-- Member color is how you tell your family apart at a glance across a kitchen, so these are
+-- chosen to differ in VALUE as well as hue: two dark fills that take white text (terracotta,
+-- teal) and two light ones that take ink (gold, dusty rose). An earlier all-dark set cleared
+-- contrast comfortably and still failed the actual job -- four muddy brown circles that were
+-- hard to tell apart at avatar size. Every value below was checked against the same formula
+-- components/family/member-avatar.tsx's foregroundFor() uses, and clears 4.5:1 against the
+-- foreground that function picks for it:
+--   #A9522F terracotta -> white 5.34:1   (also --color-accent-strong in app/globals.css)
+--   #2F6F7A teal       -> white 5.71:1
+--   #E8B44A gold       -> ink   7.99:1
+--   #C98A96 dusty rose -> ink   5.46:1
+-- The schema's own default, #C4643C, is deliberately NOT reused: it only clears ~4.0:1 (see
+-- foregroundFor's own comment).
 insert into household_members (id, household_id, user_id, display_name, role, color, points_balance) values
   ('a10a0000-0000-4000-8000-000000000003', 'a10a0000-0000-4000-8000-000000000002',
-   'a10a0000-0000-4000-8000-000000000001', 'Alex Rivera', 'owner',  '#8B3A2B', 0),
+   'a10a0000-0000-4000-8000-000000000001', 'Alex Rivera', 'owner',  '#A9522F', 0),
   ('a10a0000-0000-4000-8000-000000000004', 'a10a0000-0000-4000-8000-000000000002',
-   null, 'Jamie Rivera', 'parent', '#6B4226', 0),
+   null, 'Jamie Rivera', 'parent', '#2F6F7A', 0),
   ('a10a0000-0000-4000-8000-000000000005', 'a10a0000-0000-4000-8000-000000000002',
-   null, 'Sam Rivera',   'teen',   '#7A5C1E', 0),
+   null, 'Sam Rivera',   'teen',   '#E8B44A', 0),
   ('a10a0000-0000-4000-8000-000000000006', 'a10a0000-0000-4000-8000-000000000002',
-   null, 'Ivy Rivera',   'child',  '#B22222', 250);
+   null, 'Ivy Rivera',   'child',  '#C98A96', 250);
 
 -- The owner's PIN (1234), set through set_member_pin() (0011_member_pin_verification.sql)
 -- rather than a hand-rolled UPDATE ... set pin_hash, so it is hashed exactly the way production

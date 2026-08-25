@@ -1,5 +1,5 @@
 begin;
-select plan(4);
+select plan(6);
 
 -- Task 18 fix: households.timezone has never had a database-level constraint -- validity was
 -- only ever enforced by two call sites agreeing to check it first (create_household,
@@ -44,6 +44,24 @@ select lives_ok(
   $$ update households set timezone = 'Europe/London'
      where id = '7b7b7b7b-7b7b-4b7b-8b7b-7b7b7b7b7b7b' $$,
   'a valid IANA timezone is accepted on UPDATE'
+);
+
+-- 0018 skips the lookup when an UPDATE names `timezone` without changing its value -- the
+-- household settings form does exactly that on every save, and pg_timezone_names costs ~29ms
+-- per scan with no caching. The skip must not become a hole: a resubmitted identical value
+-- still succeeds, and a genuine change is still validated on the very next statement.
+select lives_ok(
+  $$ update households set name = 'Guard Renamed', timezone = 'Europe/London'
+     where id = '7b7b7b7b-7b7b-4b7b-8b7b-7b7b7b7b7b7b' $$,
+  'an UPDATE naming timezone without changing it is accepted (0018 fast path)'
+);
+
+select throws_ok(
+  $$ update households set name = 'Guard Renamed Again', timezone = 'Not/AZoneEither'
+     where id = '7b7b7b7b-7b7b-4b7b-8b7b-7b7b7b7b7b7b' $$,
+  '22023',
+  'invalid timezone',
+  'the 0018 fast path does not let a CHANGED garbage timezone through'
 );
 
 select * from finish();
