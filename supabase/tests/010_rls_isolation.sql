@@ -1,5 +1,5 @@
 begin;
-select plan(87);
+select plan(91);
 
 -- Two households, two owners, one teen in household A, plus fixtures for
 -- fix-round-2 coverage: a real invite (so "teen cannot read invitations"
@@ -35,7 +35,13 @@ insert into households (id, name, created_by) values
   ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'House B', '22222222-2222-4222-8222-222222222222'),
   ('cccccccc-cccc-4ccc-8ccc-cccccccccccc', 'House C', '11111111-1111-4111-8111-111111111111'),
   ('dddddddd-dddd-4ddd-8ddd-dddddddddddd', 'House D', '11111111-1111-4111-8111-111111111111'),
-  ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', 'House E', '11111111-1111-4111-8111-111111111111');
+  ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', 'House E', '11111111-1111-4111-8111-111111111111'),
+  -- House F exists solely for fix-round-3's SECURITY DEFINER positive
+  -- control: it holds one login-less member (Zed) whose user_id we
+  -- attach via a trusted definer-context probe, isolated from every
+  -- other household so that mutation cannot perturb any count asserted
+  -- elsewhere in this file.
+  ('ffffffff-ffff-4fff-8fff-ffffffffffff', 'House F', '11111111-1111-4111-8111-111111111111');
 
 insert into household_settings (household_id) values
   ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
@@ -57,7 +63,22 @@ insert into household_members (id, household_id, user_id, display_name, role) va
   ('e1e1e1e1-e1e1-4e1e-8e1e-e1e1e1e1e1e1', 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
    '99999999-9999-4999-8999-999999999999', 'Owner E', 'owner'),
   ('e2e2e2e2-e2e2-4e2e-8e2e-e2e2e2e2e2e2', 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
-   '77777777-7777-4777-8777-777777777777', 'Member E', 'teen');
+   '77777777-7777-4777-8777-777777777777', 'Member E', 'teen'),
+  ('f1f1f1f1-f1f1-4f1f-8f1f-f1f1f1f1f1f1', 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+   null, 'Zed', 'child');
+
+-- Fix round 3's positive control: a tiny SECURITY DEFINER function,
+-- created here (while still running as the migration/superuser role, so
+-- it is owned by `postgres`) and dropped again after its one use below.
+-- Proves the guard trigger's `current_user = 'postgres'` exemption
+-- actually works, rather than being assumed -- Task 6's accept_invite()
+-- does not exist yet to exercise this for real.
+create function probe_definer_attach_user(mid uuid, uid uuid) returns void
+  language plpgsql security definer set search_path = public, pg_temp as $$
+  begin
+    update household_members set user_id = uid where id = mid;
+  end;
+  $$;
 
 insert into household_invites (household_id, email, token_hash, role, expires_at, created_by) values
   ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'invitee@test.local', 'hash-of-token-abc', 'parent',
@@ -189,6 +210,31 @@ select throws_ok(
   'owner A cannot insert a member row with a pre-existing user_id'
 );
 
+-- Fix round 3, open 2: the same unconsented-membership/profile-disclosure
+-- chain fix 4 closed on INSERT was still open on UPDATE --
+-- members_update_admins never restricted user_id, so an owner could
+-- repoint a login-less row at any known uid and immediately read that
+-- stranger's profile. `id` is frozen for the same class of reason (and
+-- because household_invites.member_id is a foreign key to it). Both are
+-- enforced by the trigger, not by policy -- an owner/parent legitimately
+-- reaches WITH CHECK here, so only the trigger stands between them and
+-- the plant.
+select throws_ok(
+  $$ update household_members set user_id = '22222222-2222-4222-8222-222222222222'
+     where id = 'a3a3a3a3-a3a3-4a3a-8a3a-a3a3a3a3a3a3' $$,
+  '42501',
+  null,
+  'owner A (admin) cannot repoint a login-less member row at another account'
+);
+
+select throws_ok(
+  $$ update household_members set id = 'f0f0f0f0-f0f0-4f0f-8f0f-f0f0f0f0f0f0'
+     where id = 'a3a3a3a3-a3a3-4a3a-8a3a-a3a3a3a3a3a3' $$,
+  '42501',
+  null,
+  'owner A (admin) cannot rewrite a member row''s primary key'
+);
+
 -- === Owner B's session (symmetric direction -- previously untested) ===
 set local request.jwt.claims = '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}';
 
@@ -221,6 +267,70 @@ select is(
   0,
   'owner B cannot read Owner A''s profile'
 );
+
+-- Fix round 3, open 1: the trigger's admin check
+-- (household_role(old.household_id) not in ('owner','parent')) silently
+-- PERMITS the write when the caller has no active membership in the
+-- row's household at all -- NULL not in (...) is NULL, not TRUE, so the
+-- `if` never fires. Not reachable by `authenticated` today only because
+-- members_select_household and members_update_admins already exclude a
+-- non-member before the trigger runs -- which is exactly the kind of
+-- implicit-side-effect dependency finding 2 asked us to stop relying on.
+-- To assert the trigger's OWN fail-closed behaviour, independent of the
+-- surrounding policies, both policies are temporarily widened wide open
+-- for this one probe and then restored to their real definitions
+-- immediately after -- this is still inside the outer transaction that
+-- is rolled back at the very end of this file, so nothing here can
+-- persist regardless. Altering a policy requires table ownership, so
+-- each DDL step below runs as this session's own role (postgres, the
+-- table owner) rather than as `authenticated`.
+reset role;
+drop policy members_select_household on household_members;
+create policy members_select_household on household_members for select to authenticated
+  using (true);
+drop policy members_update_admins on household_members;
+create policy members_update_admins on household_members for update to authenticated
+  using (true) with check (true);
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}';
+
+select throws_ok(
+  $$ update household_members set role = 'owner'
+     where id = 'a3a3a3a3-a3a3-4a3a-8a3a-a3a3a3a3a3a3' $$,
+  '42501',
+  null,
+  'trigger itself fails closed for a caller with no active membership in the row''s household, even when the surrounding policies are wide open'
+);
+
+reset role;
+drop policy members_select_household on household_members;
+create policy members_select_household on household_members for select to authenticated
+  using (is_household_member(household_id));
+drop policy members_update_admins on household_members;
+create policy members_update_admins on household_members for update to authenticated
+  using (household_role(household_id) in ('owner', 'parent'))
+  with check (household_role(household_id) in ('owner', 'parent'));
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}';
+
+-- Positive control for the current_user = 'postgres' exemption itself:
+-- Owner B holds no role at all in House F, yet a trusted SECURITY
+-- DEFINER function (created above, owned by `postgres`) can still attach
+-- her uid to Zed's login-less row -- proving Task 6's accept_invite()
+-- will be able to do the same, rather than merely assuming it.
+select probe_definer_attach_user('f1f1f1f1-f1f1-4f1f-8f1f-f1f1f1f1f1f1', '22222222-2222-4222-8222-222222222222');
+
+select is(
+  (select user_id::text from household_members where id = 'f1f1f1f1-f1f1-4f1f-8f1f-f1f1f1f1f1f1'),
+  '22222222-2222-4222-8222-222222222222',
+  'a trusted SECURITY DEFINER function (current_user = postgres) can still set user_id -- the exemption works, not just assumed'
+);
+
+reset role;
+drop function probe_definer_attach_user(uuid, uuid);
+set local role authenticated;
 
 -- === Parent C's session: households_delete_owner, role-check half ===
 set local request.jwt.claims = '{"sub":"55555555-5555-4555-8555-555555555555","role":"authenticated"}';
