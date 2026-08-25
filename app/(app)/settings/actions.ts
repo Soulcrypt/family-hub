@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createServerClient } from "@/lib/supabase/server";
 import { requireAccountMembership } from "@/lib/auth/active-member";
 import { canEditSettings } from "@/lib/auth/permissions";
-import { householdSchema, appearanceSchema } from "@/lib/validation/schemas";
+import { householdSchema } from "@/lib/validation/schemas";
 import { isFeatureKey, type EnabledFeatures } from "@/lib/constants/features";
 import type { Json } from "@/lib/supabase/types";
 
@@ -17,14 +17,12 @@ export type SettingsState = { error: string | null };
  * error it can say something specific and useful about; everything else falls through to one
  * generic, always-safe message per action.
  */
-function genericErrorFor(action: "household" | "features" | "appearance"): string {
+function genericErrorFor(action: "household" | "features"): string {
   switch (action) {
     case "household":
       return "We couldn't save your household settings. Please try again.";
     case "features":
       return "We couldn't save your features. Please try again.";
-    case "appearance":
-      return "We couldn't save your appearance settings. Please try again.";
   }
 }
 
@@ -102,33 +100,8 @@ export async function updateFeaturesAction(_prev: SettingsState, formData: FormD
   return { error: null };
 }
 
-/**
- * Updates the household's accent-color override, stored as `{ accent }` inside
- * `household_settings.theme_defaults` (a `Json` column with no other reserved shape today).
- * Purely a stored preference for now -- nothing in the app reads it back into the rendered
- * palette yet (the pinned brand accent in app/globals.css is still what actually paints), so
- * this action's only job is to validate and persist it for a future task to wire up.
- */
-export async function updateAppearanceAction(_prev: SettingsState, formData: FormData): Promise<SettingsState> {
-  const parsed = appearanceSchema.safeParse({ accent: formData.get("accent") });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Pick a valid color" };
-
-  const account = await requireAccountMembership();
-  if (!canEditSettings(account.role)) {
-    return { error: "You do not have permission to change appearance settings" };
-  }
-
-  const supabase = await createServerClient();
-  const { error } = await supabase
-    .from("household_settings")
-    .update({ theme_defaults: { accent: parsed.data.accent } as Json })
-    .eq("household_id", account.household_id);
-
-  if (error) {
-    if (error.code === "42501") return { error: "You do not have permission to change that" };
-    return { error: genericErrorFor("appearance") };
-  }
-
-  revalidatePath("/settings/appearance");
-  return { error: null };
-}
+// There is deliberately no `updateAppearanceAction` here. See
+// app/(app)/settings/appearance/page.tsx's doc comment: an earlier draft persisted a household
+// accent-color override with no visible effect anywhere in the app, and was removed rather than
+// shipped half-wired. That capability is deferred to whenever Task 19's identity/theming work
+// lands the required per-color AA-contrast derivation.

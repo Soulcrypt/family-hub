@@ -5,7 +5,7 @@ import { SetPinForm } from "@/components/settings/set-pin-form";
 
 const CARDS = [
   { href: "/settings/household", label: "Household", description: "Name, timezone, week start, and features" },
-  { href: "/settings/appearance", label: "Appearance", description: "Theme and household accent color" },
+  { href: "/settings/appearance", label: "Appearance", description: "Light, dark, or match your device" },
   { href: "/settings/members", label: "Members", description: "Invite family members to log in, or restore one you removed" },
 ] as const;
 

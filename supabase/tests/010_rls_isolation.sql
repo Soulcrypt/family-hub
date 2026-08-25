@@ -1,5 +1,5 @@
 begin;
-select plan(91);
+select plan(98);
 
 -- Two households, two owners, one teen in household A, plus fixtures for
 -- fix-round-2 coverage: a real invite (so "teen cannot read invitations"
@@ -458,6 +458,114 @@ select throws_ok(
   '42501',
   null,
   'a child cannot move their own row into a different household'
+);
+
+-- === Task 15 fix round 1, Finding 1: members_select_household must hide a removed
+-- (is_active = false) member from a non-admin, while an owner/parent still sees everything --
+-- 0016_restrict_inactive_member_visibility.sql. Isolated in House G (its own household and
+-- users) so nothing here can perturb any count asserted earlier in this file.
+--
+-- Fixture inserts need table-owner privilege (auth.users/profiles/households/household_members
+-- are not writable by the `authenticated` role directly) -- `reset role` back to this session's
+-- own role (postgres) first, exactly like every earlier fixture block in this file did before
+-- the very first `set local role authenticated` switch. ===
+reset role;
+insert into auth.users (id, email) values
+  ('81818181-8181-4818-8181-818181818181', 'ownerg@test.local'),
+  ('82828282-8282-4828-8282-828282828282', 'parentg@test.local'),
+  ('83838383-8383-4838-8383-838383838383', 'teeng@test.local');
+
+insert into profiles (id, display_name) values
+  ('81818181-8181-4818-8181-818181818181', 'Owner G'),
+  ('82828282-8282-4828-8282-828282828282', 'Parent G'),
+  ('83838383-8383-4838-8383-838383838383', 'Teen G')
+on conflict (id) do update set display_name = excluded.display_name;
+
+insert into households (id, name, created_by) values
+  ('88888888-8888-4888-8888-888888888888', 'House G', '81818181-8181-4818-8181-818181818181');
+
+insert into household_members (id, household_id, user_id, display_name, role, is_active) values
+  ('84848484-8484-4848-8484-848484848484', '88888888-8888-4888-8888-888888888888',
+   '81818181-8181-4818-8181-818181818181', 'Owner G', 'owner', true),
+  ('85858585-8585-4858-8585-858585858585', '88888888-8888-4888-8888-888888888888',
+   '82828282-8282-4828-8282-828282828282', 'Parent G', 'parent', true),
+  ('86868686-8686-4868-8686-868686868686', '88888888-8888-4888-8888-888888888888',
+   '83838383-8383-4838-8383-838383838383', 'Teen G', 'teen', true),
+  ('87878787-8787-4878-8787-878787878787', '88888888-8888-4888-8888-888888888888',
+   null, 'Removed Member G', 'child', false);
+
+-- Negative control, mirroring this file's existing "widen open, probe, restore" idiom (see the
+-- trigger fail-closed probe earlier in this file): temporarily reinstate the PRE-fix policy
+-- definition -- exactly what 0002_rls.sql shipped, before 0016 -- and prove Teen G's own
+-- session COULD read the removed member under it. Without this, the assertions below could
+-- pass vacuously (e.g. if House G's fixtures were wrong) without ever having exercised the
+-- actual leak this migration closes.
+reset role;
+drop policy members_select_household on household_members;
+create policy members_select_household on household_members for select to authenticated
+  using (is_household_member(household_id));
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"83838383-8383-4838-8383-838383838383","role":"authenticated"}';
+
+select is(
+  (select count(*)::int from household_members where id = '87878787-8787-4878-8787-878787878787'),
+  1,
+  'negative control: under the PRE-fix policy, a non-admin (Teen G) could read the removed member -- proves the assertions below are not vacuous'
+);
+
+reset role;
+drop policy members_select_household on household_members;
+create policy members_select_household on household_members for select to authenticated
+  using (
+    is_household_member(household_id)
+    and (is_active or household_role(household_id) in ('owner', 'parent'))
+  );
+
+-- === Teen G's session (non-admin), under the fixed policy ===
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"83838383-8383-4838-8383-838383838383","role":"authenticated"}';
+
+select is(
+  (select count(*)::int from household_members where id = '87878787-8787-4878-8787-878787878787'),
+  0,
+  'a non-admin (teen) cannot see a removed member under the fixed policy'
+);
+
+select is(
+  (select count(*)::int from household_members where household_id = '88888888-8888-4888-8888-888888888888'),
+  3,
+  'a non-admin (teen) still sees every active member of their household'
+);
+
+select is(
+  (select count(*)::int from household_members where id = '86868686-8686-4868-8686-868686868686'),
+  1,
+  'a non-admin (teen) still sees their own row'
+);
+
+-- === Parent G's session (admin): can see the removed member too. ===
+set local request.jwt.claims = '{"sub":"82828282-8282-4828-8282-828282828282","role":"authenticated"}';
+
+select is(
+  (select count(*)::int from household_members where id = '87878787-8787-4878-8787-878787878787'),
+  1,
+  'a parent (admin) can see a removed member'
+);
+
+-- === Owner G's session (admin): can see the removed member too, and every row overall. ===
+set local request.jwt.claims = '{"sub":"81818181-8181-4818-8181-818181818181","role":"authenticated"}';
+
+select is(
+  (select count(*)::int from household_members where id = '87878787-8787-4878-8787-878787878787'),
+  1,
+  'an owner (admin) can see a removed member'
+);
+
+select is(
+  (select count(*)::int from household_members where household_id = '88888888-8888-4888-8888-888888888888'),
+  4,
+  'an owner (admin) sees all four members of their household, active and removed'
 );
 
 -- Fix round 1: TRUNCATE bypasses Row Level Security entirely -- RLS

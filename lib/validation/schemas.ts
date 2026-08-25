@@ -47,10 +47,6 @@ export const householdSchema = z.object({
   weekStart: z.coerce.number().int().min(0, "Pick a day of the week").max(6, "Pick a day of the week").default(0),
 });
 
-export const appearanceSchema = z.object({
-  accent: z.string().trim().regex(/^#[0-9A-Fa-f]{6}$/, "Pick a valid color"),
-});
-
 export const memberSchema = z.object({
   displayName: z.string().trim().min(1, "Name is required").max(40),
   role: roleSchema,
@@ -68,4 +64,3 @@ export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type HouseholdInput = z.infer<typeof householdSchema>;
 export type MemberInput = z.infer<typeof memberSchema>;
-export type AppearanceInput = z.infer<typeof appearanceSchema>;
