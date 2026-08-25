@@ -17,5 +17,20 @@ self.addEventListener("activate", (event) => {
 // staleness and privacy trade-offs belong to the sub-projects that own that data.
 self.addEventListener("fetch", (event) => {
   if (event.request.mode !== "navigate") return;
-  event.respondWith(fetch(event.request).catch(() => caches.match("/offline")));
+  event.respondWith(
+    fetch(event.request).catch(async () => {
+      // `caches.match` resolves to undefined if the shell entry was evicted (browsers do
+      // evict under storage pressure), and `respondWith(undefined)` throws -- turning the
+      // friendly fallback into the browser's raw network-error page, in the exact situation
+      // this file exists to handle. Answer with something either way.
+      const cached = await caches.match("/offline");
+      return (
+        cached ??
+        new Response("<!doctype html><title>Offline</title><h1>You’re offline</h1>", {
+          status: 503,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        })
+      );
+    }),
+  );
 });
