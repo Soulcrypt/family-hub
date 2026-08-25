@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
-import { getAccountMembership } from "@/lib/auth/active-member";
 import { Button } from "@/components/ui/button";
 
 /**
  * Maps `accept_invite`'s own error text (supabase/migrations/0008_bootstrap_display_name_hardening.sql,
- * pgTAP-covered by supabase/tests/020_bootstrap.sql and supabase/tests/040_claim.sql) to
- * user-facing copy. These are Postgres RAISE EXCEPTION messages, not written for an end user,
- * so each one this page can say something specific and useful about is named explicitly here;
- * anything unrecognized falls through to one generic, always-safe message -- same pattern as
- * every other action in this codebase (see e.g. app/(app)/family/actions.ts's genericErrorFor).
+ * supabase/migrations/0012_accept_invite_one_household_guard.sql, pgTAP-covered by
+ * supabase/tests/020_bootstrap.sql and supabase/tests/040_claim.sql) to user-facing copy.
+ * These are Postgres RAISE EXCEPTION messages, not written for an end user, so each one this
+ * page can say something specific and useful about is named explicitly here; anything
+ * unrecognized falls through to one generic, always-safe message -- same pattern as every
+ * other action in this codebase (see e.g. app/(app)/family/actions.ts's genericErrorFor).
  */
 function friendlyClaimError(message: string): string {
   switch (message) {
@@ -24,6 +24,11 @@ function friendlyClaimError(message: string): string {
       return "This family member already has their own login.";
     case "you are already a member of this household":
       return "You're already a member of this household.";
+    case "you already have a household":
+      // 0012_accept_invite_one_household_guard.sql: raised for an account that already has an
+      // ACTIVE membership in a DIFFERENT household -- see that migration's header comment for
+      // why this is enforced in the RPC itself, not just here.
+      return "You already belong to a household, so this invitation can’t be accepted from this account.";
     default:
       return "We couldn't add you to this household. Please try again.";
   }
@@ -40,23 +45,20 @@ function friendlyClaimError(message: string): string {
  * app/(auth)/actions.ts's `safeNextPath` re-validates that query param before ever using it as
  * a redirect target.
  *
- * Signed in: calls `accept_invite` directly and redirects to `/dashboard` on success. Every
- * guard that decides whether a token is genuinely redeemable (expiry, reuse, cross-household
- * member_id mismatch, already-claimed, already-a-member) lives entirely inside that RPC -- this
- * page does not reimplement any of it, only surfaces whatever it decides.
+ * Signed in: calls `accept_invite` directly and redirects to `/dashboard` on success. EVERY
+ * guard that decides whether a token is genuinely redeemable -- expiry, reuse, cross-household
+ * member_id mismatch, already-claimed, already-a-member (same household), and already-a-member
+ * of a DIFFERENT household -- lives entirely inside that RPC (the last one added by
+ * 0012_accept_invite_one_household_guard.sql). This page does not reimplement, duplicate, or
+ * pre-check ANY of it; it only calls the RPC and renders whatever it decides.
  *
- * One guard this page DOES add on top of that, deliberately: `accept_invite`'s own
- * "already a member" check is scoped only to the invite's OWN household (`household_id =
- * v_invite.household_id and user_id = v_uid`), not to whether the caller belongs to ANY
- * household. A signed-in account that already belongs to a DIFFERENT household -- e.g. someone
- * who clicks a stranger's invite link out of curiosity, or is sent one in bad faith -- would
- * otherwise sail through accept_invite's new-member path and end up with a SECOND active
- * `household_members` row. This app's whole authority model
- * (`lookupAccountMembership()`/`requireAccountMembership()`, lib/auth/active-member.ts)
- * assumes exactly one, and treats a second as `MultipleHouseholdMembershipsError` -- an
- * unrecoverable lockout from every authority-gated page, not merely a rejected request. Refusing
- * here, before ever calling the RPC, is cheap insurance against a real account-corrupting
- * outcome, and does not weaken anything `accept_invite` itself guarantees.
+ * That last point used to not be true: this page previously pre-checked
+ * `getAccountMembership()` itself before calling `accept_invite`, specifically to catch the
+ * "already belongs to a different household" case. That check was real but insufficient --
+ * `accept_invite(text)` is GRANT EXECUTE'd to `authenticated` and directly callable via the
+ * anon key with nothing but the caller's own session, so a client that skips this page
+ * entirely (or calls the RPC straight from the browser) sailed right past it. The guard now
+ * lives where it can't be bypassed: inside `accept_invite` itself.
  */
 export default async function InviteClaimPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -82,22 +84,6 @@ export default async function InviteClaimPage({ params }: { params: Promise<{ to
             <Link href={`/login?next=${encodeURIComponent(next)}`}>I already have an account</Link>
           </Button>
         </div>
-      </main>
-    );
-  }
-
-  const existingMembership = await getAccountMembership();
-  if (existingMembership) {
-    return (
-      <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-6 text-center">
-        <h1 className="text-3xl">You already belong to a household</h1>
-        <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
-          Family Hub supports one household per account right now, so this invitation can’t be accepted from this
-          account.
-        </p>
-        <Button asChild size="lg">
-          <Link href="/">Go to your household</Link>
-        </Button>
       </main>
     );
   }

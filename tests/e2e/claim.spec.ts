@@ -196,14 +196,17 @@ test("an already-used invite link shows a clear error instead of a broken page",
 });
 
 /**
- * The guard app/invite/[token]/page.tsx adds on top of accept_invite itself (see that file's
- * doc comment): accept_invite's own "already a member" check is scoped only to the invite's
- * OWN household, so without this page-level guard, an account that already owns household A
- * could open a completely unrelated household B's claim-invite link (sent to them out of
- * curiosity, by mistake, or in bad faith) and would silently be attached to a STRANGER's
- * login-less child's row in household B -- a real identity takeover of someone else's profile,
- * not merely an unwanted membership. This test proves that link is refused instead, and that
- * the target member row is untouched.
+ * The guard added by supabase/migrations/0012_accept_invite_one_household_guard.sql, exercised
+ * end to end through the real UI: accept_invite's original "already a member" check was scoped
+ * only to the invite's OWN household, so an account that already owns household A could open a
+ * completely unrelated household B's claim-invite link (sent to them out of curiosity, by
+ * mistake, or in bad faith) and would silently be attached to a STRANGER's login-less child's
+ * row in household B -- a real identity takeover of someone else's profile, not merely an
+ * unwanted membership. This test proves that link is refused instead, and that the target
+ * member row is untouched. (This guard was first attempted at the Next.js page layer and moved
+ * into the RPC itself after review -- accept_invite is directly callable via the anon key, so a
+ * page-level check alone does not close it. See 0012's migration header and
+ * app/invite/[token]/page.tsx's doc comment.)
  */
 test("an account that already belongs to a household cannot be attached to a stranger's claim invite for a different household", async ({
   page,
@@ -249,11 +252,14 @@ test("an account that already belongs to a household cannot be attached to a str
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/step=members/);
 
-  // --- Alex, still signed in as themselves, opens Household B's claim invite link. ---
+  // --- Alex, still signed in as themselves, opens Household B's claim invite link. accept_invite
+  // itself rejects this (0012_accept_invite_one_household_guard.sql) -- the page just renders
+  // whatever the RPC decided, so this is the same generic error heading every other
+  // accept_invite rejection uses. ---
   await page.goto(inviteLink);
 
-  await expect(page.getByRole("heading", { name: /you already belong to a household/i })).toBeVisible();
-  await expect(page.getByRole("alert").filter({ hasText: /one household per account/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /we couldn.t add you/i })).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: /already belong to a household/i })).toBeVisible();
 
   // --- Charlie's row is untouched -- no takeover happened. ---
   const charlie = await memberIdFor(householdBName, targetChildName);
