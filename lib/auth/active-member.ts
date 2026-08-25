@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { createServerClient } from "@/lib/supabase/server";
-import type { MemberRole } from "@/lib/constants/roles";
+import type { AuthorityRole, MemberRole } from "@/lib/constants/roles";
 
 /**
  * This module implements the app's central security split: ATTRIBUTION vs. AUTHORITY.
@@ -17,20 +17,23 @@ import type { MemberRole } from "@/lib/constants/roles";
  *   `requireAccountMembership()`. The active-member cookie is NEVER consulted for this,
  *   because it is client-suppliable UI state, not proof of who is authenticated.
  *
- * Do not use `getActiveMember()`'s `.role` to gate a privileged operation — it answers
- * "who does the UI say this is," not "who is allowed to do this." Feed roles into
- * lib/auth/permissions.ts (isAdmin, canManageMembers, ...) ONLY when they came from
- * `requireAccountMembership()`.
+ * This split is enforced by the TYPE SYSTEM, not just by convention: `getActiveMember()`
+ * returns a role typed `MemberRole`, `requireAccountMembership()` returns a role typed the
+ * nominally-branded `AuthorityRole` (lib/constants/roles.ts), and every authority predicate
+ * in lib/auth/permissions.ts (isAdmin, canManageMembers, canEditSettings, canInvite) only
+ * accepts `AuthorityRole`. Feeding `getActiveMember()`'s role into any of them fails to
+ * compile — see the single cast site inside `requireAccountMembership()` below for where
+ * (and only where) a role is permitted to become authoritative.
  */
 
 const COOKIE = "fh_active_member";
 const SEPARATOR = ".";
 
 /**
- * A household member row, shaped identically whether it came from `getActiveMember()`
- * (attribution — trust it for display only) or `requireAccountMembership()` (authority —
- * trust its `.role` for permission checks). The type itself does not distinguish the two;
- * which function you called is what determines whether `.role` is safe to authorize with.
+ * A household member row resolved via the `fh_active_member` cookie — ATTRIBUTION ONLY.
+ * `.role` is a plain `MemberRole` and cannot be passed to an authority predicate in
+ * lib/auth/permissions.ts; that rejection is enforced by the compiler, not just this
+ * comment. Use it to decide whose name/avatar/points to show, never to gate an action.
  */
 export type ActiveMember = {
   id: string;
@@ -41,6 +44,14 @@ export type ActiveMember = {
   avatar_url: string | null;
   household_id: string;
 };
+
+/**
+ * A household member row resolved from the AUTHENTICATED ACCOUNT's own `user_id` —
+ * AUTHORITY. `.role` is an `AuthorityRole`, so it — and only it — may be passed to
+ * lib/auth/permissions.ts's authority predicates. Field set is otherwise identical to
+ * `ActiveMember`.
+ */
+export type AccountMembership = Omit<ActiveMember, "role"> & { role: AuthorityRole };
 
 function secret(): string {
   const value = process.env.ACTIVE_MEMBER_COOKIE_SECRET;
@@ -106,9 +117,9 @@ export async function clearActiveMember(): Promise<void> {
  *     member's data.
  *
  * Use the result to decide whose name/avatar/points to show, or whose chore an action
- * should credit. NEVER use the returned `.role` to gate a privileged operation — that is
- * exactly the mistake this module exists to prevent. For authorization, call
- * `requireAccountMembership()` instead and feed ITS role into lib/auth/permissions.ts.
+ * should credit. Its `.role` is a plain `MemberRole` and the compiler will refuse to let it
+ * reach an authority predicate in lib/auth/permissions.ts. For authorization, call
+ * `requireAccountMembership()` instead.
  */
 export async function getActiveMember(): Promise<ActiveMember | null> {
   const store = await cookies();
@@ -131,15 +142,15 @@ export async function getActiveMember(): Promise<ActiveMember | null> {
 
 /**
  * Resolves the AUTHENTICATED ACCOUNT's own membership, looked up fresh from the database
- * by `user_id` (never from the `fh_active_member` cookie). This is the only membership row
- * whose `.role` may gate a privileged operation — pass it to lib/auth/permissions.ts
- * (isAdmin, canManageMembers, canEditSettings, canInvite).
+ * by `user_id` (never from the `fh_active_member` cookie). Its `.role` is the only role in
+ * the codebase permitted to gate a privileged operation — pass it to
+ * lib/auth/permissions.ts (isAdmin, canManageMembers, canEditSettings, canInvite).
  *
  * Throws rather than returning null: every caller of this function is already committed to
  * requiring authentication and membership, so forcing a try/catch (or letting the error
  * propagate to an error boundary) is safer than a silently-ignorable null.
  */
-export async function requireAccountMembership(): Promise<ActiveMember> {
+export async function requireAccountMembership(): Promise<AccountMembership> {
   const supabase = await createServerClient();
   const {
     data: { user },
@@ -154,5 +165,17 @@ export async function requireAccountMembership(): Promise<ActiveMember> {
     .maybeSingle();
 
   if (!data) throw new Error("No household membership");
-  return data;
+
+  // THE SINGLE TRUST BOUNDARY in this module. This row was looked up by
+  // `user_id = auth.getUser().id` — the authenticated account's own row, verified by the
+  // database a moment ago — so its `role` is proven to belong to the caller, not merely
+  // displayed on their behalf. That is what justifies minting an AuthorityRole here.
+  // Do NOT widen this cast, and do NOT add a second `as AuthorityRole` anywhere else in
+  // APPLICATION code: doing so from any other row (e.g. one looked up by member id, or from
+  // getActiveMember()'s result) hands out authority to a role nobody proved the caller owns,
+  // and silently defeats the entire attribution/authority split this file exists to enforce.
+  // (Test files may construct a synthetic AuthorityRole to exercise the pure permission
+  // logic in lib/auth/permissions.ts directly — see lib/__tests__/permissions.test.ts — that
+  // never touches real authentication and is not the trust boundary this comment guards.)
+  return { ...data, role: data.role as AuthorityRole };
 }
