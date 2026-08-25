@@ -1,5 +1,5 @@
 begin;
-select plan(6);
+select plan(8);
 
 -- Task 14: the claim flow's product-facing guarantees, on top of Task 6's accept_invite()
 -- (already exhaustively covered for the cross-household guard, the already-a-member guard,
@@ -24,7 +24,17 @@ select plan(6);
 --      anon key, bypassing that page entirely. The real fix has to live here.
 --   5. Same fix, negative control: a caller whose ONLY existing membership is INACTIVE (a
 --      previously-removed member) must NOT be blocked -- only an ACTIVE membership elsewhere
---      should count.
+--      should count. This is also the ONLY coverage of "removed from household A, claims into
+--      household B still succeeds" -- the exact behavior case 4's fix depends on preserving.
+--   6. Task 14 fix round 2: an ACTIVE member of the invite's OWN household is rejected with the
+--      original, unchanged message.
+--   7. Same fix round, the actual bug: an INACTIVE member of the invite's OWN household (a
+--      previously-removed member, e.g. by Task 13's deactivate flow) gets a DISTINCT, honest
+--      message pointing at restoration -- not the same "you are already a member" message,
+--      which is actively false for someone Task 13's own member list no longer shows at all.
+--      (Restoring a removed member -- flipping is_active back to true -- is not built yet;
+--      that belongs to Task 15's member management. This message intentionally names a
+--      capability that does not exist yet.)
 --
 -- Fixtures: House Claim (Claim Owner) with two login-less-at-fixture-time children -- Claim
 -- Kid (claimed by First Claimant below) and Expired Kid (targeted by an already-expired
@@ -32,7 +42,9 @@ select plan(6);
 -- start, to isolate case 3 from case 1. Guarded Kid is a third login-less child, targeted by
 -- case 4's cross-household attack attempt. House Attacker exists solely to give Cross
 -- Household Attacker an active membership somewhere ELSE; Removed Member's only row there is
--- INACTIVE, for case 5's negative control.
+-- INACTIVE, for case 5's negative control. House Rejoin exists solely for cases 6/7: Active
+-- Rejoiner holds an ACTIVE row there, Removed Teen holds an INACTIVE one -- both then try to
+-- accept a FRESH invite for that SAME household.
 insert into auth.users (id, email, raw_user_meta_data) values
   ('c1a10000-0000-4000-8000-000000000001', 'claimowner@test.local',    '{"display_name":"Claim Owner"}'::jsonb),
   ('c1a10000-0000-4000-8000-000000000002', 'firstclaimant@test.local', '{"display_name":"First Claimant"}'::jsonb),
@@ -41,11 +53,15 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('c1a10000-0000-4000-8000-000000000005', 'existinglogin@test.local', '{"display_name":"Existing Login"}'::jsonb),
   ('c1a10000-0000-4000-8000-000000000006', 'alreadyclaimant@test.local','{"display_name":"Already Claimant"}'::jsonb),
   ('c1a10000-0000-4000-8000-000000000007', 'crosshousehold@test.local','{"display_name":"Cross Household Attacker"}'::jsonb),
-  ('c1a10000-0000-4000-8000-000000000008', 'removedmember@test.local', '{"display_name":"Removed Member"}'::jsonb);
+  ('c1a10000-0000-4000-8000-000000000008', 'removedmember@test.local', '{"display_name":"Removed Member"}'::jsonb),
+  ('c1a10000-0000-4000-8000-000000000009', 'rejoinowner@test.local',   '{"display_name":"Rejoin Owner"}'::jsonb),
+  ('c1a10000-0000-4000-8000-00000000000a', 'activerejoiner@test.local','{"display_name":"Active Rejoiner"}'::jsonb),
+  ('c1a10000-0000-4000-8000-00000000000b', 'removedteen@test.local',   '{"display_name":"Removed Teen"}'::jsonb);
 
 insert into households (id, name, created_by) values
   ('c1a20000-0000-4000-8000-000000000001', 'House Claim', 'c1a10000-0000-4000-8000-000000000001'),
-  ('c1a20000-0000-4000-8000-000000000002', 'House Attacker', 'c1a10000-0000-4000-8000-000000000007');
+  ('c1a20000-0000-4000-8000-000000000002', 'House Attacker', 'c1a10000-0000-4000-8000-000000000007'),
+  ('c1a20000-0000-4000-8000-000000000003', 'House Rejoin', 'c1a10000-0000-4000-8000-000000000009');
 
 insert into household_members (id, household_id, user_id, display_name, role, points_balance) values
   ('c1a30000-0000-4000-8000-000000000001', 'c1a20000-0000-4000-8000-000000000001',
@@ -66,6 +82,18 @@ insert into household_members (id, household_id, user_id, display_name, role, po
 insert into household_members (id, household_id, user_id, display_name, role, is_active) values
   ('c1a30000-0000-4000-8000-000000000008', 'c1a20000-0000-4000-8000-000000000002',
    'c1a10000-0000-4000-8000-000000000008', 'Removed Member', 'child', false);
+
+insert into household_members (id, household_id, user_id, display_name, role) values
+  ('c1a30000-0000-4000-8000-000000000009', 'c1a20000-0000-4000-8000-000000000003',
+   'c1a10000-0000-4000-8000-000000000009', 'Rejoin Owner', 'owner'),
+  ('c1a30000-0000-4000-8000-00000000000a', 'c1a20000-0000-4000-8000-000000000003',
+   'c1a10000-0000-4000-8000-00000000000a', 'Active Rejoiner', 'child');
+
+-- Removed Teen's row in House Rejoin -- INACTIVE, e.g. Task 13's own deactivate flow. This is
+-- the case cases 6/7 exist to distinguish from Active Rejoiner's.
+insert into household_members (id, household_id, user_id, display_name, role, is_active) values
+  ('c1a30000-0000-4000-8000-00000000000b', 'c1a20000-0000-4000-8000-000000000003',
+   'c1a10000-0000-4000-8000-00000000000b', 'Removed Teen', 'teen', false);
 
 -- Invite 1: a valid, unexpired claim invite for Claim Kid.
 insert into household_invites (household_id, token_hash, role, member_id, expires_at, created_by)
@@ -100,11 +128,28 @@ values (
 );
 
 -- Invite 5: a fresh new-member invite (member_id null) -- targeted below by Removed Member,
--- whose only existing row is inactive.
+-- whose only existing row is inactive, and whose only existing row is in a DIFFERENT
+-- household (House Attacker) than this invite's own (House Claim).
 insert into household_invites (household_id, token_hash, role, expires_at, created_by)
 values (
   'c1a20000-0000-4000-8000-000000000001', encode(digest('claim-token-removed-member-ok', 'sha256'), 'hex'), 'child',
   now() + interval '7 days', 'c1a10000-0000-4000-8000-000000000001'
+);
+
+-- Invite 6: a fresh new-member invite for House Rejoin -- targeted below by Active Rejoiner,
+-- who already has an ACTIVE row in this SAME household.
+insert into household_invites (household_id, token_hash, role, expires_at, created_by)
+values (
+  'c1a20000-0000-4000-8000-000000000003', encode(digest('claim-token-rejoin-active', 'sha256'), 'hex'), 'child',
+  now() + interval '7 days', 'c1a10000-0000-4000-8000-000000000009'
+);
+
+-- Invite 7: a fresh new-member invite for House Rejoin -- targeted below by Removed Teen, who
+-- has an INACTIVE row in this SAME household (not a different one, unlike invite 5).
+insert into household_invites (household_id, token_hash, role, expires_at, created_by)
+values (
+  'c1a20000-0000-4000-8000-000000000003', encode(digest('claim-token-rejoin-removed', 'sha256'), 'hex'), 'teen',
+  now() + interval '7 days', 'c1a10000-0000-4000-8000-000000000009'
 );
 
 -- === 1. First Claimant redeems the invite; Second Claimant then tries the SAME token. ===
@@ -166,13 +211,40 @@ select is(
   'Guarded Kid''s row was never attached to the rejected cross-household caller'
 );
 
--- === 5. Negative control: Removed Member's only row is INACTIVE, so it must not count
--- against them -- they can still accept a brand-new invite. ===
+-- === 5. Negative control: Removed Member's only row is INACTIVE, and it is in a DIFFERENT
+-- household than this invite -- neither fact should block them from accepting a brand-new
+-- invite elsewhere. This is the exact "removed from A, claims into B" behavior case 4's fix
+-- depends on preserving. ===
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"c1a10000-0000-4000-8000-000000000008","role":"authenticated"}';
 select lives_ok(
   $$ select accept_invite('claim-token-removed-member-ok') $$,
-  'a caller whose only existing membership is INACTIVE is not blocked from accepting a new invite'
+  'a caller removed from a DIFFERENT household (their only membership, and it is inactive) can still accept a fresh invite elsewhere'
+);
+reset role;
+
+-- === 6. An ACTIVE member of the invite's OWN household still gets the original, unchanged
+-- message. ===
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"c1a10000-0000-4000-8000-00000000000a","role":"authenticated"}';
+select throws_ok(
+  $$ select accept_invite('claim-token-rejoin-active') $$,
+  '22023',
+  'you are already a member of this household',
+  'an ACTIVE member of the invite''s own household is rejected with the original message, unchanged'
+);
+reset role;
+
+-- === 7. Fix round 2's actual bug: an INACTIVE member of the invite's OWN household (removed,
+-- e.g. by Task 13's deactivate flow) gets a DISTINCT, honest message -- not "you are already a
+-- member", which is false for someone the app's own member list no longer shows at all. ===
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"c1a10000-0000-4000-8000-00000000000b","role":"authenticated"}';
+select throws_ok(
+  $$ select accept_invite('claim-token-rejoin-removed') $$,
+  '22023',
+  'you were removed from this household -- ask an owner or parent to restore your membership',
+  'a REMOVED (inactive) member of the invite''s own household gets a distinct message pointing at restoration, not "already a member"'
 );
 reset role;
 

@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 
 /**
  * Maps `accept_invite`'s own error text (supabase/migrations/0008_bootstrap_display_name_hardening.sql,
- * supabase/migrations/0012_accept_invite_one_household_guard.sql, pgTAP-covered by
+ * supabase/migrations/0012_accept_invite_one_household_guard.sql,
+ * supabase/migrations/0013_accept_invite_removed_member_message.sql, pgTAP-covered by
  * supabase/tests/020_bootstrap.sql and supabase/tests/040_claim.sql) to user-facing copy.
  * These are Postgres RAISE EXCEPTION messages, not written for an end user, so each one this
  * page can say something specific and useful about is named explicitly here; anything
@@ -29,6 +30,14 @@ function friendlyClaimError(message: string): string {
       // ACTIVE membership in a DIFFERENT household -- see that migration's header comment for
       // why this is enforced in the RPC itself, not just here.
       return "You already belong to a household, so this invitation can’t be accepted from this account.";
+    case "you were removed from this household -- ask an owner or parent to restore your membership":
+      // 0013_accept_invite_removed_member_message.sql: raised for a caller whose row in THIS
+      // invite's own household still exists but is inactive (Task 13's soft-delete). There is
+      // no reactivation UI yet -- restoring a removed member belongs to Task 15's member
+      // management -- so this message names a capability the product doesn't have yet on
+      // purpose (see that migration's header comment), rather than leaving the dead end
+      // "you are already a member" produced before this fix.
+      return "You were removed from this household. Ask an owner or parent to add you back — this invitation can’t restore your old membership by itself.";
     default:
       return "We couldn't add you to this household. Please try again.";
   }
