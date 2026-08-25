@@ -1,5 +1,5 @@
 begin;
-select plan(36);
+select plan(37);
 
 -- New Owner triggers the profile-creation trigger; New Teen claims Ivy's
 -- login-less row; Claim Attempt tries to claim an already-claimed row via
@@ -35,6 +35,17 @@ values ('a0a0a0a0-a0a0-4a0a-8a0a-a0a0a0a0a0a0', 'longnameowner@test.local',
 insert into auth.users (id, email) values
   ('d0d0d0d0-d0d0-4d0d-8d0d-d0d0d0d0d0d0', null);
 
+-- Fix round 3: split_part(email, '@', 1) is untrimmed, unlike the
+-- metadata branch. A whitespace-only local part ('   ') is not '', so it
+-- previously survived nullif() as the chosen candidate and violated the
+-- new profiles_display_name_check, aborting the whole auth.users insert
+-- (not just the profile row) -- reachable via any raw auth.users insert,
+-- exactly like this test suite, Task 18's seed script, or any future
+-- admin/backfill script, even though GoTrue's own signup path almost
+-- certainly rejects this email shape first.
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('13131313-1313-4131-8131-131313131313', '   @whitespace-local.test', '{}'::jsonb);
+
 select is(
   (select display_name from profiles where id = '44444444-4444-4444-8444-444444444444'),
   'New Owner',
@@ -50,6 +61,12 @@ select is(
   (select display_name from profiles where id = 'd0d0d0d0-d0d0-4d0d-8d0d-d0d0d0d0d0d0'),
   'Member',
   'trigger falls back to a literal default when email and metadata are both absent'
+);
+
+select is(
+  (select display_name from profiles where id = '13131313-1313-4131-8131-131313131313'),
+  'Member',
+  'trigger falls back to Member (rather than aborting the signup) when the email local part is whitespace-only'
 );
 
 set local role authenticated;
