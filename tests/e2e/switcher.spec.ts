@@ -1,7 +1,6 @@
+import { execFile } from "node:child_process";
 import { expect, test } from "@playwright/test";
-import { createClient } from "@supabase/supabase-js";
 import { hashPin } from "@/lib/auth/pin";
-import type { Database } from "@/lib/supabase/types";
 
 function unique(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
@@ -9,21 +8,63 @@ function unique(prefix: string): string {
 
 const OWNER_PIN = "4821";
 
+// The local Supabase CLI's fixed default: `supabase start`/`supabase/config.toml`'s `[db]
+// port = 54322`, `postgres`/`postgres` superuser credentials. Never a deployed environment.
+const LOCAL_DB_URL = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+
 /**
- * A service-role client, used ONLY to seed a PIN hash directly on the freshly-created owner's
- * `household_members` row -- Task 13's `setPinAction` (a member setting their OWN pin) does
- * not exist yet, so this test can't set one through the app. This bypasses RLS entirely,
- * exactly the way the pgTAP suites (supabase/tests/*.sql) seed fixtures directly rather than
- * going through the application -- the point here is to test the switcher's PIN GATE, not the
- * (not-yet-built) PIN-setting flow.
+ * Runs one SQL statement against the LOCAL Supabase Postgres instance directly via `psql`, as
+ * the `postgres` superuser -- exactly the way this project's pgTAP suites
+ * (supabase/tests/*.sql) seed and query fixtures: bypassing the application/API layer (and
+ * RLS) entirely, rather than through any Supabase client or key.
+ *
+ * Why not the service-role key: it deliberately holds NO grants on any of these tables today
+ * (see this task's report, "For Task 21" section) -- nothing in the application uses it, and
+ * granting it standing DML in the production migration path just to make one local test
+ * fixture work would be exactly the kind of privilege creep this project's RLS work has spent
+ * several rounds pushing back on elsewhere. `psql` needs no new dependency (it's already
+ * load-bearing for this project's `supabase test db` workflow) and every value is passed as a
+ * separate `-v` argument (no shell involved, so no injection surface), substituted into the
+ * SQL via psql's `:'name'` syntax, which quotes/escapes it as a SQL string literal --
+ * necessary here because a bcrypt hash contains `$`, `.`, and `/`.
+ *
+ * `-t -A -F,` (tuples-only, unaligned, comma-separated) makes the stdout of a SELECT trivial
+ * to parse; callers that only need side effects (the UPDATE below) ignore the return value.
+ *
+ * The SQL is piped over stdin rather than passed via `-c`: psql's `:'name'` interpolation
+ * (confirmed empirically) is only performed for input it reads as a script -- interactively
+ * or from stdin/`-f` -- not for a `-c "..."` command-line argument, which it sends through
+ * unexpanded and Postgres then rejects as a bare `:` syntax error.
  */
-function serviceRoleClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set to run this test");
-  }
-  return createClient<Database>(url, key);
+function psql(sql: string, vars: Record<string, string> = {}): Promise<string> {
+  const args = [LOCAL_DB_URL, "-v", "ON_ERROR_STOP=1", "-t", "-A", "-F,"];
+  for (const [name, value] of Object.entries(vars)) args.push("-v", `${name}=${value}`);
+  return new Promise((resolve, reject) => {
+    const child = execFile("psql", args, (error, stdout) => {
+      if (error) reject(error);
+      else resolve(stdout);
+    });
+    child.stdin?.end(sql);
+  });
+}
+
+type MemberFixture = { id: string; role: string };
+
+/** Looks up every `household_members` row for a household by its (unique-per-test) name. */
+async function membersOf(householdName: string): Promise<MemberFixture[]> {
+  const stdout = await psql(
+    "select m.id, m.role from household_members m join households h on h.id = m.household_id where h.name = :'household_name'",
+    { household_name: householdName },
+  );
+  return stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [id, role] = line.split(",");
+      if (!id || !role) throw new Error(`unexpected psql row: ${line}`);
+      return { id, role };
+    });
 }
 
 /**
@@ -74,24 +115,19 @@ test("switching profiles changes attribution, gated by PIN for admin profiles", 
   // tests/e2e/onboarding.spec.ts. Only the URL is asserted, never dashboard content.
   await expect(page).toHaveURL(/\/dashboard/);
 
-  // --- Seed the owner's PIN directly (bypassing RLS), and capture both member ids. ---
-  const admin = serviceRoleClient();
-  const { data: household } = await admin.from("households").select("id").eq("name", householdName).single();
-  if (!household) throw new Error("household fixture was not created");
-
-  const { data: members } = await admin
-    .from("household_members")
-    .select("id, display_name, role")
-    .eq("household_id", household.id);
-  const ownerRow = members?.find((m) => m.role === "owner");
-  const childRow = members?.find((m) => m.role === "child");
+  // --- Seed the owner's PIN directly via psql, and capture both member ids. ---
+  // Task 13's setPinAction (a member setting their OWN pin) doesn't exist yet, so this test
+  // can't set one through the app -- the point here is to test the switcher's PIN GATE, not
+  // the (not-yet-built) PIN-setting flow.
+  const members = await membersOf(householdName);
+  const ownerRow = members.find((m) => m.role === "owner");
+  const childRow = members.find((m) => m.role === "child");
   if (!ownerRow || !childRow) throw new Error("expected an owner and a child member fixture");
 
-  const { error: seedError } = await admin
-    .from("household_members")
-    .update({ pin_hash: await hashPin(OWNER_PIN) })
-    .eq("id", ownerRow.id);
-  if (seedError) throw seedError;
+  await psql("update household_members set pin_hash = :'pin_hash' where id = :'member_id'", {
+    pin_hash: await hashPin(OWNER_PIN),
+    member_id: ownerRow.id,
+  });
 
   // --- Both members appear on the switcher. ---
   await page.goto("/switch");
