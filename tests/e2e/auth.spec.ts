@@ -23,6 +23,9 @@ test("a wrong password shows an error and does not sign in", async ({ page }) =>
   await page.getByLabel("Email").fill("nobody@test.local");
   await page.getByLabel("Password").fill("wrong-password");
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("alert")).toContainText(/invalid/i);
+  // Next.js's own route announcer (#__next-route-announcer__, always present once a page has
+  // hydrated) is also role="alert", so a bare getByRole("alert") matches two elements here --
+  // filter to the one carrying the actual error text.
+  await expect(page.getByRole("alert").filter({ hasText: /invalid/i })).toBeVisible();
   await expect(page).toHaveURL(/\/login/);
 });
