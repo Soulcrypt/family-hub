@@ -200,17 +200,31 @@ export class MultipleHouseholdMembershipsError extends Error {
   }
 }
 
-type MembershipLookup =
+/**
+ * The discriminated result behind `getAccountMembership()`/`requireAccountMembership()`
+ * (which collapse it into a nullable value / thrown errors) and `getMembershipStatus()`
+ * (which hands it out as-is). Exported so a caller that needs to branch on ALL of these
+ * cases — e.g. `app/page.tsx`'s redirect gate — can do so from a single lookup instead of
+ * re-deriving "signed in?" with its own separate `auth.getUser()` call.
+ *
+ * `"unavailable"` is distinct from `"unauthenticated"`: it means `auth.getUser()` itself
+ * failed (a transient Supabase auth-service problem), not that the caller is genuinely
+ * signed out. Conflating the two would let an outage bounce an account that DOES have a
+ * household through the onboarding redirect — see `getMembershipStatus()`'s doc comment.
+ */
+export type MembershipLookup =
   | { status: "unauthenticated" }
+  | { status: "unavailable"; cause: unknown }
   | { status: "none" }
   | { status: "multiple" }
   | { status: "found"; membership: AccountMembership };
 
 /**
- * Shared resolver behind both `getAccountMembership()` and `requireAccountMembership()`.
- * Looks up the AUTHENTICATED ACCOUNT's own membership by `user_id` — never from the
- * `fh_active_member` cookie — and classifies the result rather than deciding for the caller
- * whether an absent membership should be an error or a branchable state.
+ * Shared resolver behind `getAccountMembership()`, `requireAccountMembership()`, and
+ * `getMembershipStatus()`. Looks up the AUTHENTICATED ACCOUNT's own membership by `user_id`
+ * — never from the `fh_active_member` cookie — and classifies the result rather than
+ * deciding for the caller whether an absent membership should be an error or a branchable
+ * state.
  */
 async function lookupAccountMembership(): Promise<MembershipLookup> {
   const supabase = await createServerClient();
@@ -219,7 +233,16 @@ async function lookupAccountMembership(): Promise<MembershipLookup> {
     error: userError,
   } = await supabase.auth.getUser();
   if (userError) {
+    // Previously this was logged and then fell through to `!user` → "unauthenticated",
+    // which made a transient auth-service failure indistinguishable from a genuinely
+    // signed-out visitor. Now that the discriminated status is public (via
+    // `getMembershipStatus()`) and can drive a redirect directly, that conflation would let
+    // an outage silently send an account WITH a household back through onboarding. Report it
+    // as its own status instead. `getAccountMembership()`/`requireAccountMembership()` still
+    // fold this into the same outcome as "unauthenticated" as before — see their comments —
+    // this only adds a place for a more careful caller to tell the difference.
     console.error("[active-member] auth.getUser() failed", userError);
+    return { status: "unavailable", cause: userError };
   }
   if (!user) return { status: "unauthenticated" };
 
@@ -277,6 +300,7 @@ export async function getAccountMembership(): Promise<AccountMembership | null> 
   const result = await lookupAccountMembership();
   switch (result.status) {
     case "unauthenticated":
+    case "unavailable": // preserves this function's pre-existing behavior — see the module note above
     case "none":
       return null;
     case "multiple":
@@ -304,6 +328,7 @@ export async function requireAccountMembership(): Promise<AccountMembership> {
   const result = await lookupAccountMembership();
   switch (result.status) {
     case "unauthenticated":
+    case "unavailable": // preserves this function's pre-existing behavior — see the module note above
       throw new NotAuthenticatedError();
     case "none":
       throw new NoHouseholdMembershipError();
@@ -312,4 +337,39 @@ export async function requireAccountMembership(): Promise<AccountMembership> {
     case "found":
       return result.membership;
   }
+}
+
+/**
+ * Thrown by a status-driven caller (currently `app/page.tsx`) when `getMembershipStatus()`
+ * comes back `"unavailable"` — `auth.getUser()` itself failed, so it is UNKNOWN whether the
+ * account is signed out or has a household. The caller must treat this as an error, not
+ * silently redirect: redirecting to `/welcome` would look like a normal sign-out, and
+ * redirecting to `/onboarding` risks sending an account that already has a household through
+ * onboarding again. Carries the original lookup failure as `.cause` for diagnostics.
+ */
+export class MembershipLookupUnavailableError extends Error {
+  constructor(cause: unknown) {
+    super("Could not verify authentication status", { cause });
+    this.name = "MembershipLookupUnavailableError";
+  }
+}
+
+/**
+ * Resolves the AUTHENTICATED ACCOUNT's own membership as a discriminated status, instead of
+ * collapsing "not signed in" and "no household yet" into the same `null` the way
+ * `getAccountMembership()` does. Use this where a caller needs to react differently to those
+ * two cases from a SINGLE lookup — e.g. `app/page.tsx`'s redirect gate, which must send a
+ * signed-out visitor to `/welcome` but a signed-in, not-yet-onboarded account to
+ * `/onboarding`. Calling `auth.getUser()` again just to recover that distinction (after
+ * already calling `getAccountMembership()`) would be a second, redundant round-trip to the
+ * auth service on every hit of that route — this is the one-lookup alternative.
+ *
+ * Does NOT throw for `"multiple"` or `"unavailable"` the way `getAccountMembership()` and
+ * `requireAccountMembership()` do — it hands back the full `MembershipLookup` and leaves the
+ * decision to the caller. A caller that does not want to think about every branch should use
+ * `getAccountMembership()` or `requireAccountMembership()` instead; this function exists for
+ * the caller that does.
+ */
+export async function getMembershipStatus(): Promise<MembershipLookup> {
+  return lookupAccountMembership();
 }
