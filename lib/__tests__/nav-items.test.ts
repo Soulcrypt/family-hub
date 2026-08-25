@@ -15,13 +15,32 @@ describe("navItemsFor", () => {
     expect(hrefs).not.toContain("/calendar");
   });
 
-  it("includes a feature as soon as its flag is on", () => {
-    const hrefs = navItemsFor({ family: true, settings: true, meals: true }).map((i) => i.href);
-    expect(hrefs).toContain("/meals");
+  // Regression coverage for the shipping bug this task fixes: enabling a feature used to be
+  // enough on its own to put a link in the nav, even though calendar/meals/chores/habits have
+  // no screen built yet (SP2-SP5's job) -- so the moment a household turned one on, the nav
+  // offered a link straight to a 404. `hasScreen` (lib/constants/features.ts) is the fact
+  // that actually gates a nav link now; "enabled" alone is no longer sufficient.
+  it("never includes a feature that has no screen yet, even when its flag is enabled", () => {
+    const hrefs = navItemsFor({
+      family: true,
+      settings: true,
+      calendar: true,
+      meals: true,
+      chores: true,
+      habits: true,
+    }).map((i) => i.href);
+    expect(hrefs).toEqual(["/dashboard", "/family", "/settings"]);
   });
 
-  it("keeps settings last", () => {
-    const items = navItemsFor({ family: true, settings: true, meals: true, calendar: true });
+  it("keeps settings last even with every feature enabled", () => {
+    const items = navItemsFor({
+      family: true,
+      settings: true,
+      calendar: true,
+      meals: true,
+      chores: true,
+      habits: true,
+    });
     expect(items[items.length - 1]?.href).toBe("/settings");
   });
 

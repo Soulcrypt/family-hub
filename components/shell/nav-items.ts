@@ -40,15 +40,26 @@ const LOCKED_FEATURES: ReadonlySet<FeatureKey> = new Set(
   FEATURES.filter((feature) => feature.locked).map((feature) => feature.key),
 );
 
+// A feature with no screen built yet (`hasScreen: false` in the FEATURES catalogue --
+// lib/constants/features.ts) must never produce a nav link, no matter what its enabled flag
+// says. This was the shipping bug this function's caller found: a household could enable
+// Calendar in onboarding, Settings, or the seed, and the nav would happily link to `/calendar`
+// -- a route that doesn't exist until SP2 builds it. See this task's brief for the full story.
+const SCREENED_FEATURES: ReadonlySet<FeatureKey> = new Set(
+  FEATURES.filter((feature) => feature.hasScreen).map((feature) => feature.key),
+);
+
 /**
  * Pure function turning a household's enabled-feature flags into the ordered list of nav
- * items to render. `null`-feature items (Home) and locked-feature items (Family, Settings)
- * always appear; everything else appears only once its flag is `true`. Order in `ALL` is the
- * nav's display order, so keep Settings last there if you add a new feature.
+ * items to render. `null`-feature items (Home) always appear. Everything else needs a screen
+ * to exist (`hasScreen`) before it can appear at all; once it has one, locked-feature items
+ * (Family, Settings) always appear and the rest appear only once their flag is `true`. Order
+ * in `ALL` is the nav's display order, so keep Settings last there if you add a new feature.
  */
 export function navItemsFor(features: EnabledFeatures): NavItem[] {
   return ALL.filter((item) => {
     if (item.feature === null) return true;
+    if (!SCREENED_FEATURES.has(item.feature)) return false;
     if (LOCKED_FEATURES.has(item.feature)) return true;
     return features[item.feature] === true;
   });

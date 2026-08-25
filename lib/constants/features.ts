@@ -7,14 +7,23 @@
  * Everything past `family`/`settings` has no screens yet (SP2–SP5 build them); they're
  * listed here so a household's choice is recorded now and the navigation lights up the
  * moment those sub-projects land, instead of forcing a second onboarding-style prompt later.
+ *
+ * `hasScreen` records that same fact explicitly — whether THIS codebase actually has a route
+ * for the feature yet — independently of `enabled_features` (a household's choice) and
+ * `locked` (whether that choice is real). A feature can be enabled with no screen (the
+ * everyday state for calendar/meals/chores/habits right now): the choice is still recorded,
+ * but nothing that reads this catalogue should ever turn that into a navigable link before
+ * the screen exists. `components/shell/nav-items.ts`'s `navItemsFor()` is the consumer this
+ * matters for — see its doc comment for what broke when a feature could be "enabled" without
+ * `hasScreen` gating the link.
  */
 export const FEATURES = [
-  { key: "family", label: "Family", description: "Profiles, roles and birthdays", locked: true },
-  { key: "settings", label: "Settings", description: "Household preferences", locked: true },
-  { key: "calendar", label: "Calendar", description: "Shared family schedule", locked: false },
-  { key: "meals", label: "Meals", description: "Recipes and weekly planning", locked: false },
-  { key: "chores", label: "Chores", description: "Tasks, points and rewards", locked: false },
-  { key: "habits", label: "Habits", description: "Daily streaks", locked: false },
+  { key: "family", label: "Family", description: "Profiles, roles and birthdays", locked: true, hasScreen: true },
+  { key: "settings", label: "Settings", description: "Household preferences", locked: true, hasScreen: true },
+  { key: "calendar", label: "Calendar", description: "Shared family schedule", locked: false, hasScreen: false },
+  { key: "meals", label: "Meals", description: "Recipes and weekly planning", locked: false, hasScreen: false },
+  { key: "chores", label: "Chores", description: "Tasks, points and rewards", locked: false, hasScreen: false },
+  { key: "habits", label: "Habits", description: "Daily streaks", locked: false, hasScreen: false },
 ] as const;
 
 export type FeatureKey = (typeof FEATURES)[number]["key"];

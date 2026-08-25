@@ -102,12 +102,28 @@ test("a parent can rename the household, enable a feature, toggle the theme, and
   await page.reload();
   await expect(page.getByLabel("Household name")).toHaveValue(renamedHouseholdName);
 
-  // --- Enabling the Meals feature makes a Meals entry appear in navigation. ---
+  // --- Enabling the Meals feature records the household's choice, but does NOT put a Meals
+  // entry in the navigation -- Meals has no screen yet (lib/constants/features.ts's
+  // `hasScreen`), and a nav link to a route that doesn't exist is exactly the shipping bug
+  // this task fixes (a household used to get one the moment it enabled a feature here, in
+  // onboarding, or via the seed). The choice is still real: it survives a reload (the
+  // checkbox itself stays checked) and the dashboard's placeholder for Meals switches to
+  // "already on" copy instead of "turn it on in Settings" -- see the equivalent dashboard
+  // assertions in tests/e2e/dashboard.spec.ts. ---
   await expect(page.getByRole("link", { name: "Meals", exact: true })).not.toBeVisible();
   await page.locator("#feature-meals").check();
   await page.getByRole("button", { name: "Save features" }).click();
   await expect(mainContent.getByRole("alert")).not.toBeVisible();
-  await expect(page.getByRole("link", { name: "Meals", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save features" })).toBeEnabled();
+  await expect(page.getByRole("link", { name: "Meals", exact: true })).not.toBeVisible();
+
+  await page.reload();
+  await expect(page.locator("#feature-meals")).toBeChecked();
+
+  await page.goto("/dashboard");
+  await expect(
+    page.locator("#main-content").getByText("Meals are on — their screen is still on the way."),
+  ).toBeVisible();
 
   // --- The theme toggle switches the <html> class between light and dark. Scoped to
   // #main-content: ThemeToggle is ALSO mounted in the sidebar (app/(app)/layout.tsx renders it

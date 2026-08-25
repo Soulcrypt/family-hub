@@ -252,6 +252,17 @@ test("the app shell shows the sidebar on wide viewports and the bottom navigatio
 });
 
 test("the bottom navigation's overflow disclosure opens, traps focus, and navigates", async ({ page }, testInfo) => {
+  // Currently unreachable in the real app: this task's fix gates every nav link on
+  // `hasScreen` (lib/constants/features.ts, components/shell/nav-items.ts), and today only
+  // Home, Family and Settings have one -- 3 items, nowhere near bottom-nav.tsx's MAX_VISIBLE
+  // (5). Before the fix, enabling all 4 optional features produced 7 (fake) nav items and
+  // forced this overflow to appear; now no real household configuration can, until SP2+ ships
+  // a screen for an optional feature. The slicing logic itself (splitBottomNavItems) stays
+  // covered directly with synthetic data in lib/__tests__/bottom-nav-reachability.test.ts, so
+  // this UI-interaction test is skipped rather than deleted or faked -- re-enable it (with a
+  // features list drawn from whatever ships a real screen first) once that stops being true.
+  test.skip(true, "no optional feature has a screen yet, so the bottom nav can never overflow for a real household");
+
   test.skip(testInfo.project.name !== "phone", 'the "More" overflow disclosure only exists in the phone bottom nav');
 
   const householdName = unique("The Overflow Family");
@@ -298,4 +309,82 @@ test("the bottom navigation's overflow disclosure opens, traps focus, and naviga
   await dialog.getByRole("link", { name: "Settings", exact: true }).click();
   await expect(page).toHaveURL(/\/settings/);
   await expect(dialog).not.toBeVisible();
+});
+
+/**
+ * Regression coverage for the shipping bug this task fixes: a household that enables every
+ * optional feature in onboarding got a sidebar/bottom-nav link straight to a 404, because
+ * lib/constants/features.ts listed calendar/meals/chores/habits as choosable long before any
+ * of SP2-SP5 built a screen for them, and navItemsFor() (components/shell/nav-items.ts) gated
+ * links purely on the enabled flag, not on whether a screen exists to receive them.
+ *
+ * A test that hardcodes `/calendar` only catches THIS feature going stale -- the same bug
+ * reappears the day `/meals` is enabled by a real household. So this test doesn't hardcode a
+ * route at all: it reads the actual `href`s the rendered navigation offers (every optional
+ * feature turned on, so nothing is gated out for lack of being enabled) and visits each one,
+ * asserting none 404s. That is the real invariant -- the navigation must never advertise a
+ * link that doesn't resolve -- and it stays valid regardless of which feature ships next.
+ *
+ * Enumeration source depends on viewport, matching how the two nav surfaces actually render
+ * (see the "shows the sidebar on wide viewports..." test above): the bottom nav's own visible
+ * tabs plus whatever "More" discloses on phone, and the sidebar's full, never-overflowed list
+ * everywhere else (sidebar.tsx has no MAX_VISIBLE slicing -- see bottom-nav.tsx's
+ * splitBottomNavItems() doc comment for why only the bottom nav needs one).
+ *
+ * Trustworthiness: this asserts the enumerated list is non-empty before checking anything
+ * else. Home is unconditionally in navItemsFor()'s output (see nav-items.ts), so a correctly
+ * working enumeration can never come back empty -- if it does, the LOCATOR is broken, not the
+ * app, and a bare "every href resolved" loop over zero hrefs would otherwise pass vacuously.
+ */
+test("the navigation never offers a link that doesn't resolve, for a household with every feature enabled", async ({
+  page,
+}, testInfo) => {
+  const householdName = unique("The Fully Featured Family");
+
+  await onboardHousehold(page, {
+    ownerName: "Riley Owner",
+    householdName,
+    features: ["calendar", "meals", "chores", "habits"],
+  });
+
+  await page.goto("/dashboard");
+
+  async function hrefsFromLocator(locator: import("@playwright/test").Locator): Promise<string[]> {
+    const raw = await locator.evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+    return raw.filter((href): href is string => typeof href === "string" && href.length > 0);
+  }
+
+  let hrefs: string[];
+  if (testInfo.project.name === "phone") {
+    const bottomNav = page.locator("nav.fixed");
+    const visible = await hrefsFromLocator(bottomNav.locator("a[href]"));
+
+    const moreButton = page.getByRole("button", { name: "More" });
+    let overflow: string[] = [];
+    if (await moreButton.isVisible()) {
+      await moreButton.click();
+      const dialog = page.getByRole("dialog");
+      await expect(dialog).toBeVisible();
+      overflow = await hrefsFromLocator(dialog.locator("a[href]"));
+      await page.keyboard.press("Escape");
+      await expect(dialog).not.toBeVisible();
+    }
+    hrefs = [...visible, ...overflow];
+  } else {
+    const sidebarNav = page.locator("aside nav[aria-label='Main']");
+    hrefs = await hrefsFromLocator(sidebarNav.locator("a[href]"));
+  }
+
+  expect(hrefs.length, "the navigation enumeration must find at least one link (Home)").toBeGreaterThan(0);
+
+  for (const href of hrefs) {
+    const response = await page.goto(href);
+    // `toBeLessThan(400)` rather than `not.toBe(404)`: the invariant is that the link
+    // RESOLVES, and a 500 fails that just as completely as a 404 does. `page.goto` follows
+    // redirects, so this is the final status, not an intermediate 307.
+    expect(
+      response?.status(),
+      `navigating to ${href} (linked from the primary navigation)`,
+    ).toBeLessThan(400);
+  }
 });

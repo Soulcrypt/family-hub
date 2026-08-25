@@ -46,9 +46,12 @@ export default async function DashboardPage() {
   const activeMember = await getActiveMember();
 
   const enabledFeatures = parseEnabledFeatures(settings?.enabled_features);
-  const disabledFeatures = FEATURES.filter(
-    (feature) => !feature.locked && !isFeatureEnabled(enabledFeatures, feature.key),
-  );
+  // Keyed off "has no screen yet" (lib/constants/features.ts), not "disabled" -- a household
+  // that turned a feature ON in onboarding is a genuinely different state from one that left
+  // it off, and both need to be visibly accounted for rather than the enabled one silently
+  // vanishing. See this task's brief, point 2, and the fix for the sibling bug in
+  // components/shell/nav-items.ts (a screen-less feature must never get a nav link either).
+  const unbuiltFeatures = FEATURES.filter((feature) => !feature.hasScreen);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-6 py-10">
@@ -60,15 +63,19 @@ export default async function DashboardPage() {
 
       <FamilyStrip members={members ?? []} activeMemberId={activeMember?.id ?? null} />
 
-      {disabledFeatures.length > 0 ? (
+      {unbuiltFeatures.length > 0 ? (
         <section aria-labelledby="coming-soon-heading" className="mt-8">
           <h2 id="coming-soon-heading" className="text-lg font-medium text-ink">
             Coming soon
           </h2>
           <ul className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {disabledFeatures.map((feature) => (
+            {unbuiltFeatures.map((feature) => (
               <li key={feature.key}>
-                <ComingSoonCard featureKey={feature.key} label={feature.label} />
+                <ComingSoonCard
+                  featureKey={feature.key}
+                  label={feature.label}
+                  enabled={isFeatureEnabled(enabledFeatures, feature.key)}
+                />
               </li>
             ))}
           </ul>
@@ -80,21 +87,52 @@ export default async function DashboardPage() {
 
 /**
  * Copy is written per feature (not a single templated string) so the grammar reads naturally
- * regardless of whether the feature's own label is singular ("Calendar arrives") or plural
- * ("Meals arrive") -- see FEATURES, lib/constants/features.ts. Reads as deliberately-not-yet-
- * enabled rather than broken or empty (this task's brief, point 8): a household that turned a
- * feature off in onboarding should understand it can turn it back on in Settings, not wonder
- * why the card is blank.
+ * regardless of whether the feature's own label is singular ("Calendar arrives"/"is") or
+ * plural ("Meals arrive"/"are") -- see FEATURES, lib/constants/features.ts.
+ *
+ * Each feature carries TWO variants because "has no screen yet" and "is enabled" are
+ * independent facts (this task's brief, point 2) -- a household can have turned a feature on
+ * with no screen behind it yet, which is a genuinely different state from never having turned
+ * it on at all, and deserves copy that says so instead of repeating advice that's already
+ * stale:
+ *   - `disabled`: the household hasn't turned this on. Reads as deliberately-not-yet-enabled
+ *     rather than broken or empty -- it should understand it can turn the feature on in
+ *     Settings, not wonder why the card is blank.
+ *   - `enabled`: the household already turned this on. "Turn it on in Settings" would be
+ *     actively wrong advice here -- it's already on, only the screen is still coming.
  */
-const COMING_SOON_COPY: Partial<Record<FeatureKey, string>> = {
-  calendar: "Calendar arrives soon — turn it on in Settings when you’re ready.",
-  meals: "Meals arrive soon — turn it on in Settings when you’re ready.",
-  chores: "Chores arrive soon — turn it on in Settings when you’re ready.",
-  habits: "Habits arrive soon — turn it on in Settings when you’re ready.",
+const COMING_SOON_COPY: Partial<Record<FeatureKey, { enabled: string; disabled: string }>> = {
+  calendar: {
+    disabled: "Calendar arrives soon — turn it on in Settings when you’re ready.",
+    enabled: "Calendar is on — its screen is still on the way.",
+  },
+  meals: {
+    disabled: "Meals arrive soon — turn it on in Settings when you’re ready.",
+    enabled: "Meals are on — their screen is still on the way.",
+  },
+  chores: {
+    disabled: "Chores arrive soon — turn it on in Settings when you’re ready.",
+    enabled: "Chores are on — their screen is still on the way.",
+  },
+  habits: {
+    disabled: "Habits arrive soon — turn it on in Settings when you’re ready.",
+    enabled: "Habits are on — their screen is still on the way.",
+  },
 };
 
-function ComingSoonCard({ featureKey, label }: { featureKey: FeatureKey; label: string }) {
-  const copy = COMING_SOON_COPY[featureKey] ?? `${label} isn’t turned on yet.`;
+function ComingSoonCard({
+  featureKey,
+  label,
+  enabled,
+}: {
+  featureKey: FeatureKey;
+  label: string;
+  enabled: boolean;
+}) {
+  const copyVariants = COMING_SOON_COPY[featureKey];
+  const copy = enabled
+    ? (copyVariants?.enabled ?? `${label} is on — its screen is still on the way.`)
+    : (copyVariants?.disabled ?? `${label} isn’t turned on yet.`);
   return (
     <div className="flex min-h-[96px] flex-col justify-center gap-1 rounded-[18px] bg-surface px-5 py-5 shadow-elevation ring-1 ring-[color:var(--color-muted)]">
       <p className="text-base font-medium text-ink">{label}</p>

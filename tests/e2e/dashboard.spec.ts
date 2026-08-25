@@ -82,10 +82,49 @@ test("the dashboard greets the household, shows every active member, and placeho
   await expect(mainContent.getByText(ownerName, { exact: true })).toBeVisible();
   await expect(mainContent.getByText(childName, { exact: true })).toBeVisible();
 
-  // --- Every disabled (non-locked) feature shows a "coming soon" placeholder, not an empty
-  // region -- distinguishable from an error or a broken/missing card. ---
+  // --- Every feature with no screen yet shows a "coming soon" placeholder, not an empty
+  // region -- distinguishable from an error or a broken/missing card. None of these features
+  // were enabled during onboarding, so each gets the DISABLED-state copy pointing at Settings. ---
   await expect(mainContent.getByText("Calendar arrives soon — turn it on in Settings when you’re ready.")).toBeVisible();
   await expect(mainContent.getByText("Meals arrive soon — turn it on in Settings when you’re ready.")).toBeVisible();
+  await expect(mainContent.getByText("Chores arrive soon — turn it on in Settings when you’re ready.")).toBeVisible();
+  await expect(mainContent.getByText("Habits arrive soon — turn it on in Settings when you’re ready.")).toBeVisible();
+});
+
+/**
+ * Regression coverage for this task's brief: the placeholder logic used to key off "disabled,
+ * non-locked feature" (app/(app)/dashboard/page.tsx), so a household that turned Calendar ON
+ * in onboarding got no dashboard card at all for it -- the same feature whose nav link 404'd
+ * (see tests/e2e/family.spec.ts's "the navigation never offers a link that doesn't resolve"
+ * regression test). The fix keys the placeholder off `hasScreen` instead
+ * (lib/constants/features.ts): a feature with no screen is accounted for whether or not the
+ * household turned it on, and the copy says which state it's actually in -- "turn it on in
+ * Settings" is wrong advice for a feature that's already on.
+ */
+test("an enabled-but-unbuilt feature gets 'already on' placeholder copy, distinct from a disabled one", async ({
+  page,
+}) => {
+  const householdName = unique("The Early Adopter Family");
+  const ownerName = "Enable Owner";
+
+  await onboardHousehold(page, {
+    ownerName,
+    householdName,
+    features: ["calendar", "meals"],
+  });
+
+  await page.goto("/dashboard");
+  const mainContent = page.locator("#main-content");
+
+  // Calendar and Meals were turned ON -- no "turn it on in Settings" copy, since that would be
+  // stale/wrong advice for a feature the household already enabled. Instead they get copy that
+  // says the feature is already on and its screen is still coming.
+  await expect(mainContent.getByText("Calendar arrives soon — turn it on in Settings when you’re ready.")).not.toBeVisible();
+  await expect(mainContent.getByText("Meals arrive soon — turn it on in Settings when you’re ready.")).not.toBeVisible();
+  await expect(mainContent.getByText("Calendar is on — its screen is still on the way.")).toBeVisible();
+  await expect(mainContent.getByText("Meals are on — their screen is still on the way.")).toBeVisible();
+
+  // Chores and Habits were never enabled -- still get the original "turn it on" copy.
   await expect(mainContent.getByText("Chores arrive soon — turn it on in Settings when you’re ready.")).toBeVisible();
   await expect(mainContent.getByText("Habits arrive soon — turn it on in Settings when you’re ready.")).toBeVisible();
 });
