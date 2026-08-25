@@ -20,4 +20,11 @@ describe("Button", () => {
       expect(el.className).toContain("min-h-[44px]");
     }
   });
+
+  it("uses the AA-legible accent-strong fill for the default variant", () => {
+    render(<Button>Add member</Button>);
+    const className = screen.getByRole("button", { name: "Add member" }).className;
+    expect(className).toContain("bg-accent-strong");
+    expect(className).toContain("text-on-accent");
+  });
 });

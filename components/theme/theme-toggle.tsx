@@ -69,7 +69,7 @@ export function ThemeToggle() {
           onKeyDown={(event) => handleKeyDown(event, index)}
           className={cn(
             "flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[12px] transition-colors",
-            mounted && theme === value ? "bg-surface text-accent" : "text-muted hover:text-ink",
+            mounted && theme === value ? "bg-surface text-accent" : "text-muted-foreground hover:text-ink",
           )}
         >
           <Icon size={18} aria-hidden />

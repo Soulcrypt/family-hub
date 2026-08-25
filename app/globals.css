@@ -25,18 +25,25 @@
   --card-foreground: var(--color-ink);
   --popover: var(--color-surface);
   --popover-foreground: var(--color-ink);
-  --primary: var(--color-accent);
-  --primary-foreground: #FFFFFF;
+  --primary: var(--color-accent-strong);
+  --primary-foreground: var(--color-on-accent);
   --secondary: var(--color-sunken);
   --secondary-foreground: var(--color-ink);
   --muted: var(--color-sunken);
-  --muted-foreground: var(--color-muted);
+  --muted-foreground: var(--color-muted-strong);
   --accent: var(--color-accent);
   --accent-foreground: #FFFFFF;
   --destructive: #9B4A38;
   --border: var(--color-border);
   --input: var(--color-border);
   --ring: var(--color-accent);
+  /* WCAG-AA-legible derivatives of the pinned palette. --color-accent and
+     --color-muted stay exactly as specced (correct for icons, borders,
+     focus rings, indicators — non-text 3:1 uses); these are what
+     text-bearing surfaces use instead so normal text clears 4.5:1. */
+  --color-accent-strong: #A9522F;
+  --color-on-accent: #FFFFFF;
+  --color-muted-strong: #6F6459;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -67,18 +74,21 @@
   --card-foreground: var(--color-ink);
   --popover: var(--color-surface);
   --popover-foreground: var(--color-ink);
-  --primary: var(--color-accent);
-  --primary-foreground: #FFFFFF;
+  --primary: var(--color-accent-strong);
+  --primary-foreground: var(--color-on-accent);
   --secondary: var(--color-sunken);
   --secondary-foreground: var(--color-ink);
   --muted: var(--color-sunken);
-  --muted-foreground: var(--color-muted);
+  --muted-foreground: var(--color-muted-strong);
   --accent: var(--color-accent);
   --accent-foreground: #FFFFFF;
   --destructive: #9B4A38;
   --border: var(--color-border);
   --input: var(--color-border);
   --ring: var(--color-accent);
+  --color-accent-strong: #E08B5F;
+  --color-on-accent: #2A2520;
+  --color-muted-strong: #A89B8E;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -99,8 +109,17 @@
   --color-surface: var(--color-surface);
   --color-sunken: var(--color-sunken);
   --color-ink: var(--color-ink);
-  --color-muted: var(--color-muted);
+  /* "muted" (bg-muted/text-muted/etc.) is shadcn's subtle-surface role and
+     now resolves to the sunken surface, matching the shadcn convention
+     later tasks will expect. The pinned --color-muted ink tone is still
+     declared (tokens test covers it) and stays reachable for text via
+     muted-foreground / muted-strong below — it no longer backs the bare
+     "muted" utility name, to avoid two roles sharing one name. */
+  --color-muted: var(--muted);
   --color-accent: var(--color-accent);
+  --color-accent-strong: var(--color-accent-strong);
+  --color-on-accent: var(--color-on-accent);
+  --color-muted-strong: var(--color-muted-strong);
   --color-border: var(--color-border);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
