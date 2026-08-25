@@ -1,5 +1,5 @@
 begin;
-select plan(32);
+select plan(36);
 
 -- New Owner triggers the profile-creation trigger; New Teen claims Ivy's
 -- login-less row; Claim Attempt tries to claim an already-claimed row via
@@ -18,7 +18,9 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('88888888-8888-4888-8888-888888888888', 'newmember@test.local',        '{"display_name":"New Member"}'::jsonb),
   ('99999999-9999-4999-9999-999999999999', 'crossattacker@test.local',    '{"display_name":"Cross Attacker"}'::jsonb),
   ('c0c0c0c0-c0c0-4c0c-8c0c-c0c0c0c0c0c0', 'deactivatedclaim@test.local', '{"display_name":"Deactivated Claim"}'::jsonb),
-  ('b0b0b0b0-b0b0-4b0b-8b0b-b0b0b0b0b0b0', 'longnameclaimer@test.local',  '{"display_name":"Short Name For Now"}'::jsonb);
+  ('b0b0b0b0-b0b0-4b0b-8b0b-b0b0b0b0b0b0', 'longnameclaimer@test.local',  '{"display_name":"Short Name For Now"}'::jsonb),
+  ('e0e0e0e0-e0e0-4e0e-8e0e-e0e0e0e0e0e0', 'boundaryowner@test.local',    '{"display_name":"Boundary Owner"}'::jsonb),
+  ('f0f0f0f0-f0f0-4f0f-8f0f-f0f0f0f0f0f0', 'boundaryclaimer@test.local',  '{"display_name":"Boundary Claimer"}'::jsonb);
 
 -- I-1: a display_name over household_members' 40-char cap must not brick
 -- the account. jsonb_build_object is needed since repeat() can't sit
@@ -303,6 +305,65 @@ select ok(
   (select length(display_name) <= 40 from household_members
    where user_id = 'b0b0b0b0-b0b0-4b0b-8b0b-b0b0b0b0b0b0'),
   'accept_invite''s new-member path defensively re-caps display_name at its own copy site'
+);
+
+-- I-1 residual (fix round 2): profiles.display_name has no CHECK of its
+-- own (only NOT NULL), and profiles_update_self lets any user set it to
+-- anything -- including a name whose first 40 characters are entirely
+-- whitespace even though the full (untruncated) name has real content
+-- beyond that point. A bare left(v_display_name, 40) at either RPC's
+-- copy site would then trim to empty and violate
+-- household_members_display_name_check, bricking the account exactly
+-- like the original over-length case, just entered through a different
+-- door.
+--
+-- Note: a *purely* whitespace profile name (the exact shape originally
+-- reproduced against round 1) is no longer constructible at all once
+-- profiles_display_name_check lands in 0008 -- that CHECK enforces
+-- length(trim(display_name)) between 1 and 80 unconditionally, for every
+-- caller, including profiles_update_self, so setting a profile name to
+-- e.g. 45 spaces now fails at the UPDATE itself. This fixture instead
+-- targets the risk that survives even with that CHECK in place: a name
+-- that trims non-empty as a WHOLE (so it still satisfies profiles' own
+-- 80-character bound) but whose first 40 characters -- exactly what the
+-- copy sites take via left(..., 40) -- are all whitespace. That gap
+-- exists precisely because profiles allows up to 80 characters while
+-- household_members caps at 40; the copy-site fix has to handle it even
+-- with the CHECK in place. Each update below is done as the affected
+-- user's own session, through profiles_update_self, matching how a real
+-- user would reach this state -- an entirely ordinary self-edit.
+set local request.jwt.claims = '{"sub":"e0e0e0e0-e0e0-4e0e-8e0e-e0e0e0e0e0e0","role":"authenticated"}';
+update profiles set display_name = repeat(' ', 40) || 'Bob' where id = 'e0e0e0e0-e0e0-4e0e-8e0e-e0e0e0e0e0e0';
+
+select lives_ok(
+  $$ select create_household('Boundary House', 'UTC') $$,
+  'create_household succeeds even when the first 40 characters of the caller''s display_name are all whitespace'
+);
+
+select is(
+  (select display_name from household_members where user_id = 'e0e0e0e0-e0e0-4e0e-8e0e-e0e0e0e0e0e0'),
+  'Member',
+  'create_household''s copy site falls back to Member when truncation would otherwise leave whitespace'
+);
+
+set local request.jwt.claims = '{"sub":"44444444-4444-4444-8444-444444444444","role":"authenticated"}';
+insert into household_invites (household_id, token_hash, role, expires_at, created_by)
+select id, encode(digest('claim-token-boundary', 'sha256'), 'hex'), 'child',
+       now() + interval '7 days', '44444444-4444-4444-8444-444444444444'
+from households where name = 'The Testers';
+
+set local request.jwt.claims = '{"sub":"f0f0f0f0-f0f0-4f0f-8f0f-f0f0f0f0f0f0","role":"authenticated"}';
+update profiles set display_name = repeat(' ', 40) || 'Cee' where id = 'f0f0f0f0-f0f0-4f0f-8f0f-f0f0f0f0f0f0';
+
+select lives_ok(
+  $$ select accept_invite('claim-token-boundary') $$,
+  'accept_invite''s new-member path succeeds even when the first 40 characters of the caller''s display_name are all whitespace'
+);
+
+select is(
+  (select display_name from household_members where user_id = 'f0f0f0f0-f0f0-4f0f-8f0f-f0f0f0f0f0f0'),
+  'Member',
+  'accept_invite''s copy site falls back to Member when truncation would otherwise leave whitespace'
 );
 
 -- Cross-household guard: household_invites.household_id and the
