@@ -47,7 +47,7 @@ export async function switchToMemberAction(_prev: SwitchState, formData: FormDat
     .eq("is_active", true)
     .maybeSingle();
 
-  if (!target) return { error: "That profile is not available" };
+  if (!target) return { error: "That profile isn't available anymore — choose another from the list." };
 
   // Skip the PIN when switching into the authenticated account's OWN row. The PIN exists to
   // stop someone switching into ANOTHER person's admin profile -- requiring one to become
@@ -57,12 +57,12 @@ export async function switchToMemberAction(_prev: SwitchState, formData: FormDat
   const isOwnRow = target.user_id !== null && target.user_id === account.user_id;
 
   if (!isOwnRow && requiresPin(target.role)) {
-    if (!pin) return { error: "This profile needs a PIN" };
+    if (!pin) return { error: "Enter this profile’s PIN to continue." };
     const { data: verified, error } = await supabase.rpc("verify_member_pin", {
       p_member_id: target.id,
       p_pin: pin,
     });
-    if (error || !verified) return { error: "Incorrect PIN" };
+    if (error || !verified) return { error: "Incorrect PIN — try again." };
   }
 
   await setActiveMember(target.id);

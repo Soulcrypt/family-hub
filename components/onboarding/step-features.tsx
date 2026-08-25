@@ -2,6 +2,8 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { saveFeaturesAction, type ActionState } from "@/app/onboarding/actions";
 import { Button } from "@/components/ui/button";
 import { FEATURES, isFeatureEnabled, type EnabledFeatures } from "@/lib/constants/features";
@@ -22,10 +24,18 @@ export function StepFeatures({ enabledFeatures }: { enabledFeatures: EnabledFeat
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-8 px-6 py-16">
+      <Link
+        href="/onboarding?step=members"
+        className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 rounded-[12px] px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >
+        <ChevronLeft size={18} aria-hidden />
+        Back
+      </Link>
+
       <div>
-        <p className="text-sm text-muted">Step 4 of 4</p>
+        <p className="text-sm text-muted-foreground">Step 4 of 4</p>
         <h1 className="text-3xl">Choose your features</h1>
-        <p className="mt-2 text-muted">
+        <p className="mt-2 text-muted-foreground">
           Turn on what your family will use. You can change these anytime in Settings.
         </p>
       </div>
@@ -35,7 +45,7 @@ export function StepFeatures({ enabledFeatures }: { enabledFeatures: EnabledFeat
           {FEATURES.map((feature) => (
             <li
               key={feature.key}
-              className="rounded-[14px] bg-surface ring-1 ring-foreground/10 has-disabled:opacity-80"
+              className="rounded-[14px] bg-surface shadow-elevation ring-1 ring-[color:var(--color-muted)] has-disabled:opacity-80"
             >
               {/*
                 The checkbox and its text share ONE <label> (rather than an input + a
@@ -54,14 +64,14 @@ export function StepFeatures({ enabledFeatures }: { enabledFeatures: EnabledFeat
                   value={feature.key}
                   defaultChecked={feature.locked || isFeatureEnabled(enabledFeatures, feature.key)}
                   disabled={feature.locked}
-                  className="size-5 shrink-0 rounded border-input disabled:opacity-60"
+                  className="size-5 shrink-0 rounded border-[var(--color-muted)] disabled:opacity-60"
                 />
-                <span className="flex flex-1 flex-col">
+                <span className="flex min-w-0 flex-1 flex-col">
                   <span className="text-sm font-medium">
                     {feature.label}
-                    {feature.locked ? <span className="ml-2 text-xs text-muted">Always on</span> : null}
+                    {feature.locked ? <span className="ml-2 text-xs text-muted-foreground">Always on</span> : null}
                   </span>
-                  <span className="text-xs text-muted">{feature.description}</span>
+                  <span className="text-xs text-muted-foreground">{feature.description}</span>
                 </span>
               </label>
             </li>
@@ -69,7 +79,7 @@ export function StepFeatures({ enabledFeatures }: { enabledFeatures: EnabledFeat
         </ul>
 
         {state.error ? (
-          <p role="alert" className="rounded-[12px] bg-[#F5DEDA] px-4 py-3 text-sm text-[#9B4A38]">
+          <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
             {state.error}
           </p>
         ) : null}

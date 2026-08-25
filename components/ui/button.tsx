@@ -10,9 +10,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-accent-strong text-on-accent hover:brightness-95",
-        outline: "border border-border bg-surface text-ink hover:bg-sunken",
+        outline: "border border-[var(--color-muted)] bg-surface text-ink hover:bg-sunken",
         ghost: "text-ink hover:bg-sunken",
-        destructive: "bg-[#9B4A38] text-white hover:brightness-95",
+        destructive: "bg-destructive text-on-destructive hover:brightness-95",
       },
       size: {
         default: "min-h-[44px] px-5 py-2",

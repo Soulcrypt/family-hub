@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { addMemberAction, type ActionState } from "@/app/onboarding/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +28,6 @@ export type OnboardingMember = {
 };
 
 export function StepMembers({ members }: { members: OnboardingMember[] }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [hasLogin, setHasLogin] = useState(false);
   const [state, formAction, pending] = useActionState(addMemberAction, INITIAL);
@@ -45,16 +45,24 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-8 px-6 py-16">
+      <Link
+        href="/onboarding?step=household"
+        className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 rounded-[12px] px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >
+        <ChevronLeft size={18} aria-hidden />
+        Back
+      </Link>
+
       <div>
-        <p className="text-sm text-muted">Step 3 of 4</p>
+        <p className="text-sm text-muted-foreground">Step 3 of 4</p>
         <h1 className="text-3xl">Add your family</h1>
-        <p className="mt-2 text-muted">
+        <p className="mt-2 text-muted-foreground">
           Add the people in your household now, or skip this and add them anytime in Settings.
         </p>
       </div>
 
       {members.length === 0 ? (
-        <p className="rounded-[14px] border border-dashed border-border px-4 py-6 text-center text-sm text-muted">
+        <p className="rounded-[14px] border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
           No family members yet. Add one below, or continue and add them later.
         </p>
       ) : (
@@ -69,9 +77,9 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
                 className="size-8 shrink-0 rounded-full"
                 style={{ backgroundColor: member.color }}
               />
-              <div className="flex flex-1 flex-col">
-                <span className="text-sm font-medium">{member.display_name}</span>
-                <span className="text-xs text-muted">{ROLE_LABELS[member.role]}</span>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-sm font-medium">{member.display_name}</span>
+                <span className="text-xs text-muted-foreground">{ROLE_LABELS[member.role]}</span>
               </div>
             </li>
           ))}
@@ -87,7 +95,7 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add a family member</DialogTitle>
-            <DialogDescription>They&apos;ll show up in your household right away.</DialogDescription>
+            <DialogDescription>They’ll show up in your household right away.</DialogDescription>
           </DialogHeader>
 
           <form ref={formRef} action={formAction} className="flex flex-col gap-4">
@@ -103,7 +111,7 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
                 name="role"
                 defaultValue="child"
                 required
-                className="min-h-[44px] w-full rounded-[12px] border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                className="min-h-[44px] w-full rounded-[12px] border border-[var(--color-muted)] bg-surface px-2.5 text-sm text-ink outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 {ROLES.map((role) => (
                   <option key={role} value={role}>
@@ -120,7 +128,7 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
                 name="color"
                 type="color"
                 defaultValue="#C4643C"
-                className="h-11 w-16 cursor-pointer rounded-[12px] border border-input bg-transparent p-1"
+                className="h-11 w-16 cursor-pointer rounded-[12px] border border-[var(--color-muted)] bg-transparent p-1"
               />
             </div>
 
@@ -135,24 +143,24 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
                 name="hasLogin"
                 checked={hasLogin}
                 onChange={(event) => setHasLogin(event.target.checked)}
-                className="size-5 shrink-0 rounded border-input"
+                className="size-5 shrink-0 rounded border-[var(--color-muted)]"
               />
-              They&apos;ll have their own login
+              They’ll have their own login
             </label>
             {hasLogin ? (
-              <p className="text-xs text-muted">
-                Invites aren&apos;t available yet — for now they&apos;ll be added without a way to sign in
-                themselves, and you can invite them once that&apos;s ready.
+              <p className="text-xs text-muted-foreground">
+                Invites aren’t available yet — for now they’ll be added without a way to sign in
+                themselves, and you can invite them once that’s ready.
               </p>
             ) : null}
 
             {state.error ? (
-              <p role="alert" className="rounded-[12px] bg-[#F5DEDA] px-4 py-3 text-sm text-[#9B4A38]">
+              <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
                 {state.error}
               </p>
             ) : null}
 
-            <DialogFooter>
+            <DialogFooter showCloseButton>
               <Button type="submit" disabled={pending}>
                 {pending ? "Adding…" : "Add member"}
               </Button>
@@ -161,8 +169,8 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
         </DialogContent>
       </Dialog>
 
-      <Button type="button" size="lg" onClick={() => router.push("/onboarding?step=features")}>
-        Continue
+      <Button asChild size="lg">
+        <Link href="/onboarding?step=features">Continue</Link>
       </Button>
     </main>
   );

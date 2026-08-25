@@ -17,6 +17,26 @@ export type ActionState = { error: string | null };
 // actually raises.
 const DUPLICATE_HOUSEHOLD_MESSAGE = "you already have a household";
 
+/**
+ * The same defect app/(auth)/actions.ts's `mapSignUpError` exists to fix, applied here: a raw
+ * Postgres/PostgREST `error.message` (constraint names, internal column references, RLS
+ * "permission denied for table X" text, connection/timeout errors -- none of it written for an
+ * end user) must never reach the UI verbatim. Every call site below has already special-cased
+ * the one error it can say something specific and useful about (the duplicate-household race
+ * in createHouseholdAction); everything else -- including anything unrecognized -- falls
+ * through to this one generic, always-safe message per action.
+ */
+function genericErrorFor(action: "household" | "member" | "features"): string {
+  switch (action) {
+    case "household":
+      return "We couldn't create your household. Please try again.";
+    case "member":
+      return "We couldn't add this family member. Please try again.";
+    case "features":
+      return "We couldn't save your features. Please try again.";
+  }
+}
+
 export async function createHouseholdAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   // Resumability guard, checked BEFORE validating the submitted form: a second tab, a double
   // submit, or a browser-back resubmission of a stale form could reach here after this
@@ -55,15 +75,15 @@ export async function createHouseholdAction(_prev: ActionState, formData: FormDa
     // error -- since from the user's point of view they DO have a household now, just not
     // the one this particular call tried to create; a double-click should land them on step
     // 3, not show them an error. Every other error (bad name, bad timezone, not
-    // authenticated) falls through to the generic surface-the-message branch below --
-    // create_household()'s own messages for those are already clean enough to show directly,
-    // unlike GoTrue's auth errors elsewhere in this app.
+    // authenticated, a genuine DB/RLS fault) falls through to `genericErrorFor("household")`
+    // below -- a raw `error.message` here is Postgres/PostgREST text, not user-facing copy
+    // (see that function's doc comment).
     if (error.message === DUPLICATE_HOUSEHOLD_MESSAGE) {
       const membership = await requireAccountMembership();
       await setActiveMember(membership.id);
       redirect("/onboarding?step=members");
     }
-    return { error: error.message };
+    return { error: genericErrorFor("household") };
   }
 
   const membership = await requireAccountMembership();
@@ -106,7 +126,7 @@ export async function addMemberAction(_prev: ActionState, formData: FormData): P
     birthday: parsed.data.birthday || null,
     user_id: null,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: genericErrorFor("member") };
 
   revalidatePath("/onboarding");
   return { error: null };
@@ -129,7 +149,7 @@ export async function saveFeaturesAction(_prev: ActionState, formData: FormData)
     .from("household_settings")
     .update({ enabled_features: enabled as Json })
     .eq("household_id", account.household_id);
-  if (error) return { error: error.message };
+  if (error) return { error: genericErrorFor("features") };
 
   revalidatePath("/onboarding");
   return { error: null };

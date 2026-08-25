@@ -6,7 +6,7 @@ export default function WelcomePage() {
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-10 px-6 text-center">
       <div className="flex flex-col gap-4">
         <h1 className="text-4xl">Family Hub</h1>
-        <p className="text-lg text-muted">
+        <p className="text-lg text-muted-foreground">
           Meals, plans, chores and days — for everyone under one roof.
         </p>
       </div>

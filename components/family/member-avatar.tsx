@@ -103,7 +103,14 @@ export function MemberAvatar({
       {avatarUrl ? (
         // A fixed-size circular portrait; next/image's responsive-sizing machinery buys nothing here.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+        <img
+          src={avatarUrl}
+          alt=""
+          width={px}
+          height={px}
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
       ) : (
         <span aria-hidden="true" className="font-medium">
           {initial}

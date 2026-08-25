@@ -44,7 +44,9 @@ export function BottomNav({ items }: BottomNavProps) {
   const tabClassName = (active: boolean) =>
     cn(
       "flex min-h-[44px] flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent",
-      active ? "text-accent" : "text-muted hover:text-ink",
+      // text-accent-strong, not the pinned text-accent (3.76:1, fails AA at this text-xs
+      // size) -- see the design-fix report's contrast sweep.
+      active ? "text-accent-strong" : "text-muted-foreground hover:text-ink",
     );
 
   return (

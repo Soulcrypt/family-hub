@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { createHouseholdAction, type ActionState } from "@/app/onboarding/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,16 +18,27 @@ export function StepHousehold() {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-8 px-6">
+      {/* Safe unconditionally: this step only ever renders while no household exists yet (see
+          app/onboarding/page.tsx's resumability guard), so /welcome can't itself bounce forward
+          the way /onboarding?step=household would once a household exists. */}
+      <Link
+        href="/welcome"
+        className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 rounded-[12px] px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >
+        <ChevronLeft size={18} aria-hidden />
+        Back
+      </Link>
+
       <div>
-        <p className="text-sm text-muted">Step 2 of 4</p>
+        <p className="text-sm text-muted-foreground">Step 2 of 4</p>
         <h1 className="text-3xl">Create your household</h1>
-        <p className="mt-2 text-muted">Give your family a name. You can change this anytime in Settings.</p>
+        <p className="mt-2 text-muted-foreground">Give your family a name. You can change this anytime in Settings.</p>
       </div>
 
       <form action={formAction} className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <Label htmlFor="name">Household name</Label>
-          <Input id="name" name="name" autoComplete="off" required maxLength={80} placeholder="The Parkers" />
+          <Input id="name" name="name" autoComplete="off" required maxLength={80} placeholder="The Parkers…" />
         </div>
         {/*
           Uncontrolled and set imperatively via ref, not React state: this needs the
@@ -47,7 +60,7 @@ export function StepHousehold() {
         />
 
         {state.error ? (
-          <p role="alert" className="rounded-[12px] bg-[#F5DEDA] px-4 py-3 text-sm text-[#9B4A38]">
+          <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
             {state.error}
           </p>
         ) : null}

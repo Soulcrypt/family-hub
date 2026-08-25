@@ -54,8 +54,16 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh md:flex">
+      <a
+        href="#main-content"
+        className="sr-only rounded-[12px] bg-accent-strong px-4 py-3 text-sm font-medium text-on-accent focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50"
+      >
+        Skip to content
+      </a>
       <Sidebar items={items} householdName={household?.name ?? "Family Hub"} activeMember={activeMember} />
-      <main className="flex-1 pb-[calc(56px+env(safe-area-inset-bottom))] md:pb-0">{children}</main>
+      <main id="main-content" className="flex-1 pb-[calc(56px+env(safe-area-inset-bottom))] md:pb-0">
+        {children}
+      </main>
       <BottomNav items={items} />
     </div>
   );

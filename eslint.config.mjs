@@ -37,6 +37,24 @@ const eslintConfig = defineConfig([
           message:
             "`as AuthorityRole` is only permitted inside lib/auth/active-member.ts (the one trust-boundary mint site) or lib/__tests__/ (non-exported test fixtures). See lib/constants/roles.ts.",
         },
+        // `text-muted`/`text-sunken`/`text-surface`/`text-bg` are shadcn SURFACE-role color
+        // names (bg-muted, bg-sunken, ...) repointed onto this palette's near-background
+        // tones -- pairing any of them with `text-` puts foreground-legible text in a
+        // background-legible color, which is how `text-muted` shipped at 1.09:1 contrast
+        // (roughly 40% of on-screen text effectively invisible) and survived twelve task
+        // reviews and 207 tests before anyone measured it. Use the matching `-foreground`
+        // token instead (`text-muted-foreground`, etc. -- see app/globals.css's `--muted-
+        // foreground` mapping) or `text-ink` for full-strength text.
+        {
+          selector: "Literal[value=/(^|\\s)text-(muted|sunken|surface|bg)(\\s|$)/]",
+          message:
+            "Bare `text-muted`/`text-sunken`/`text-surface`/`text-bg` is a surface-role color paired with text -- it renders at ~1:1 contrast against the very surface it names. Use `text-muted-foreground` (or another `-foreground`/`text-ink` token) instead.",
+        },
+        {
+          selector: "TemplateElement[value.raw=/(^|\\s)text-(muted|sunken|surface|bg)(\\s|$)/]",
+          message:
+            "Bare `text-muted`/`text-sunken`/`text-surface`/`text-bg` is a surface-role color paired with text -- it renders at ~1:1 contrast against the very surface it names. Use `text-muted-foreground` (or another `-foreground`/`text-ink` token) instead.",
+        },
       ],
     },
   },

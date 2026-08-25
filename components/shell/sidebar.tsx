@@ -21,7 +21,7 @@ export function Sidebar({ items, householdName, activeMember }: SidebarProps) {
     <aside className="hidden shrink-0 border-r border-border bg-surface md:flex md:w-[260px] md:flex-col">
       <div className="flex flex-col gap-1 px-6 pt-8 pb-6">
         <span className="text-lg font-medium text-ink">Family Hub</span>
-        <span className="truncate text-sm text-muted">{householdName}</span>
+        <span className="truncate text-sm text-muted-foreground">{householdName}</span>
       </div>
 
       <nav aria-label="Main" className="flex flex-1 flex-col gap-1 px-3">
@@ -35,7 +35,7 @@ export function Sidebar({ items, householdName, activeMember }: SidebarProps) {
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex min-h-[44px] items-center gap-3 rounded-[12px] px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-                isActive ? "bg-sunken text-ink" : "text-muted hover:bg-sunken hover:text-ink",
+                isActive ? "bg-sunken text-ink" : "text-muted-foreground hover:bg-sunken hover:text-ink",
               )}
             >
               <Icon size={20} aria-hidden />
@@ -61,7 +61,7 @@ export function Sidebar({ items, householdName, activeMember }: SidebarProps) {
           ) : (
             <span
               aria-hidden="true"
-              className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-sunken text-sm font-medium text-muted"
+              className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-sunken text-sm font-medium text-muted-foreground"
             >
               ?
             </span>

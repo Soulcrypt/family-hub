@@ -29,7 +29,10 @@ test("a new user can complete onboarding and reach the dashboard", async ({ page
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText("Ivy")).toBeVisible();
 
-  await page.getByRole("button", { name: "Continue" }).click();
+  // This step's "Continue" is a plain navigation Link (not a form-submit button, unlike the
+  // household/features steps' -- see the Web Interface Guidelines fix that made it a <Link> so
+  // Cmd/Ctrl/middle-click work), so its accessible role is "link", not "button".
+  await page.getByRole("link", { name: "Continue" }).click();
   await expect(page).toHaveURL(/step=features/);
 
   await page.getByRole("button", { name: "Continue" }).click();

@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { createServerClient } from "@/lib/supabase/server";
 import { getAccountMembership } from "@/lib/auth/active-member";
 import { finishOnboardingAction } from "./actions";
@@ -35,7 +37,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
     return (
       <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-8 px-6 text-center">
         <h1 className="text-4xl">Welcome to Family Hub</h1>
-        <p className="text-lg text-muted">Four short steps and your household is ready.</p>
+        <p className="text-lg text-muted-foreground">Four short steps and your household is ready.</p>
         <form method="get">
           <input type="hidden" name="step" value="household" />
           <Button type="submit" size="lg">
@@ -80,8 +82,15 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-8 px-6 text-center">
-      <h1 className="text-4xl">You&apos;re ready</h1>
-      <p className="text-lg text-muted">
+      <Link
+        href="/onboarding?step=features"
+        className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 self-start rounded-[12px] px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >
+        <ChevronLeft size={18} aria-hidden />
+        Back
+      </Link>
+      <h1 className="text-4xl">You’re ready</h1>
+      <p className="text-lg text-muted-foreground break-words">
         {household?.name ?? "Your household"} is set up. You can change any of this later in Settings.
       </p>
       <form action={finishOnboardingAction}>

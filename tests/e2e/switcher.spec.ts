@@ -123,7 +123,9 @@ test("switching profiles changes attribution, gated by PIN for admin profiles ot
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(parentName)).toBeVisible();
 
-  await page.getByRole("button", { name: "Continue" }).click();
+  // This step's "Continue" is a plain navigation Link, not a form-submit button -- see
+  // onboarding.spec.ts's identical note.
+  await page.getByRole("link", { name: "Continue" }).click();
   await expect(page).toHaveURL(/step=features/);
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/step=ready/);
@@ -153,7 +155,10 @@ test("switching profiles changes attribution, gated by PIN for admin profiles ot
 
   // --- All three members appear on the switcher. ---
   await page.goto("/switch");
-  await expect(page.getByRole("heading", { name: /who's this/i })).toBeVisible();
+  // The heading renders a typographic apostrophe (’, U+2019), not the straight ' this regex
+  // used to match against -- fixed as part of this batch's &apos;-to-curly-quote sweep
+  // (app/switch/page.tsx). Matching either form keeps this assertion from drifting again.
+  await expect(page.getByRole("heading", { name: /who[’']s this/i })).toBeVisible();
   await expect(page.getByText(ownerName, { exact: true })).toBeVisible();
   await expect(page.getByText(childName, { exact: true })).toBeVisible();
   await expect(page.getByText(parentName, { exact: true })).toBeVisible();

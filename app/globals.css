@@ -16,6 +16,7 @@
   --radius-card: 16px;
   --radius-control: 12px;
   --tap-min: 44px;
+  color-scheme: light;
   /* shadcn semantic tokens, remapped onto Task 2's warm palette so every
      installed primitive themes automatically instead of rendering in
      shadcn's neutral grey defaults. */
@@ -34,6 +35,14 @@
   --accent: var(--color-accent);
   --accent-foreground: #FFFFFF;
   --destructive: #9B4A38;
+  /* Soft tinted background for inline error banners -- pairs with --destructive text at
+     4.76:1 (light). See the dark override below for why this can't just reuse --destructive
+     itself as a background. */
+  --color-destructive-bg: #F5DEDA;
+  /* Text/icon color for content that sits ON a --destructive-colored surface (the destructive
+     button variant). White in light mode; see the dark override for why dark mode needs a
+     different value entirely, mirroring --color-on-accent's light/dark split. */
+  --color-on-destructive: #FFFFFF;
   --border: var(--color-border);
   --input: var(--color-border);
   --ring: var(--color-accent);
@@ -44,6 +53,10 @@
   --color-accent-strong: #A9522F;
   --color-on-accent: #FFFFFF;
   --color-muted-strong: #6F6459;
+  /* Warm elevation shadow -- offset + blur (never a zero-offset halo), tinted from the
+     light theme's own ink color rather than neutral black so surfaces read as "warm dark",
+     matching the rest of the palette. */
+  --shadow-elevation: 0 2px 6px 0 rgba(42, 37, 32, 0.10), 0 1px 2px 0 rgba(42, 37, 32, 0.06);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -68,6 +81,7 @@
   --color-muted: #A89B8E;
   --color-accent: #E08B5F;
   --color-border: #332B26;
+  color-scheme: dark;
   --background: var(--color-bg);
   --foreground: var(--color-ink);
   --card: var(--color-surface);
@@ -82,13 +96,27 @@
   --muted-foreground: var(--color-muted-strong);
   --accent: var(--color-accent);
   --accent-foreground: #FFFFFF;
-  --destructive: #9B4A38;
+  /* #9B4A38 (the light-mode value) only reaches 2.93:1 on the dark bg -- fails WCAG AA's 4.5:1
+     for text. #E2836A is the same warm-red hue lightened for a dark ground: 6.58:1 on
+     --color-bg (#1A1614), 6.11:1 on --color-surface (#221D1A). See the design-fix report for
+     the full candidate list this was picked from. */
+  --destructive: #E2836A;
+  /* A dark warm-maroon tint (not a lightened version of the light bg) so the banner reads as
+     a distinct surface -- --destructive text on it measures 5.43:1. */
+  --color-destructive-bg: #3A211D;
+  /* White-on-#E2836A is only 2.73:1 -- fails. The dark ink (matching --color-on-accent's own
+     dark-mode value, since both are light/saturated warm surfaces needing a dark foreground)
+     measures 5.56:1. */
+  --color-on-destructive: #2A2520;
   --border: var(--color-border);
   --input: var(--color-border);
   --ring: var(--color-accent);
   --color-accent-strong: #E08B5F;
   --color-on-accent: #2A2520;
   --color-muted-strong: #A89B8E;
+  /* Dark surfaces need a darker, more opaque shadow to read against an already-dark ground --
+     tinted from the dark theme's own near-black bg components (26,22,20), never pure black. */
+  --shadow-elevation: 0 2px 8px 0 rgba(10, 8, 7, 0.45), 0 1px 3px 0 rgba(10, 8, 7, 0.3);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -139,6 +167,9 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-destructive: var(--destructive);
+  --color-destructive-bg: var(--color-destructive-bg);
+  --color-on-destructive: var(--color-on-destructive);
+  --shadow-elevation: var(--shadow-elevation);
   --color-accent-foreground: var(--accent-foreground);
   --color-muted-foreground: var(--muted-foreground);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -165,6 +196,11 @@
     background-color: var(--color-bg);
     color: var(--color-ink);
     font-family: var(--font-sans);
+    /* Kills the default ~300ms tap delay on touch devices (this app is built for shared
+       kitchen/wall tablets) and suppresses the grey/blue flash Chrome/Android paints on tap,
+       which otherwise shows through even where a component supplies its own :active state. */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   h1, h2, h3 {
     font-family: var(--font-display);
@@ -176,6 +212,18 @@
   }
   * {
     @apply border-border outline-ring/50;
+  }
+  /* Gates every tw-animate-css enter/exit animation (Dialog, Select, etc. all animate purely
+     via the data-open/data-closed animate-in/animate-out utilities) and this file's own
+     transition-colors utilities behind the user's motion preference, in one place rather than
+     a `motion-reduce:` variant on every animated component. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
   html {
     @apply font-sans;
