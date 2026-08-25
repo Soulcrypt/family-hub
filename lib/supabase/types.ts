@@ -252,6 +252,13 @@ export type Database = {
     }
     Functions: {
       accept_invite: { Args: { p_token: string }; Returns: string }
+      assert_invite_claimable: {
+        Args: {
+          p_invite: Database["public"]["Tables"]["household_invites"]["Row"]
+          p_uid: string
+        }
+        Returns: undefined
+      }
       create_household: {
         Args: { p_name: string; p_timezone?: string }
         Returns: string

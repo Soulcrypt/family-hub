@@ -218,13 +218,16 @@ test("an already-used invite link shows a clear error instead of a broken page",
  * page-level check alone does not close it. See 0012's migration header and
  * app/invite/[token]/page.tsx's doc comment.)
  *
- * Since fix round 3, previewing a token this way (read-only, via preview_invite) does NOT check
- * anything about the caller -- only the token's own validity -- so Alex DOES see the normal
- * confirm screen ("Join Household B as Charlie?") before anything is rejected. The guard still
- * fires, just one step later: pressing "Join the household" is what calls accept_invite, and
- * that's what raises the rejection this test asserts. This is exactly the shape fix round 3
- * asked for -- every existing error path unchanged, only the trigger moved from render to
- * submit.
+ * Fix round 3 introduced a confirm screen fed by a read-only `preview_invite` RPC that checked
+ * ONLY the token's own validity, not the caller's eligibility -- which meant Alex, in this
+ * exact scenario, would have read "Join Household B as Charlie?" (a real household and a real
+ * child's name) before being turned away on submit. That is worse disclosure than the original
+ * flow (a single generic rejection, no names at all), and this test's own prior version proved
+ * it without anyone noticing at the time. Fix round 4 gives `preview_invite` the SAME
+ * eligibility checks `accept_invite` runs, via a shared `assert_invite_claimable()` helper
+ * (supabase/migrations/0015_shared_invite_eligibility_check.sql) -- so Alex is now refused at
+ * the PREVIEW itself: no confirm screen, no household name, no child's name, just the same
+ * generic error screen every other unreachable invite produces.
  */
 test("an account that already belongs to a household cannot be attached to a stranger's claim invite for a different household", async ({
   page,
@@ -270,18 +273,18 @@ test("an account that already belongs to a household cannot be attached to a str
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/step=members/);
 
-  // --- Alex, still signed in as themselves, opens Household B's claim invite link. Previewing
-  // it (read-only) succeeds -- the token itself is perfectly valid -- so Alex sees the normal
-  // confirm screen naming Household B and Charlie, same as any legitimate invite. ---
+  // --- Alex, still signed in as themselves, opens Household B's claim invite link.
+  // preview_invite (0015) now checks Alex's OWN eligibility, not just the token -- so this is
+  // refused immediately, before any confirm screen exists to leak Household B's name or
+  // Charlie's. ---
   await page.goto(inviteLink);
-  await expect(page.getByRole("heading", { name: `Join ${householdBName}?` })).toBeVisible();
-  await expect(page.getByText(/joining as charlie/i)).toBeVisible();
-
-  // --- Only pressing "Join the household" actually calls accept_invite, and THAT is what
-  // 0012_accept_invite_one_household_guard.sql rejects -- rendered inline on this same screen,
-  // the same generic error heading every other accept_invite rejection uses. ---
-  await page.getByRole("button", { name: "Join the household" }).click();
+  await expect(page.getByRole("heading", { name: /we couldn.t add you/i })).toBeVisible();
   await expect(page.getByRole("alert").filter({ hasText: /already belong to a household/i })).toBeVisible();
+
+  // --- Neither Household B's name nor Charlie's ever appeared anywhere on this screen. ---
+  await expect(page.getByText(householdBName)).toHaveCount(0);
+  await expect(page.getByText(targetChildName, { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Join the household" })).toHaveCount(0);
   await expect(page).not.toHaveURL(/\/dashboard/);
 
   // --- Charlie's row is untouched -- no takeover happened. ---
