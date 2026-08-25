@@ -61,7 +61,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <Sidebar items={items} householdName={household?.name ?? "Family Hub"} activeMember={activeMember} />
-      <main id="main-content" className="flex-1 pb-[calc(56px+env(safe-area-inset-bottom))] md:pb-0">
+      <main
+        id="main-content"
+        className="min-w-0 flex-1 pb-[calc(56px+env(safe-area-inset-bottom))] md:pb-0"
+      >
         {children}
       </main>
       <BottomNav items={items} />
