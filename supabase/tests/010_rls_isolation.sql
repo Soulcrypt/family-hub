@@ -1,5 +1,5 @@
 begin;
-select plan(11);
+select plan(41);
 
 -- Two households, two owners, one teen in household A.
 insert into auth.users (id, email) values
@@ -107,6 +107,28 @@ select is(
   0,
   'teen cannot read invitations'
 );
+
+-- Fix round 1: TRUNCATE bypasses Row Level Security entirely -- RLS
+-- policies are never consulted for TRUNCATE -- so a role holding it could
+-- empty any of these tables regardless of every policy above. REFERENCES
+-- and TRIGGER are the same class of grant unrelated to the CRUD
+-- operations the policies actually govern. None of the three should be
+-- held by anon or authenticated on any of the five tables. This asserts
+-- that directly against pg_catalog via has_table_privilege(), independent
+-- of RLS, so a future migration cannot silently reintroduce the grant
+-- (e.g. by recreating a table without repeating the revoke).
+select ok(
+    not has_table_privilege(r.role_name, t.table_name, p.priv),
+    format('%s cannot %s on %s (bypasses/unrelated-to RLS)', r.role_name, p.priv, t.table_name)
+  )
+from
+  unnest(array['anon', 'authenticated']) as r(role_name),
+  unnest(array[
+    'profiles', 'households', 'household_members',
+    'household_invites', 'household_settings'
+  ]) as t(table_name),
+  unnest(array['TRUNCATE', 'REFERENCES', 'TRIGGER']) as p(priv)
+order by t.table_name, r.role_name, p.priv;
 
 select * from finish();
 rollback;
