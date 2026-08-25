@@ -2,7 +2,6 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { addMemberAction, type ActionState } from "@/app/onboarding/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,14 +44,15 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-8 px-6 py-16">
-      <Link
-        href="/onboarding?step=household"
-        className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 rounded-[12px] px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
-        <ChevronLeft size={18} aria-hidden />
-        Back
-      </Link>
-
+      {/* No Back control on this step, deliberately: by the time this step renders, a
+          household already exists and cannot be un-created (see app/onboarding/page.tsx's
+          resumability guard, which unconditionally bounces any visit to ?step=household back
+          to here once membership exists -- tests/e2e/onboarding.spec.ts:65-66 asserts exactly
+          that). A Back link here would render, get clicked, and visibly do nothing --
+          confirmed by testing it, not just reasoning about it -- which reads as "the app is
+          broken," a worse outcome than having no control at all. There genuinely is nowhere
+          earlier to go back to; the honest interface says so by omission. (An explicit
+          "rename household" affordance would belong to Settings, Task 15 -- not this step.) */}
       <div>
         <p className="text-sm text-muted-foreground">Step 3 of 4</p>
         <h1 className="text-3xl">Add your family</h1>
