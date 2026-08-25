@@ -5,8 +5,12 @@ import type { AuthorityRole, MemberRole } from "@/lib/constants/roles";
  * answer "may the CALLER do this?" and take an `AuthorityRole`, not a plain `MemberRole` —
  * the type system, not just this comment, is what stops a role from `getActiveMember()`
  * (UI-attribution-only) from being fed into an authorization check: passing a plain
- * `MemberRole` to any of the four functions above fails to compile. Only
- * `requireAccountMembership()` (lib/auth/active-member.ts) can produce an `AuthorityRole`.
+ * `MemberRole` directly to any of the four functions above fails to compile. That guarantee
+ * additionally depends on an ESLint rule (`@typescript-eslint/method-signature-style`,
+ * eslint.config.mjs) that closes a TypeScript method-shorthand bivariance gap — see the
+ * `AuthorityRole` doc comment in lib/constants/roles.ts for the full mechanism. Only
+ * `getAccountMembership()` / `requireAccountMembership()` (lib/auth/active-member.ts) can
+ * produce an `AuthorityRole`.
  *
  * `requiresPin` is deliberately NOT branded — it asks "does switching *into this profile*
  * require a PIN?", a question about the TARGET member being switched into, not about the
