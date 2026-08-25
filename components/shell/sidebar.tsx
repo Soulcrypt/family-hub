@@ -2,11 +2,33 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  CalendarDays,
+  Home,
+  ListChecks,
+  Settings as SettingsIcon,
+  Sparkles,
+  Users,
+  UtensilsCrossed,
+  type LucideIcon,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { MemberAvatar } from "@/components/family/member-avatar";
 import { cn } from "@/lib/utils";
-import type { NavItem } from "@/components/shell/nav-items";
+import type { NavIconKey, NavItem } from "@/components/shell/nav-items";
 import type { ActiveMember } from "@/lib/auth/active-member";
+
+// See nav-items.ts's doc comment on `NavIconKey`: the actual icon components are resolved
+// here, client-side, rather than carried across the server/client boundary as data.
+const ICONS: Record<NavIconKey, LucideIcon> = {
+  home: Home,
+  calendar: CalendarDays,
+  meals: UtensilsCrossed,
+  chores: ListChecks,
+  habits: Sparkles,
+  family: Users,
+  settings: SettingsIcon,
+};
 
 type SidebarProps = {
   items: NavItem[];
@@ -27,7 +49,7 @@ export function Sidebar({ items, householdName, activeMember }: SidebarProps) {
       <nav aria-label="Main" className="flex flex-1 flex-col gap-1 px-3">
         {items.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          const Icon = item.icon;
+          const Icon = ICONS[item.icon];
           return (
             <Link
               key={item.href}

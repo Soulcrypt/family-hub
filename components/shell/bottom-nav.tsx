@@ -3,10 +3,32 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MoreHorizontal } from "lucide-react";
+import {
+  CalendarDays,
+  Home,
+  ListChecks,
+  MoreHorizontal,
+  Settings as SettingsIcon,
+  Sparkles,
+  Users,
+  UtensilsCrossed,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { NavItem } from "@/components/shell/nav-items";
+import type { NavIconKey, NavItem } from "@/components/shell/nav-items";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
+// See nav-items.ts's doc comment on `NavIconKey`: the actual icon components are resolved
+// here, client-side, rather than carried across the server/client boundary as data.
+const ICONS: Record<NavIconKey, LucideIcon> = {
+  home: Home,
+  calendar: CalendarDays,
+  meals: UtensilsCrossed,
+  chores: ListChecks,
+  habits: Sparkles,
+  family: Users,
+  settings: SettingsIcon,
+};
 
 type BottomNavProps = { items: NavItem[] };
 
@@ -55,7 +77,7 @@ export function BottomNav({ items }: BottomNavProps) {
       className="fixed inset-x-0 bottom-0 z-10 flex border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       {visible.map((item) => {
-        const Icon = item.icon;
+        const Icon = ICONS[item.icon];
         return (
           <Link
             key={item.href}
@@ -84,7 +106,7 @@ export function BottomNav({ items }: BottomNavProps) {
             </DialogHeader>
             <ul className="flex flex-col gap-1">
               {overflow.map((item) => {
-                const Icon = item.icon;
+                const Icon = ICONS[item.icon];
                 return (
                   <li key={item.href}>
                     <DialogClose asChild>

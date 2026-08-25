@@ -1,17 +1,32 @@
-import { CalendarDays, Home, ListChecks, Settings, Sparkles, Users, UtensilsCrossed } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { FEATURES, type EnabledFeatures, type FeatureKey } from "@/lib/constants/features";
 
-export type NavItem = { href: string; label: string; icon: LucideIcon; feature: FeatureKey | null };
+/**
+ * Task 13 fix: this module is imported by BOTH a Server Component (app/(app)/layout.tsx,
+ * which calls `navItemsFor()`) and the Client Components that render its result (Sidebar,
+ * BottomNav). It used to store the actual lucide-react icon COMPONENT on each `NavItem`
+ * (`icon: LucideIcon`) -- a function -- and pass that across the server/client boundary as a
+ * prop. React Server Components can only serialize plain data across that boundary; a
+ * function/component reference is not serializable, and `/family` (the first route to ever
+ * render this shell -- see this task's report) 500'd on every request with "Functions cannot
+ * be passed directly to Client Components" the instant it did.
+ *
+ * The fix: `icon` is now a plain string KEY. The actual lucide-react components are imported
+ * and resolved entirely CLIENT-SIDE, inside Sidebar and BottomNav themselves (each keeps its
+ * own `ICONS: Record<NavIconKey, LucideIcon>` map) -- nothing but serializable data ever
+ * crosses the boundary.
+ */
+export type NavIconKey = "home" | "calendar" | "meals" | "chores" | "habits" | "family" | "settings";
+
+export type NavItem = { href: string; label: string; icon: NavIconKey; feature: FeatureKey | null };
 
 const ALL: NavItem[] = [
-  { href: "/dashboard", label: "Home", icon: Home, feature: null },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays, feature: "calendar" },
-  { href: "/meals", label: "Meals", icon: UtensilsCrossed, feature: "meals" },
-  { href: "/chores", label: "Chores", icon: ListChecks, feature: "chores" },
-  { href: "/habits", label: "Habits", icon: Sparkles, feature: "habits" },
-  { href: "/family", label: "Family", icon: Users, feature: "family" },
-  { href: "/settings", label: "Settings", icon: Settings, feature: "settings" },
+  { href: "/dashboard", label: "Home", icon: "home", feature: null },
+  { href: "/calendar", label: "Calendar", icon: "calendar", feature: "calendar" },
+  { href: "/meals", label: "Meals", icon: "meals", feature: "meals" },
+  { href: "/chores", label: "Chores", icon: "chores", feature: "chores" },
+  { href: "/habits", label: "Habits", icon: "habits", feature: "habits" },
+  { href: "/family", label: "Family", icon: "family", feature: "family" },
+  { href: "/settings", label: "Settings", icon: "settings", feature: "settings" },
 ];
 
 // `family` and `settings` are `locked: true` in the FEATURES catalogue (lib/constants/features.ts)
