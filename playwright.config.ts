@@ -1,4 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
+import { config as loadEnv } from "dotenv";
+
+// Playwright's own process doesn't get Next.js's automatic .env.local loading -- only the
+// `npm run dev` server (spawned below via webServer) does. tests/e2e/switcher.spec.ts needs
+// NEXT_PUBLIC_SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY itself, to seed a PIN hash directly in
+// the database, so load the same file explicitly here before workers are spawned -- they
+// inherit process.env from this process.
+loadEnv({ path: ".env.local" });
 
 export default defineConfig({
   testDir: "./tests/e2e",
