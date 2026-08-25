@@ -97,15 +97,21 @@ insert into household_settings (household_id, enabled_features) values (
 -- hard to tell apart at avatar size. Every value below was checked against the same formula
 -- components/family/member-avatar.tsx's foregroundFor() uses, and clears 4.5:1 against the
 -- foreground that function picks for it:
---   #A9522F terracotta -> white 5.34:1   (also --color-accent-strong in app/globals.css)
+--   #7C4A6B plum       -> white 6.89:1
 --   #2F6F7A teal       -> white 5.71:1
 --   #E8B44A gold       -> ink   7.99:1
 --   #C98A96 dusty rose -> ink   5.46:1
+--
+-- The owner was terracotta (#A9522F) until review pointed out that is literally
+-- --color-accent-strong (app/globals.css) -- the fill behind the app's own primary buttons.
+-- A person's identity colour should not be the same colour as the app's chrome, or a white
+-- initial on that fill reads as a control rather than a face. Plum keeps the warmth and is
+-- unmistakably not a button.
 -- The schema's own default, #C4643C, is deliberately NOT reused: it only clears ~4.0:1 (see
 -- foregroundFor's own comment).
 insert into household_members (id, household_id, user_id, display_name, role, color, points_balance) values
   ('a10a0000-0000-4000-8000-000000000003', 'a10a0000-0000-4000-8000-000000000002',
-   'a10a0000-0000-4000-8000-000000000001', 'Alex Rivera', 'owner',  '#A9522F', 0),
+   'a10a0000-0000-4000-8000-000000000001', 'Alex Rivera', 'owner',  '#7C4A6B', 0),
   ('a10a0000-0000-4000-8000-000000000004', 'a10a0000-0000-4000-8000-000000000002',
    null, 'Jamie Rivera', 'parent', '#2F6F7A', 0),
   ('a10a0000-0000-4000-8000-000000000005', 'a10a0000-0000-4000-8000-000000000002',
