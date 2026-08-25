@@ -131,8 +131,12 @@ test("a login-less member with a points balance claims their own login via an in
   await page.getByRole("button", { name: "Create account" }).click();
 
   // signUp() redirects back to the SAME invite (via the `next` param carried through the
-  // signup form), which -- now that this account is authenticated -- calls accept_invite and
-  // redirects to /dashboard on success.
+  // signup form) -- now that this account is authenticated, the page previews the invite
+  // (read-only, no mutation yet) and shows exactly what's about to happen before anything is
+  // claimed. Only pressing "Join the household" actually calls accept_invite.
+  await expect(page.getByRole("heading", { name: `Join ${householdName}?` })).toBeVisible();
+  await expect(page.getByText(/joining as ivy/i)).toBeVisible();
+  await page.getByRole("button", { name: "Join the household" }).click();
   await expect(page).toHaveURL(/\/dashboard/);
 
   // --- The database proves the payoff: same row, same id, same points, new user_id, new
@@ -172,7 +176,8 @@ test("an already-used invite link shows a clear error instead of a broken page",
   await dialog.getByRole("button", { name: "Create invite link" }).click();
   const inviteLink = await dialog.getByLabel("Invitation link").inputValue();
 
-  // First claimant redeems it successfully.
+  // First claimant redeems it successfully -- previewing the invite (read-only) doesn't burn
+  // it; only pressing "Join the household" does.
   await page.request.post("/auth/signout");
   await page.goto(inviteLink);
   await page.getByRole("link", { name: "Create your account" }).click();
@@ -180,9 +185,13 @@ test("an already-used invite link shows a clear error instead of a broken page",
   await page.getByLabel("Email").fill(`${unique("first")}@test.local`);
   await page.getByLabel("Password").fill("correct-horse-battery");
   await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.getByRole("heading", { name: `Join ${householdName}?` })).toBeVisible();
+  await page.getByRole("button", { name: "Join the household" }).click();
   await expect(page).toHaveURL(/\/dashboard/);
 
-  // A second, different person tries the SAME link.
+  // A second, different person tries the SAME link. The invite is now already used, so
+  // previewing it fails immediately -- no confirm screen is ever shown, exactly the same error
+  // path as before this token could be previewed at all.
   await page.request.post("/auth/signout");
   await page.goto(inviteLink);
   await page.getByRole("link", { name: "Create your account" }).click();
@@ -192,6 +201,7 @@ test("an already-used invite link shows a clear error instead of a broken page",
   await page.getByRole("button", { name: "Create account" }).click();
 
   await expect(page.getByRole("alert").filter({ hasText: /already been used/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Join the household" })).toHaveCount(0);
   await expect(page).not.toHaveURL(/\/dashboard/);
 });
 
@@ -207,6 +217,14 @@ test("an already-used invite link shows a clear error instead of a broken page",
  * into the RPC itself after review -- accept_invite is directly callable via the anon key, so a
  * page-level check alone does not close it. See 0012's migration header and
  * app/invite/[token]/page.tsx's doc comment.)
+ *
+ * Since fix round 3, previewing a token this way (read-only, via preview_invite) does NOT check
+ * anything about the caller -- only the token's own validity -- so Alex DOES see the normal
+ * confirm screen ("Join Household B as Charlie?") before anything is rejected. The guard still
+ * fires, just one step later: pressing "Join the household" is what calls accept_invite, and
+ * that's what raises the rejection this test asserts. This is exactly the shape fix round 3
+ * asked for -- every existing error path unchanged, only the trigger moved from render to
+ * submit.
  */
 test("an account that already belongs to a household cannot be attached to a stranger's claim invite for a different household", async ({
   page,
@@ -252,14 +270,19 @@ test("an account that already belongs to a household cannot be attached to a str
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/step=members/);
 
-  // --- Alex, still signed in as themselves, opens Household B's claim invite link. accept_invite
-  // itself rejects this (0012_accept_invite_one_household_guard.sql) -- the page just renders
-  // whatever the RPC decided, so this is the same generic error heading every other
-  // accept_invite rejection uses. ---
+  // --- Alex, still signed in as themselves, opens Household B's claim invite link. Previewing
+  // it (read-only) succeeds -- the token itself is perfectly valid -- so Alex sees the normal
+  // confirm screen naming Household B and Charlie, same as any legitimate invite. ---
   await page.goto(inviteLink);
+  await expect(page.getByRole("heading", { name: `Join ${householdBName}?` })).toBeVisible();
+  await expect(page.getByText(/joining as charlie/i)).toBeVisible();
 
-  await expect(page.getByRole("heading", { name: /we couldn.t add you/i })).toBeVisible();
+  // --- Only pressing "Join the household" actually calls accept_invite, and THAT is what
+  // 0012_accept_invite_one_household_guard.sql rejects -- rendered inline on this same screen,
+  // the same generic error heading every other accept_invite rejection uses. ---
+  await page.getByRole("button", { name: "Join the household" }).click();
   await expect(page.getByRole("alert").filter({ hasText: /already belong to a household/i })).toBeVisible();
+  await expect(page).not.toHaveURL(/\/dashboard/);
 
   // --- Charlie's row is untouched -- no takeover happened. ---
   const charlie = await memberIdFor(householdBName, targetChildName);
@@ -267,4 +290,74 @@ test("an account that already belongs to a household cannot be attached to a str
     id: charlie,
   });
   expect(stillUnclaimed.trim()).toBe("t");
+});
+
+async function inviteIsUnaccepted(householdName: string): Promise<boolean> {
+  const stdout = await psql(
+    "select accepted_at is null from household_invites where household_id = (select id from households where name = :'name')",
+    { name: householdName },
+  );
+  return stdout.trim() === "t";
+}
+
+/**
+ * Task 14 fix round 3, the core guarantee: claiming is IRREVERSIBLE (the token is single-use),
+ * so merely RENDERING `/invite/[token]` for a signed-in visitor must never call accept_invite --
+ * only an explicit press of "Join the household" may. Before this fix, a signed-in visitor's
+ * own browser or client prefetching a hovered/visible invite link (or simply reloading the
+ * page) would have silently burned the invitation. This test proves the invite survives
+ * multiple renders of the confirm screen untouched, and is only consumed by the button press.
+ */
+test("loading or reloading the invite confirm screen never claims it -- only pressing the button does", async ({
+  page,
+}) => {
+  const householdName = unique("The Prefetch Family");
+  const childName = "Sam";
+
+  await page.goto("/signup");
+  await page.getByLabel("Your name").fill("Robin Owner");
+  await page.getByLabel("Email").fill(`${unique("robin")}@test.local`);
+  await page.getByLabel("Password").fill("correct-horse-battery");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await page.getByRole("button", { name: "Get started" }).click();
+  await page.getByLabel("Household name").fill(householdName);
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=members/);
+
+  await page.getByRole("button", { name: "Add a family member" }).click();
+  await page.getByLabel("Name").fill(childName);
+  await page.getByLabel("Role").selectOption("child");
+  await page.getByRole("button", { name: "Add member" }).click();
+  await expect(page.getByText(childName, { exact: true })).toBeVisible();
+
+  await page.goto("/settings/members");
+  const samRow = page.getByRole("listitem").filter({ hasText: childName });
+  await samRow.getByRole("button", { name: "Invite them to log in" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name: "Create invite link" }).click();
+  const inviteLink = await dialog.getByLabel("Invitation link").inputValue();
+
+  await page.request.post("/auth/signout");
+  await page.goto(inviteLink);
+  await page.getByRole("link", { name: "Create your account" }).click();
+  await page.getByLabel("Your name").fill("Sam Claimant");
+  await page.getByLabel("Email").fill(`${unique("sam-claim")}@test.local`);
+  await page.getByLabel("Password").fill("correct-horse-battery");
+  await page.getByRole("button", { name: "Create account" }).click();
+
+  // Signed in now, landed back on the SAME invite -- the confirm screen renders, and the
+  // database proves nothing was claimed by that render alone.
+  await expect(page.getByRole("heading", { name: `Join ${householdName}?` })).toBeVisible();
+  expect(await inviteIsUnaccepted(householdName)).toBe(true);
+
+  // Reloading (simulating a second GET -- e.g. a prefetch, or the visitor just refreshing)
+  // re-runs the same read-only preview and must not claim it either.
+  await page.reload();
+  await expect(page.getByRole("heading", { name: `Join ${householdName}?` })).toBeVisible();
+  expect(await inviteIsUnaccepted(householdName)).toBe(true);
+
+  // Only the explicit button press claims it.
+  await page.getByRole("button", { name: "Join the household" }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
+  expect(await inviteIsUnaccepted(householdName)).toBe(false);
 });

@@ -1,47 +1,10 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
+import { ConfirmClaimForm } from "@/components/invite/confirm-claim-form";
+import { friendlyClaimError } from "./friendly-error";
 
-/**
- * Maps `accept_invite`'s own error text (supabase/migrations/0008_bootstrap_display_name_hardening.sql,
- * supabase/migrations/0012_accept_invite_one_household_guard.sql,
- * supabase/migrations/0013_accept_invite_removed_member_message.sql, pgTAP-covered by
- * supabase/tests/020_bootstrap.sql and supabase/tests/040_claim.sql) to user-facing copy.
- * These are Postgres RAISE EXCEPTION messages, not written for an end user, so each one this
- * page can say something specific and useful about is named explicitly here; anything
- * unrecognized falls through to one generic, always-safe message -- same pattern as every
- * other action in this codebase (see e.g. app/(app)/family/actions.ts's genericErrorFor).
- */
-function friendlyClaimError(message: string): string {
-  switch (message) {
-    case "invitation not found":
-      return "This invitation link isn't valid. Ask whoever invited you to send a new one.";
-    case "invitation already used":
-      return "This invitation has already been used.";
-    case "invitation expired":
-      return "This invitation has expired. Ask whoever invited you to send a new one.";
-    case "profile already claimed":
-      return "This family member already has their own login.";
-    case "you are already a member of this household":
-      return "You're already a member of this household.";
-    case "you already have a household":
-      // 0012_accept_invite_one_household_guard.sql: raised for an account that already has an
-      // ACTIVE membership in a DIFFERENT household -- see that migration's header comment for
-      // why this is enforced in the RPC itself, not just here.
-      return "You already belong to a household, so this invitation can’t be accepted from this account.";
-    case "you were removed from this household -- ask an owner or parent to restore your membership":
-      // 0013_accept_invite_removed_member_message.sql: raised for a caller whose row in THIS
-      // invite's own household still exists but is inactive (Task 13's soft-delete). There is
-      // no reactivation UI yet -- restoring a removed member belongs to Task 15's member
-      // management -- so this message names a capability the product doesn't have yet on
-      // purpose (see that migration's header comment), rather than leaving the dead end
-      // "you are already a member" produced before this fix.
-      return "You were removed from this household. Ask an owner or parent to add you back — this invitation can’t restore your old membership by itself.";
-    default:
-      return "We couldn't add you to this household. Please try again.";
-  }
-}
+type InvitePreview = { household_name: string | null; member_display_name: string | null };
 
 /**
  * The claim flow's landing page -- public (`/invite` is in `PUBLIC_PATHS`,
@@ -52,22 +15,30 @@ function friendlyClaimError(message: string): string {
  * someone who already has an account elsewhere) with `?next=/invite/<token>` so they land back
  * on THIS SAME invite afterward, instead of the ordinary onboarding/home redirect --
  * app/(auth)/actions.ts's `safeNextPath` re-validates that query param before ever using it as
- * a redirect target.
+ * a redirect target. This branch never queries `household_invites` at all -- a bogus token and
+ * a real one produce byte-identical output here, so there is no existence oracle for a
+ * signed-out visitor.
  *
- * Signed in: calls `accept_invite` directly and redirects to `/dashboard` on success. EVERY
- * guard that decides whether a token is genuinely redeemable -- expiry, reuse, cross-household
- * member_id mismatch, already-claimed, already-a-member (same household), and already-a-member
- * of a DIFFERENT household -- lives entirely inside that RPC (the last one added by
- * 0012_accept_invite_one_household_guard.sql). This page does not reimplement, duplicate, or
- * pre-check ANY of it; it only calls the RPC and renders whatever it decides.
+ * Signed in: Task 14 fix round 3 -- this branch used to call `accept_invite` directly during
+ * this very render (a plain GET). Claiming is IRREVERSIBLE (the token is single-use), so
+ * anything that triggered this RPC without the person's explicit intent -- most plausibly their
+ * OWN browser or client prefetching a hovered/visible link -- would permanently burn a real
+ * invitation before they ever decided to click anything. This project's interface guidelines
+ * require confirmation before an irreversible action, never immediate execution on render.
  *
- * That last point used to not be true: this page previously pre-checked
- * `getAccountMembership()` itself before calling `accept_invite`, specifically to catch the
- * "already belongs to a different household" case. That check was real but insufficient --
- * `accept_invite(text)` is GRANT EXECUTE'd to `authenticated` and directly callable via the
- * anon key with nothing but the caller's own session, so a client that skips this page
- * entirely (or calls the RPC straight from the browser) sailed right past it. The guard now
- * lives where it can't be bypassed: inside `accept_invite` itself.
+ * The fix: this render now only PREVIEWS the token, via the read-only `preview_invite` RPC
+ * (supabase/migrations/0014_invite_preview_rpc.sql) -- it mutates nothing, so rendering its
+ * result on a plain GET is exactly as safe as every other read this page already does. If the
+ * token itself is invalid (not found / expired / already used), that's shown immediately, same
+ * as before -- nothing has been risked by looking. If it's valid, `ConfirmClaimForm`
+ * (components/invite/confirm-claim-form.tsx) renders what the person is about to do -- which
+ * household, and whose profile -- with a single button. Only pressing that button submits
+ * `confirmClaimAction` (app/invite/[token]/actions.ts), which is the one and only place
+ * `accept_invite` itself is still called. Every guard that decides whether the token is
+ * genuinely redeemable by THIS caller (expiry, reuse, cross-household mismatch,
+ * already-claimed, already-a-member of this household -- active or removed -- already-a-member
+ * of a different household) still lives entirely inside that RPC; this page and its preview
+ * never reimplement, duplicate, or pre-check any of it.
  */
 export default async function InviteClaimPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -97,21 +68,34 @@ export default async function InviteClaimPage({ params }: { params: Promise<{ to
     );
   }
 
-  const { error } = await supabase.rpc("accept_invite", { p_token: token });
-  if (!error) redirect("/dashboard");
+  const { data, error } = await supabase.rpc("preview_invite", { p_token: token });
+
+  if (error) {
+    return (
+      <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-6 text-center">
+        <h1 className="text-3xl">We couldn’t add you</h1>
+        <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
+          {friendlyClaimError(error.message)}
+        </p>
+        {/* "/dashboard" doesn't exist yet (Task 16) and "/" always knows the right place to
+            send a signed-in account -- onboarding, dashboard, or wherever this account already
+            belongs. */}
+        <Button asChild size="lg">
+          <Link href="/">Continue</Link>
+        </Button>
+      </main>
+    );
+  }
+
+  const preview = data as InvitePreview;
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-6 text-center">
-      <h1 className="text-3xl">We couldn’t add you</h1>
-      <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
-        {friendlyClaimError(error.message)}
-      </p>
-      {/* "/dashboard" doesn't exist yet (Task 16) and "/" always knows the right place to send
-          a signed-in account -- onboarding, dashboard, or (for the "already used"/"already
-          claimed" cases) wherever this account already belongs. */}
-      <Button asChild size="lg">
-        <Link href="/">Continue</Link>
-      </Button>
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-6">
+      <ConfirmClaimForm
+        token={token}
+        householdName={preview.household_name ?? "your household"}
+        memberName={preview.member_display_name}
+      />
     </main>
   );
 }

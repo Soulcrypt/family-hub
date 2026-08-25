@@ -261,6 +261,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["member_role"]
       }
       is_household_member: { Args: { hid: string }; Returns: boolean }
+      preview_invite: { Args: { p_token: string }; Returns: Json }
       set_member_pin: {
         Args: { p_member_id: string; p_pin: string }
         Returns: undefined
