@@ -168,6 +168,15 @@ test("switching profiles changes attribution, gated by PIN for admin profiles ot
   // still proves it renders, and still only matches this one element.
   await expect(page.getByRole("button", { name: parentName })).toBeVisible();
 
+  // A gated tile says so BEFORE it is tapped, to assistive tech as well as visually -- the
+  // lock badge itself is decorative, so the fact rides on the tile's accessible name. Without
+  // this you only discover a profile is locked by committing to the tap.
+  await expect(page.getByRole("button", { name: parentName })).toHaveAccessibleName(/pin/i);
+
+  // ...and a tile with NO pin set does not claim to be protected. Dana is an owner, which
+  // requiresPin() by role, but has never set one.
+  await expect(page.getByRole("button", { name: ownerName })).not.toHaveAccessibleName(/pin/i);
+
   // --- The child's tile (no PIN required) switches attribution immediately. ---
   await page.getByRole("button", { name: childName }).click();
   await expect(page).toHaveURL(/\/dashboard/);
@@ -233,10 +242,13 @@ test("switching profiles changes attribution, gated by PIN for admin profiles ot
 // has a PIN (1234); Jamie Rivera (parent) has never had one set.
 const DEMO_EMAIL = "demo@familyhub.local";
 const DEMO_PASSWORD = "demo-password-123";
-const RIVERA_HOUSEHOLD_ID = "a10a0000-0000-4000-8000-000000000002";
-const ALEX_MEMBER_ID = "a10a0000-0000-4000-8000-000000000003"; // owner, PIN 1234
 const JAMIE_MEMBER_ID = "a10a0000-0000-4000-8000-000000000004"; // parent, no PIN ever set
-const ALEX_PIN = "1234";
+
+// This spec reads the seeded household but never WRITES to it. An earlier version of the test
+// below inserted a second login-having member straight into the Rivera household to get a
+// gated tile -- which meant every run, on every one of the four Playwright projects, left
+// another member behind in the demo data. The gated-tile assertions live in the test above
+// instead, against a household that test creates for itself.
 
 async function signIn(page: import("@playwright/test").Page, email: string, password: string): Promise<void> {
   await page.goto("/login");
@@ -261,76 +273,4 @@ test("a parent profile that has never had a PIN set (Jamie Rivera, seeded) switc
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page).toHaveURL(/\/dashboard/);
   await expect.poll(() => activeMemberId(page)).toBe(JAMIE_MEMBER_ID);
-});
-
-/**
- * Inserts a second, login-having member directly into the seeded Rivera household via psql --
- * mirroring supabase/seed.sql's own hand-rolled auth.users/auth.identities insert (real
- * pgcrypto-hashed password, every GoTrue-required column) so the resulting account can sign in
- * through the actual /login form. Needed because the ONLY seeded login is Alex's own account,
- * and switching into your OWN row never prompts for a PIN regardless of role (see
- * switchToMemberAction's doc comment) -- proving Alex's PIN still gates a switch requires a
- * session that is genuinely a DIFFERENT account.
- */
-async function addCoMemberWithLogin(displayName: string, email: string, password: string): Promise<string> {
-  const userId = crypto.randomUUID();
-  await psql(
-    `insert into auth.users (
-       instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
-       confirmation_token, recovery_token, email_change_token_new, email_change,
-       raw_app_meta_data, raw_user_meta_data, created_at, updated_at, last_sign_in_at
-     ) values (
-       '00000000-0000-0000-0000-000000000000', :'user_id'::uuid, 'authenticated', 'authenticated',
-       :'email', extensions.crypt(:'password', extensions.gen_salt('bf', 10)), now(),
-       '', '', '', '',
-       '{"provider":"email","providers":["email"]}'::jsonb,
-       jsonb_build_object('display_name', :'display_name'),
-       now(), now(), now()
-     );
-     insert into auth.identities (
-       id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at
-     ) values (
-       gen_random_uuid(), :'user_id', :'user_id'::uuid,
-       jsonb_build_object('sub', :'user_id', 'email', :'email', 'email_verified', true, 'phone_verified', false),
-       'email', now(), now(), now()
-     );
-     insert into household_members (household_id, user_id, display_name, role)
-     values (:'household_id'::uuid, :'user_id'::uuid, :'display_name', 'parent');`,
-    { user_id: userId, email, password, display_name: displayName, household_id: RIVERA_HOUSEHOLD_ID },
-  );
-  return userId;
-}
-
-test("Alex Rivera's seeded PIN (1234) still gates a switch into that profile from a co-member's own session", async ({
-  page,
-}) => {
-  const coParentEmail = `${unique("co-parent")}@test.local`;
-  const coParentPassword = "correct-horse-battery";
-  await addCoMemberWithLogin("Cameron Co-Parent", coParentEmail, coParentPassword);
-
-  await signIn(page, coParentEmail, coParentPassword);
-  await expect(page).toHaveURL(/\/dashboard/);
-
-  await page.goto("/switch");
-
-  // Alex's tile is PIN-protected (a lock badge, discoverable to assistive tech via the tile's
-  // accessible name), and tapping it opens the dialog rather than switching straight through --
-  // Alex's row belongs to a DIFFERENT auth account than the one signed in here.
-  const alexTile = page.getByRole("button", { name: /alex rivera/i });
-  await expect(alexTile).toHaveAccessibleName(/pin/i);
-  await alexTile.click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-
-  // A wrong PIN is rejected and attribution does not change.
-  await page.getByLabel("PIN").fill("0000");
-  await page.getByRole("button", { name: "Unlock" }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "Incorrect PIN" })).toBeVisible();
-  await expect(page).toHaveURL(/\/switch/);
-
-  // The correct seeded PIN switches attribution to Alex.
-  await page.getByLabel("PIN").fill(ALEX_PIN);
-  await page.getByRole("button", { name: "Unlock" }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
-  await expect.poll(() => activeMemberId(page)).toBe(ALEX_MEMBER_ID);
 });
