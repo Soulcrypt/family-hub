@@ -37,8 +37,19 @@ function bestForegroundRatio(fill: string): number {
 }
 
 describe("member color swatch palette", () => {
-  it("has at least 8 preset swatches", () => {
-    expect(MEMBER_COLOR_SWATCHES.length).toBeGreaterThanOrEqual(8);
+  // Pinned to the exact set in Design-Spec §2.2 rather than a minimum count. The spec assigns
+  // the first three to the household (Cody / Elizabeth / Ivy) and offers the last three to
+  // future members; a count assertion would let a well-meaning edit swap in an off-spec hue
+  // and still pass.
+  it("is exactly the palette Design-Spec §2.2 defines, in order", () => {
+    expect(MEMBER_COLOR_SWATCHES.map((s) => s.hex)).toEqual([
+      "#B6E6B0",
+      "#F3B3D4",
+      "#FFD08A",
+      "#9AD0FF",
+      "#C9B8F5",
+      "#F5D48A",
+    ]);
   });
 
   it("every swatch is a distinct #RRGGBB hex value", () => {

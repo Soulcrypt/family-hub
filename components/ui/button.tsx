@@ -4,27 +4,38 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Design-Spec §6 "Buttons". Pill-shaped throughout (radius 99 — the spec's only button shape),
+ * spring-eased, scale .97 on press.
+ *
+ * `default` fills with `--color-accent-strong` (#0073E8) rather than the identity accent
+ * #0A84FF. The spec asks for white 13/700 on #0A84FF, which measures 3.65:1 — an AA failure at
+ * that size, and one the spec's own §10 ("all text >= 4.5:1") contradicts. The darker fill
+ * along the same hue clears it at 4.53:1. #0A84FF survives untouched everywhere it is NOT
+ * behind text: borders, rings, indicators, the active dock circle.
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[12px] text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-pill font-semibold transition-[background-color,color,border-color,filter,transform] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[.97] disabled:pointer-events-none disabled:opacity-40",
   {
     variants: {
       variant: {
-        default: "bg-accent-strong text-on-accent hover:brightness-95",
-        outline: "border border-[var(--color-muted)] bg-surface text-ink hover:bg-sunken",
-        ghost: "text-ink hover:bg-sunken",
-        destructive: "bg-destructive text-on-destructive hover:brightness-95",
-        // A destructive TRIGGER, as distinct from a destructive confirmation. The filled
-        // variant above belongs on the button that actually does the deleting, inside a
-        // confirmation dialog; using it for the trigger makes "Remove from household" the
-        // loudest object on a page whose primary action is "Save changes". Destructive text on
-        // a plain surface measures 6.12:1 light / 6.11:1 dark, so the quieter treatment costs
-        // no legibility.
-        destructiveOutline: "border border-destructive/40 bg-surface text-destructive hover:bg-destructive-bg",
+        default: "bg-accent-strong text-on-accent hover:brightness-110",
+        // §6 "On-tint primary": inside an accent-tinted card, a blue fill would vanish into the
+        // tint, so the button inverts to white-on-dark instead.
+        onTint: "bg-white text-[#0C0D10] hover:brightness-95",
+        secondary: "bg-glass-hover text-text border border-hairline hover:bg-glass-hover",
+        ghost: "text-accent-text hover:brightness-110",
+        // §6 "Destructive: ghost in danger; confirm via sheet, never instant." The filled
+        // treatment belongs on the confirmation itself, not on the trigger that opens it.
+        destructive: "bg-danger text-on-accent hover:brightness-110",
+        destructiveOutline: "border border-danger/40 bg-transparent text-danger-text hover:bg-danger/10",
       },
       size: {
-        default: "min-h-[44px] px-5 py-2",
-        sm: "min-h-[44px] px-4 text-sm",
-        lg: "min-h-[52px] px-7 text-base",
+        // §4: >= 44px hit target everywhere. Phone primaries are taller per §6 (14x28).
+        default: "min-h-[44px] px-[18px] py-[10px] text-[13px]",
+        sm: "min-h-[44px] px-4 text-[12px]",
+        lg: "min-h-[52px] px-7 text-[15px]",
+        wall: "min-h-[56px] px-8 text-[15px]",
         icon: "min-h-[44px] min-w-[44px]",
       },
     },

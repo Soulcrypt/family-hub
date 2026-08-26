@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><style>body{margin:0;background:#eceae6;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;color:#1d1d1f}a{color:#0a6cd6;text-decoration:none}a:hover{color:#084f9e}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}.dv-next{margin:22px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}@keyframes auroraA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,14px) scale(1.06)}}@keyframes auroraB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-24px,10px) scale(1.05)}}@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes sunspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes breathe{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.25)}}@keyframes kenburns{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}@keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}@keyframes glowpulse{0%,100%{box-shadow:0 0 0 0 rgba(10,132,255,0)}50%{box-shadow:0 0 34px 4px rgba(10,132,255,.25)}}.ph{background:repeating-linear-gradient(45deg,#e8e6e1,#e8e6e1 8px,#efede9 8px,#efede9 16px);display:flex;align-items:center;justify-content:center;color:#8a877f;font:500 11px ui-monospace,Menlo,monospace}</style></helmet>
+<section class="dv-turn" id="t5">
+<div class="dv-thd"><a class="dv-tid" href="#t5">5</a><span class="dv-tname">Budget via Rocket Money · grocery list with Instacart / Notes export</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="5a"><div class="dv-olabel"><a class="dv-oid" href="#5a">5a</a>Budget — synced from Rocket Money</div>
+<div class="dv-card" style="width:1000px;background:#0c0d10">
+<div style="padding:28px 34px 34px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><div style="color:#fff;font-size:24px;font-weight:700;letter-spacing:-.02em">Budget</div><div style="font-size:13px;color:rgba(255,255,255,.45);margin-top:4px;display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:6px;background:rgba(147,112,255,.14);border:1px solid rgba(147,112,255,.3);color:#c9b8f5;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px">🚀 Rocket Money</span>synced 12 min ago · read-only</div></div>
+<div style="display:flex;gap:10px"><div style="font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);padding:10px 16px;border-radius:99px">Open in Rocket Money ↗</div><div style="font-size:13px;font-weight:700;background:#0a84ff;color:#fff;padding:10px 16px;border-radius:99px">Sync now</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1.5fr;gap:14px">
+<div style="background:linear-gradient(145deg,rgba(10,132,255,.14),rgba(10,132,255,.03));border:1px solid rgba(10,132,255,.22);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:6px">
+<div style="font-size:12px;font-weight:700;color:#6fb4ff;letter-spacing:.06em">LEFT TO SPEND · AUGUST</div>
+<div style="color:#fff;font-size:44px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums">$1,240</div>
+<div style="font-size:13px;color:rgba(255,255,255,.5)">of $4,200 budgeted · on pace ✓</div>
+<div style="height:6px;border-radius:99px;background:rgba(255,255,255,.1);margin-top:10px"><div style="width:70%;height:100%;border-radius:99px;background:#0a84ff"></div></div>
+</div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px 22px;display:flex;flex-direction:column;gap:12px">
+<div style="color:#fff;font-size:13px;font-weight:700">Categories · from Rocket Money</div>
+<div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:5px"><span style="color:#fff;font-weight:600">Groceries</span><span>$620 / $800</span></div><div style="height:6px;border-radius:99px;background:rgba(255,255,255,.1)"><div style="width:77%;height:100%;border-radius:99px;background:#0a84ff"></div></div></div>
+<div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:5px"><span style="color:#fff;font-weight:600">Eating out</span><span>$180 / $200</span></div><div style="height:6px;border-radius:99px;background:rgba(255,255,255,.1)"><div style="width:90%;height:100%;border-radius:99px;background:#ff9500"></div></div></div>
+<div><div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:5px"><span style="color:#fff;font-weight:600">Kids &amp; Ivy</span><span>$140 / $250</span></div><div style="height:6px;border-radius:99px;background:rgba(255,255,255,.1)"><div style="width:56%;height:100%;border-radius:99px;background:#34c759"></div></div></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px">
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="color:#fff;font-size:13px;font-weight:700">Recent transactions</div>
+<div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:10px"><div style="width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:14px">🛒</div><div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:600">Woodman's Market</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">Groceries · today</div></div><div style="color:#fff;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">−$114.32</div></div>
+<div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:10px"><div style="width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:14px">⛽</div><div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:600">Kwik Trip</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">Gas · yesterday</div></div><div style="color:#fff;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">−$48.10</div></div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:14px">📺</div><div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:600">Streaming bundle</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">Subscriptions · Aug 24 · flagged by Rocket Money</div></div><div style="color:#fff;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">−$22.99</div></div>
+</div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="color:#fff;font-size:13px;font-weight:700">Hearth-only · allowances</div>
+<div style="font-size:12.5px;color:rgba(255,255,255,.5);line-height:1.5">Chore points convert here — kept in Hearth, separate from Rocket Money.</div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:8px"><div style="width:22px;height:22px;border-radius:99px;background:#ffd08a"></div><div style="color:#fff;font-size:13px;font-weight:600">Ivy's fund</div></div><div style="font-size:13px;color:#fff;font-weight:700">$42.50</div></div>
+<div style="font-size:11.5px;color:rgba(255,255,255,.35)">★10 = $1.00 · configurable</div>
+</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="5b"><div class="dv-olabel"><a class="dv-oid" href="#5b">5b</a>Grocery list — generated from the meal plan, export anywhere</div>
+<div class="dv-card" style="width:390px;background:#0c0d10;border-radius:44px">
+<div style="padding:16px 18px 24px;display:flex;flex-direction:column;gap:14px;min-height:760px">
+<div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 8px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px"><div><div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em">Groceries</div><div style="font-size:12.5px;color:rgba(255,255,255,.45);margin-top:2px">from this week's plan · 32 items · est. $118</div></div><div style="font-size:12px;font-weight:700;color:#6fb4ff">✦ Regenerate</div></div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:11px">
+<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em">PRODUCE</div>
+<div style="display:flex;align-items:center;gap:11px"><div style="width:22px;height:22px;border-radius:99px;background:#34c759;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700">✓</div><div style="flex:1;color:rgba(255,255,255,.4);font-size:14px;font-weight:500;text-decoration:line-through">Lemons × 4</div><div style="font-size:11px;color:rgba(255,255,255,.3)">chicken · Wed</div></div>
+<div style="display:flex;align-items:center;gap:11px"><div style="width:22px;height:22px;border-radius:99px;border:2px solid rgba(255,255,255,.2)"></div><div style="flex:1;color:#fff;font-size:14px;font-weight:500">Baby potatoes · 2 lb</div><div style="font-size:11px;color:rgba(255,255,255,.3)">chicken · Wed</div></div>
+<div style="display:flex;align-items:center;gap:11px"><div style="width:22px;height:22px;border-radius:99px;border:2px solid rgba(255,255,255,.2)"></div><div style="flex:1;color:#fff;font-size:14px;font-weight:500">Bell peppers × 3</div><div style="font-size:11px;color:rgba(255,255,255,.3)">stir-fry · Thu</div></div>
+<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em;margin-top:6px">MEAT &amp; FISH</div>
+<div style="display:flex;align-items:center;gap:11px"><div style="width:22px;height:22px;border-radius:99px;border:2px solid rgba(255,255,255,.2)"></div><div style="flex:1;color:#fff;font-size:14px;font-weight:500">Chicken thighs · 2.5 lb</div><div style="font-size:11px;color:rgba(255,255,255,.3)">chicken · Wed</div></div>
+<div style="display:flex;align-items:center;gap:11px"><div style="width:22px;height:22px;border-radius:99px;border:2px solid rgba(255,255,255,.2)"></div><div style="flex:1;color:#fff;font-size:14px;font-weight:500">Salmon fillets × 4</div><div style="font-size:11px;color:rgba(255,255,255,.3)">bowls · Tue</div></div>
+<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em;margin-top:6px">PANTRY</div>
+<div style="display:flex;align-items:center;gap:11px"><div style="width:22px;height:22px;border-radius:99px;border:2px solid rgba(255,255,255,.2)"></div><div style="flex:1;color:#fff;font-size:14px;font-weight:500">Jasmine rice · 2 lb</div><div style="font-size:11px;color:rgba(255,255,255,.3)">2 recipes</div></div>
+<div style="border:1.5px dashed rgba(255,255,255,.15);border-radius:12px;padding:10px;text-align:center;font-size:12.5px;font-weight:600;color:#6fb4ff">+ Add item</div>
+</div>
+<div style="background:linear-gradient(145deg,rgba(10,132,255,.14),rgba(10,132,255,.03));border:1px solid rgba(10,132,255,.22);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px">
+<div style="font-size:11px;font-weight:700;color:#6fb4ff;letter-spacing:.06em">SEND LIST TO</div>
+<div style="display:flex;gap:8px">
+<div style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:18px">🥕</div><div style="color:#fff;font-size:11.5px;font-weight:700;margin-top:4px">Instacart</div><div style="font-size:9.5px;color:rgba(255,255,255,.4)">opens cart</div></div>
+<div style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:18px">📝</div><div style="color:#fff;font-size:11.5px;font-weight:700;margin-top:4px">Notes</div><div style="font-size:9.5px;color:rgba(255,255,255,.4)">share sheet</div></div>
+<div style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:18px">☑️</div><div style="color:#fff;font-size:11.5px;font-weight:700;margin-top:4px">Reminders</div><div style="font-size:9.5px;color:rgba(255,255,255,.4)">as checklist</div></div>
+<div style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:18px">⧉</div><div style="color:#fff;font-size:11.5px;font-weight:700;margin-top:4px">Copy</div><div style="font-size:9.5px;color:rgba(255,255,255,.4)">plain text</div></div>
+</div>
+</div>
+</div>
+</div></div>
+
+</div>
+<p class="dv-next">Try next: "phone budget widget" · "show the Instacart handoff confirmation" · "pantry staples that auto-skip the list"</p>
+</section>
+<section class="dv-turn" id="t4">
+<div class="dv-thd"><a class="dv-tid" href="#t4">4</a><span class="dv-tname">End-to-end — welcome, auth, onboarding, add flows, settings, fitness</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="4a"><div class="dv-olabel"><a class="dv-oid" href="#4a">4a</a>Welcome</div>
+<div class="dv-card" style="width:390px;background:#0c0d10;border-radius:44px;position:relative;overflow:hidden">
+<div style="position:absolute;inset:0;background:radial-gradient(400px 300px at 50% 20%,rgba(10,132,255,.25),transparent 70%);pointer-events:none"></div>
+<div style="position:relative;padding:16px 24px 32px;display:flex;flex-direction:column;min-height:740px">
+<div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 4px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center">
+<div style="width:76px;height:76px;border-radius:22px;background:#0a84ff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:38px;box-shadow:0 12px 40px rgba(10,132,255,.35)">H</div>
+<div><div style="color:#fff;font-size:34px;font-weight:700;letter-spacing:-.03em">Hearth</div><div style="font-size:15px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.5">Your family, in one<br>calm place.</div></div>
+<div style="font-size:12px;color:rgba(255,255,255,.35)">Meals · calendar · chores · Ivy · photos</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="text-align:center;font-size:15px;font-weight:700;background:#0a84ff;color:#fff;padding:15px;border-radius:16px">Create your household</div>
+<div style="text-align:center;font-size:15px;font-weight:600;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);padding:15px;border-radius:16px">Sign in</div>
+<div style="text-align:center;font-size:11.5px;color:rgba(255,255,255,.35);margin-top:6px">Works offline · installs like an app</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="4b"><div class="dv-olabel"><a class="dv-oid" href="#4b">4b</a>Sign in / create account — form states</div>
+<div class="dv-card" style="width:390px;background:#0c0d10;border-radius:44px">
+<div style="padding:16px 24px 32px;display:flex;flex-direction:column;gap:18px;min-height:740px">
+<div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 4px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div>
+<div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:10px">Welcome back</div>
+<div style="display:flex;background:rgba(255,255,255,.08);border-radius:99px;padding:3px;align-self:flex-start"><div style="font-size:12px;font-weight:700;background:#fff;color:#0c0d10;padding:7px 18px;border-radius:99px">Sign in</div><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6);padding:7px 18px">Create account</div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.5)">Email</div><div style="background:rgba(255,255,255,.05);border:1.5px solid #0a84ff;box-shadow:0 0 0 3px rgba(10,132,255,.25);border-radius:14px;padding:14px 16px;color:#fff;font-size:15px;display:flex;justify-content:space-between;align-items:center">cody@garthwaite.co<span style="color:#0a84ff;font-weight:300">|</span></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.5)">Password</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;color:rgba(255,255,255,.35);font-size:15px;display:flex;justify-content:space-between"><span>••••••••</span><span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.4)">Show</span></div></div>
+<div style="font-size:12px;font-weight:600;color:#6fb4ff;align-self:flex-end">Forgot password?</div>
+<div style="text-align:center;font-size:15px;font-weight:700;background:#0a84ff;color:#fff;padding:15px;border-radius:16px">Continue</div>
+<div style="display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.3);font-size:11px"><div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div>or<div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div></div>
+<div style="text-align:center;font-size:14px;font-weight:600;color:#0c0d10;background:#fff;padding:14px;border-radius:16px"> Continue with Apple</div>
+<div style="text-align:center;font-size:14px;font-weight:600;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);padding:14px;border-radius:16px">G · Continue with Google</div>
+<div style="margin-top:auto;text-align:center;font-size:12px;color:rgba(255,255,255,.35)">By continuing you agree to the <span style="color:rgba(255,255,255,.6)">terms</span></div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="4c"><div class="dv-olabel"><a class="dv-oid" href="#4c">4c</a>Onboarding 2/5 — add family members</div>
+<div class="dv-card" style="width:390px;background:#0c0d10;border-radius:44px">
+<div style="padding:16px 24px 32px;display:flex;flex-direction:column;gap:16px;min-height:740px">
+<div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 4px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div>
+<div style="display:flex;gap:5px;margin-top:6px"><div style="flex:1;height:3px;border-radius:99px;background:#34c759"></div><div style="flex:1;height:3px;border-radius:99px;background:#fff"></div><div style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.15)"></div><div style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.15)"></div><div style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.15)"></div></div>
+<div style="margin-top:10px"><div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em">Who's in the family?</div><div style="font-size:14px;color:rgba(255,255,255,.5);margin-top:6px">Everyone gets a color and their own view.</div></div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:99px;background:#b6e6b0"></div><div style="flex:1"><div style="color:#fff;font-size:15px;font-weight:600">Cody</div><div style="font-size:12px;color:rgba(255,255,255,.4)">you</div></div><div style="font-size:11px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);padding:5px 12px;border-radius:99px">Parent</div></div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:99px;background:#f3b3d4"></div><div style="flex:1"><div style="color:#fff;font-size:15px;font-weight:600">Elizabeth</div><div style="font-size:12px;color:rgba(255,255,255,.4)">invite sent ✓</div></div><div style="font-size:11px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);padding:5px 12px;border-radius:99px">Parent</div></div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:99px;background:#ffd08a"></div><div style="flex:1"><div style="color:#fff;font-size:15px;font-weight:600">Ivy</div><div style="font-size:12px;color:rgba(255,255,255,.4)">age 2 · tracker instead of chores</div></div><div style="font-size:11px;font-weight:700;color:#ffd08a;background:rgba(255,208,138,.14);padding:5px 12px;border-radius:99px">Toddler</div></div>
+<div style="border:1.5px dashed rgba(255,255,255,.18);border-radius:18px;padding:15px;text-align:center;font-size:13px;font-weight:600;color:#6fb4ff">+ Add member</div>
+<div style="margin-top:auto;text-align:center;font-size:15px;font-weight:700;background:#0a84ff;color:#fff;padding:15px;border-radius:16px">Continue</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="4d"><div class="dv-olabel"><a class="dv-oid" href="#4d">4d</a>Onboarding 3/5 — calendars &amp; location</div>
+<div class="dv-card" style="width:390px;background:#0c0d10;border-radius:44px">
+<div style="padding:16px 24px 32px;display:flex;flex-direction:column;gap:16px;min-height:740px">
+<div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 4px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div>
+<div style="display:flex;gap:5px;margin-top:6px"><div style="flex:1;height:3px;border-radius:99px;background:#34c759"></div><div style="flex:1;height:3px;border-radius:99px;background:#34c759"></div><div style="flex:1;height:3px;border-radius:99px;background:#fff"></div><div style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.15)"></div><div style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.15)"></div></div>
+<div style="margin-top:10px"><div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em">Bring your calendars</div><div style="font-size:14px;color:rgba(255,255,255,.5);margin-top:6px">Everything lands in one family view.</div></div>
+<div style="background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.25);border-radius:18px;padding:16px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:12px;background:#fff;color:#0c0d10;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px">G</div><div style="flex:1"><div style="color:#fff;font-size:14px;font-weight:600">Google Calendar</div><div style="font-size:12px;color:#34c759;font-weight:600">Connected ✓ · two-way sync</div></div></div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:12px;background:#5522fa;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px">HEY</div><div style="flex:1"><div style="color:#fff;font-size:14px;font-weight:600">HEY Calendar</div><div style="font-size:12px;color:rgba(255,255,255,.4)">paste your subscription link</div></div></div>
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;font-size:13px;color:rgba(255,255,255,.35);display:flex;justify-content:space-between;align-items:center">webcal://hey.com/…<span style="font-size:12px;font-weight:700;color:#6fb4ff">Add</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.5)">Home location — for weather &amp; local news</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;color:#fff;font-size:15px;display:flex;justify-content:space-between;align-items:center">Whitewater, WI<span style="font-size:11px;font-weight:700;color:#34c759">◎ detected</span></div></div>
+<div style="margin-top:auto;display:flex;flex-direction:column;gap:10px"><div style="text-align:center;font-size:15px;font-weight:700;background:#0a84ff;color:#fff;padding:15px;border-radius:16px">Continue</div><div style="text-align:center;font-size:13px;font-weight:600;color:rgba(255,255,255,.4)">Skip for now</div></div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="4e"><div class="dv-olabel"><a class="dv-oid" href="#4e">4e</a>Onboarding 5/5 — pick widgets</div>
+<div class="dv-card" style="width:390px;background:#0c0d10;border-radius:44px">
+<div style="padding:16px 24px 32px;display:flex;flex-direction:column;gap:16px;min-height:740px">
+<div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 4px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div>
+<div style="display:flex;gap:5px;margin-top:6px"><div style="flex:1;height:3px;border-radius:99px;background:#34c759"></div><div style="flex:1;height:3px;border-radius:99px;background:#34c759"></div><div style="flex:1;height:3px;border-radius:99px;background:#34c759"></div><div style="flex:1;height:3px;border-radius:99px;background:#34c759"></div><div style="flex:1;height:3px;border-radius:99px;background:#fff"></div></div>
+<div style="margin-top:10px"><div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em">Build your dashboard</div><div style="font-size:14px;color:rgba(255,255,255,.5);margin-top:6px">Pick widgets — rearrange anytime.</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="background:rgba(10,132,255,.1);border:1.5px solid #0a84ff;border-radius:16px;padding:14px"><div style="display:flex;justify-content:space-between"><div style="color:#fff;font-size:13px;font-weight:600">Schedule</div><div style="width:18px;height:18px;border-radius:99px;background:#0a84ff;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700">✓</div></div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">today's events</div></div>
+<div style="background:rgba(10,132,255,.1);border:1.5px solid #0a84ff;border-radius:16px;padding:14px"><div style="display:flex;justify-content:space-between"><div style="color:#fff;font-size:13px;font-weight:600">Dinner</div><div style="width:18px;height:18px;border-radius:99px;background:#0a84ff;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700">✓</div></div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">tonight + macros</div></div>
+<div style="background:rgba(10,132,255,.1);border:1.5px solid #0a84ff;border-radius:16px;padding:14px"><div style="display:flex;justify-content:space-between"><div style="color:#fff;font-size:13px;font-weight:600">Weather</div><div style="width:18px;height:18px;border-radius:99px;background:#0a84ff;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700">✓</div></div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">Whitewater</div></div>
+<div style="background:rgba(10,132,255,.1);border:1.5px solid #0a84ff;border-radius:16px;padding:14px"><div style="display:flex;justify-content:space-between"><div style="color:#fff;font-size:13px;font-weight:600">Photos</div><div style="width:18px;height:18px;border-radius:99px;background:#0a84ff;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700">✓</div></div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">latest album</div></div>
+<div style="background:rgba(10,132,255,.1);border:1.5px solid #0a84ff;border-radius:16px;padding:14px"><div style="display:flex;justify-content:space-between"><div style="color:#fff;font-size:13px;font-weight:600">Local news</div><div style="width:18px;height:18px;border-radius:99px;background:#0a84ff;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700">✓</div></div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">2 headlines</div></div>
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="display:flex;justify-content:space-between"><div style="color:#fff;font-size:13px;font-weight:600">Chores</div><div style="width:18px;height:18px;border-radius:99px;border:1.5px solid rgba(255,255,255,.25)"></div></div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">up for grabs</div></div>
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="display:flex;justify-content:space-between"><div style="color:#fff;font-size:13px;font-weight:600">Ivy</div><div style="width:18px;height:18px;border-radius:99px;border:1.5px solid rgba(255,255,255,.25)"></div></div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">naps &amp; routine</div></div>
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="display:flex;justify-content:space-between"><div style="color:#fff;font-size:13px;font-weight:600">Fitness</div><div style="width:18px;height:18px;border-radius:99px;border:1.5px solid rgba(255,255,255,.25)"></div></div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">goals &amp; streaks</div></div>
+</div>
+<div style="margin-top:auto;text-align:center;font-size:15px;font-weight:700;background:#0a84ff;color:#fff;padding:15px;border-radius:16px">Finish setup 🎉</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="4f"><div class="dv-olabel"><a class="dv-oid" href="#4f">4f</a>New chore — bottom sheet</div>
+<div class="dv-card" style="width:390px;background:#050608;border-radius:44px;position:relative">
+<div style="padding:16px 18px 0;opacity:.3;filter:blur(1px)"><div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 8px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div><div style="color:#fff;font-size:26px;font-weight:700;padding:10px 4px">Chores</div></div>
+<div style="background:#141519;border-radius:32px 32px 44px 44px;margin-top:8px;padding:12px 24px 32px;display:flex;flex-direction:column;gap:16px;border-top:1px solid rgba(255,255,255,.1)">
+<div style="width:36px;height:5px;border-radius:99px;background:rgba(255,255,255,.2);align-self:center"></div>
+<div style="color:#fff;font-size:20px;font-weight:700;letter-spacing:-.01em">New chore</div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.5)">Name</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;color:#fff;font-size:15px">Fold laundry</div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.5)">Points</div><div style="display:flex;align-items:center;gap:14px;align-self:flex-start;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:99px;padding:6px"><div style="width:40px;height:40px;border-radius:99px;background:rgba(255,255,255,.08);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600">−</div><div style="color:#ffd60a;font-size:17px;font-weight:800;min-width:44px;text-align:center">★ 10</div><div style="width:40px;height:40px;border-radius:99px;background:rgba(255,255,255,.08);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600">+</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.5)">Assign to</div>
+<div style="display:flex;gap:8px"><div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:99px;padding:7px 14px 7px 8px"><div style="width:26px;height:26px;border-radius:99px;background:#b6e6b0"></div><div style="color:#fff;font-size:13px;font-weight:600">Cody</div></div><div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:99px;padding:7px 14px 7px 8px"><div style="width:26px;height:26px;border-radius:99px;background:#f3b3d4"></div><div style="color:#fff;font-size:13px;font-weight:600">Elizabeth</div></div><div style="display:flex;align-items:center;background:rgba(10,132,255,.14);border:1.5px solid #0a84ff;border-radius:99px;padding:7px 14px"><div style="color:#6fb4ff;font-size:13px;font-weight:700">Up for grabs</div></div></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.5)">Repeat</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;color:#fff;font-size:15px;display:flex;justify-content:space-between;align-items:center">Weekly · Thursday<span style="color:rgba(255,255,255,.35)">›</span></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div><div style="color:#fff;font-size:14px;font-weight:600">Photo proof</div><div style="font-size:12px;color:rgba(255,255,255,.4)">for kids — snap when done</div></div><div style="width:51px;height:31px;border-radius:99px;background:rgba(255,255,255,.15);position:relative"><div style="position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:99px;background:#fff"></div></div></div>
+<div style="text-align:center;font-size:15px;font-weight:700;background:#0a84ff;color:#fff;padding:15px;border-radius:16px">Create chore</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="4g"><div class="dv-olabel"><a class="dv-oid" href="#4g">4g</a>Add recipe — import from URL with parsed preview</div>
+<div class="dv-card" style="width:860px;background:#0c0d10">
+<div style="padding:28px 34px 34px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="color:#fff;font-size:24px;font-weight:700;letter-spacing:-.02em">Add recipe</div><div style="display:flex;background:rgba(255,255,255,.08);border-radius:99px;padding:3px"><div style="font-size:12px;font-weight:700;background:#fff;color:#0c0d10;padding:6px 16px;border-radius:99px">Import from URL</div><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6);padding:6px 16px">Manual</div></div></div>
+<div style="display:flex;gap:10px"><div style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:13px 16px;color:rgba(255,255,255,.7);font-size:14px">https://cooking.example.com/sheet-pan-lemon-chicken</div><div style="font-size:13px;font-weight:700;background:#0a84ff;color:#fff;padding:13px 22px;border-radius:14px">Import</div></div>
+<div style="background:rgba(52,199,89,.06);border:1px solid rgba(52,199,89,.2);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:12px;font-weight:700;color:#34c759">✓ RECIPE FOUND — review before saving</div>
+<div style="display:flex;gap:16px">
+<div class="ph" style="width:120px;height:120px;border-radius:14px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:column;gap:5px"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4)">Title</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:#fff;font-size:14px;font-weight:600">Sheet-pan lemon chicken</div></div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;display:flex;flex-direction:column;gap:5px"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4)">Servings</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:#fff;font-size:14px">4</div></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:5px"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4)">Time</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:#fff;font-size:14px">35 min</div></div>
+<div style="flex:1.4;display:flex;flex-direction:column;gap:5px"><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4)">Tags</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:#fff;font-size:14px">dinner · chicken</div></div>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center"><div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">kcal / serving</div><div style="color:#fff;font-size:19px;font-weight:700;margin-top:3px">520</div></div>
+<div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center"><div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">protein</div><div style="color:#8ab8ff;font-size:19px;font-weight:700;margin-top:3px">42g</div></div>
+<div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center"><div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">carbs</div><div style="color:#ffcf8a;font-size:19px;font-weight:700;margin-top:3px">28g</div></div>
+<div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center"><div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">fat</div><div style="color:#f3a3c0;font-size:19px;font-weight:700;margin-top:3px">24g</div></div>
+</div>
+<div style="font-size:12px;color:rgba(255,255,255,.4)">12 ingredients and 8 steps parsed · macros estimated from ingredients — tap any value to edit</div>
+</div>
+<div style="display:flex;gap:10px;justify-content:flex-end"><div style="font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);padding:12px 20px;border-radius:99px">Discard</div><div style="font-size:13px;font-weight:700;background:#0a84ff;color:#fff;padding:12px 22px;border-radius:99px">Save to database</div></div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="4h"><div class="dv-olabel"><a class="dv-oid" href="#4h">4h</a>Family settings — members, theme, connections</div>
+<div class="dv-card" style="width:1000px;background:#0c0d10">
+<div style="padding:28px 34px 34px;display:flex;gap:26px">
+<div style="width:200px;display:flex;flex-direction:column;gap:4px;flex:none">
+<div style="color:#fff;font-size:20px;font-weight:700;letter-spacing:-.01em;padding:0 12px 14px">Settings</div>
+<div style="font-size:13px;font-weight:700;color:#fff;background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px">Family</div>
+<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,.5);padding:10px 12px">Calendars</div>
+<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,.5);padding:10px 12px">Notifications</div>
+<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,.5);padding:10px 12px">Appearance</div>
+<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,.5);padding:10px 12px">Wall display</div>
+<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,.5);padding:10px 12px">Data &amp; export</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="color:#fff;font-size:16px;font-weight:700">The Garthwaites</div><div style="font-size:12px;font-weight:700;background:#0a84ff;color:#fff;padding:8px 14px;border-radius:99px">+ Invite member</div></div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden">
+<div style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06)"><div style="width:38px;height:38px;border-radius:99px;background:#b6e6b0"></div><div style="flex:1"><div style="color:#fff;font-size:14px;font-weight:600">Cody</div><div style="font-size:12px;color:rgba(255,255,255,.4)">cody@garthwaite.co</div></div><div style="font-size:11px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);padding:5px 12px;border-radius:99px">Parent · admin</div><div style="display:flex;gap:5px"><div style="width:18px;height:18px;border-radius:99px;background:#b6e6b0;border:2px solid #fff"></div><div style="width:18px;height:18px;border-radius:99px;background:#9ad0ff"></div><div style="width:18px;height:18px;border-radius:99px;background:#c9b8f5"></div></div><div style="font-size:12px;color:rgba(255,255,255,.4)">PIN ••••</div><div style="font-size:12px;font-weight:600;color:#6fb4ff">Edit</div></div>
+<div style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06)"><div style="width:38px;height:38px;border-radius:99px;background:#f3b3d4"></div><div style="flex:1"><div style="color:#fff;font-size:14px;font-weight:600">Elizabeth</div><div style="font-size:12px;color:rgba(255,255,255,.4)">liz@garthwaite.co</div></div><div style="font-size:11px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);padding:5px 12px;border-radius:99px">Parent</div><div style="font-size:12px;color:rgba(255,255,255,.4)">PIN ••••</div><div style="font-size:12px;font-weight:600;color:#6fb4ff">Edit</div></div>
+<div style="display:flex;align-items:center;gap:14px;padding:16px 18px"><div style="width:38px;height:38px;border-radius:99px;background:#ffd08a"></div><div style="flex:1"><div style="color:#fff;font-size:14px;font-weight:600">Ivy</div><div style="font-size:12px;color:rgba(255,255,255,.4)">born May 2024 · auto-upgrades to Kid role</div></div><div style="font-size:11px;font-weight:700;color:#ffd08a;background:rgba(255,208,138,.14);padding:5px 12px;border-radius:99px">Toddler</div><div style="font-size:12px;font-weight:600;color:#6fb4ff">Edit</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+<div style="color:#fff;font-size:13px;font-weight:700">Appearance</div>
+<div style="display:flex;background:rgba(255,255,255,.08);border-radius:99px;padding:3px;align-self:flex-start"><div style="font-size:12px;font-weight:700;background:#fff;color:#0c0d10;padding:6px 16px;border-radius:99px">Auto</div><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6);padding:6px 16px">Light</div><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6);padding:6px 16px">Dark</div></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;color:rgba(255,255,255,.7)">Ambient animations</div><div style="width:51px;height:31px;border-radius:99px;background:#34c759;position:relative"><div style="position:absolute;top:2px;right:2px;width:27px;height:27px;border-radius:99px;background:#fff"></div></div></div>
+</div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+<div style="color:#fff;font-size:13px;font-weight:700">Connections</div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;color:rgba(255,255,255,.7)">Google Calendar</div><div style="font-size:12px;color:#34c759;font-weight:700">Connected ✓</div></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;color:rgba(255,255,255,.7)">HEY Calendar</div><div style="font-size:12px;color:#34c759;font-weight:700">Subscribed ✓</div></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;color:rgba(255,255,255,.7)">Location</div><div style="font-size:12px;color:rgba(255,255,255,.5)">Whitewater, WI</div></div>
+</div>
+</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="4i"><div class="dv-olabel"><a class="dv-oid" href="#4i">4i</a>Fitness — goals, log, family leaderboard</div>
+<div class="dv-card" style="width:1000px;background:#0c0d10">
+<div style="padding:28px 34px 34px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div><div style="color:#fff;font-size:24px;font-weight:700;letter-spacing:-.02em">Fitness</div><div style="font-size:13px;color:rgba(255,255,255,.45);margin-top:4px">Week of Aug 24 · goals reset Monday</div></div><div style="font-size:13px;font-weight:700;background:#0a84ff;color:#fff;padding:9px 16px;border-radius:99px">+ Log activity</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px;display:flex;gap:20px;align-items:center">
+<div style="width:88px;height:88px;border-radius:99px;background:conic-gradient(#0a84ff 0 76%,rgba(255,255,255,.1) 76% 100%);display:flex;align-items:center;justify-content:center;flex:none"><div style="width:68px;height:68px;border-radius:99px;background:#15161a;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="color:#fff;font-size:17px;font-weight:800">76%</div></div></div>
+<div style="flex:1"><div style="display:flex;align-items:center;gap:8px"><div style="width:24px;height:24px;border-radius:99px;background:#b6e6b0"></div><div style="color:#fff;font-size:15px;font-weight:700">Cody</div></div><div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:6px">Goal: 4 workouts · <span style="color:#fff;font-weight:600">3 done</span></div><div style="font-size:12px;color:#ff9500;font-weight:700;margin-top:4px">🔥 6-week streak</div></div>
+</div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px;display:flex;gap:20px;align-items:center">
+<div style="width:88px;height:88px;border-radius:99px;background:conic-gradient(#f3b3d4 0 100%);display:flex;align-items:center;justify-content:center;flex:none"><div style="width:68px;height:68px;border-radius:99px;background:#15161a;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="color:#fff;font-size:17px;font-weight:800">100%</div></div></div>
+<div style="flex:1"><div style="display:flex;align-items:center;gap:8px"><div style="width:24px;height:24px;border-radius:99px;background:#f3b3d4"></div><div style="color:#fff;font-size:15px;font-weight:700">Elizabeth</div><div style="font-size:11px;font-weight:800;color:#ffd60a">👑 week leader</div></div><div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:6px">Goal: 3 runs · <span style="color:#fff;font-weight:600">3 done — 14.2 mi</span></div><div style="font-size:12px;color:#34c759;font-weight:700;margin-top:4px">✓ goal hit · +★15 bonus</div></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px">
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="color:#fff;font-size:13px;font-weight:700">This week</div>
+<div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:10px"><div style="width:22px;height:22px;border-radius:99px;background:#f3b3d4"></div><div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:600">Morning run · 5.1 mi</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">Tue 6:15 AM · 47 min</div></div><div style="font-size:12px;color:rgba(255,255,255,.5)">412 kcal</div></div>
+<div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:10px"><div style="width:22px;height:22px;border-radius:99px;background:#b6e6b0"></div><div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:600">Strength · upper body</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">Tue 8:00 PM · 40 min</div></div><div style="font-size:12px;color:rgba(255,255,255,.5)">280 kcal</div></div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:22px;height:22px;border-radius:99px;background:#ffd08a"></div><div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:600">Stroller walk · everyone</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">Sun 4:30 PM · 1.8 mi</div></div><div style="font-size:12px;color:#6fb4ff;font-weight:700">family +★5</div></div>
+</div>
+<div style="background:linear-gradient(145deg,rgba(10,132,255,.14),rgba(10,132,255,.03));border:1px solid rgba(10,132,255,.22);border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="color:#fff;font-size:13px;font-weight:700">Leaderboard · August</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="color:#ffd60a;font-size:13px;font-weight:800;width:16px">1</div><div style="width:22px;height:22px;border-radius:99px;background:#f3b3d4"></div><div style="flex:1;color:#fff;font-size:13px;font-weight:600">Elizabeth</div><div style="font-size:12px;color:rgba(255,255,255,.6)">12 workouts</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="color:rgba(255,255,255,.4);font-size:13px;font-weight:800;width:16px">2</div><div style="width:22px;height:22px;border-radius:99px;background:#b6e6b0"></div><div style="flex:1;color:#fff;font-size:13px;font-weight:600">Cody</div><div style="font-size:12px;color:rgba(255,255,255,.6)">10 workouts</div></div>
+<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:auto">Hitting a weekly goal earns ★15 toward rewards</div>
+</div>
+</div>
+</div>
+</div></div>
+
+</div>
+<p class="dv-next">Try next: "phone version of fitness" · "PIN profile-switch screen" · "grocery list screen from the meal plan"</p>
+</section>
+<section class="dv-turn" id="t3">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Live motion demo — <a class="dv-oid" href="#2a">2a</a> dashboard with the "alive by default" system running (Design Spec §7)</span></div>
+<div class="dv-opts">
+<div class="dv-opt" id="3a"><div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Watch: aurora drift · staggered entrance · sun rays · breathing live dot · photo Ken Burns · dinner-card glow · hover any card</div>
+<div class="dv-card" style="width:1140px;background:#0c0d10;position:relative">
+<div style="position:absolute;inset:-40px;background:radial-gradient(700px 340px at 12% 0%,rgba(10,132,255,.2),transparent 70%);pointer-events:none;animation:auroraA 26s ease-in-out infinite"></div>
+<div style="position:absolute;inset:-40px;background:radial-gradient(560px 300px at 95% 12%,rgba(10,132,255,.1),transparent 70%);pointer-events:none;animation:auroraB 34s ease-in-out infinite"></div>
+<div style="position:relative;padding:28px 40px 40px;display:flex;flex-direction:column;gap:28px;overflow:hidden">
+<div style="display:flex;align-items:center;justify-content:space-between;animation:rise .6s cubic-bezier(.32,.72,0,1) both">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:32px;height:32px;border-radius:10px;background:#0a84ff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px">H</div><div style="color:#fff;font-weight:600;font-size:15px;letter-spacing:-.01em">Hearth</div><div style="width:6px;height:6px;border-radius:99px;background:#34c759;animation:breathe 3s ease-in-out infinite"></div></div>
+<div style="display:flex;gap:24px;font-size:13px;color:rgba(255,255,255,.45);font-weight:500"><span style="color:#fff">Home</span><span style="transition:color .2s" style-hover="color:#fff">Meals</span><span style="transition:color .2s" style-hover="color:#fff">Calendar</span><span style="transition:color .2s" style-hover="color:#fff">Chores</span><span style="transition:color .2s" style-hover="color:#fff">Ivy</span></div>
+<div style="display:flex;gap:10px;align-items:center"><div style="font-size:12px;color:rgba(255,255,255,.7);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);padding:6px 12px;border-radius:99px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;animation:sunspin 20s linear infinite">☼</span>74° · Whitewater</div><div style="display:flex"><div style="width:28px;height:28px;border-radius:99px;background:#b6e6b0;border:2px solid #0c0d10"></div><div style="width:28px;height:28px;border-radius:99px;background:#f3b3d4;border:2px solid #0c0d10;margin-left:-8px"></div><div style="width:28px;height:28px;border-radius:99px;background:#ffd08a;border:2px solid #0c0d10;margin-left:-8px"></div></div></div>
+</div>
+<div style="animation:rise .6s cubic-bezier(.32,.72,0,1) .08s both"><div style="color:#fff;font-size:42px;font-weight:700;letter-spacing:-.03em;line-height:1.08">Good evening, Cody.</div><div style="font-size:15px;color:rgba(255,255,255,.5);margin-top:8px">Wednesday, August 26 · 2 events left · dinner at 6:30 · Ivy napped 1h 40m</div></div>
+<div style="display:grid;grid-template-columns:1.25fr 1fr;gap:18px">
+<div style="background:rgba(255,255,255,.055);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:26px;display:flex;flex-direction:column;gap:18px;animation:rise .6s cubic-bezier(.32,.72,0,1) .16s both;transition:transform .25s cubic-bezier(.32,.72,0,1),border-color .25s" style-hover="transform:translateY(-2px);border-color:rgba(255,255,255,.18)">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:15px">Today</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Google · HEY</div></div>
+<div style="display:flex;gap:14px;align-items:center"><div style="width:4px;height:40px;border-radius:2px;background:#f3b3d4"></div><div style="flex:1"><div style="color:#fff;font-size:15px;font-weight:600">Elizabeth — book club</div><div style="font-size:13px;color:rgba(255,255,255,.45)">7:00 PM · Google</div></div></div>
+<div style="display:flex;gap:14px;align-items:center"><div style="width:4px;height:40px;border-radius:2px;background:#ffd08a"></div><div style="flex:1"><div style="color:#fff;font-size:15px;font-weight:600">Ivy — bedtime routine</div><div style="font-size:13px;color:rgba(255,255,255,.45)">7:30 PM · bath → book → bed</div></div></div>
+</div>
+<div style="background:linear-gradient(145deg,rgba(10,132,255,.16),rgba(10,132,255,.04));backdrop-filter:blur(20px);border:1px solid rgba(10,132,255,.25);border-radius:24px;padding:26px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;animation:rise .6s cubic-bezier(.32,.72,0,1) .24s both,glowpulse 6s ease-in-out 1.5s infinite;transition:transform .25s cubic-bezier(.32,.72,0,1)" style-hover="transform:translateY(-2px)">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:15px">Tonight's dinner</div><div style="font-size:12px;color:#6fb4ff;font-weight:700">Cook mode →</div></div>
+<div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15">Sheet-pan lemon chicken</div>
+<div style="display:flex;gap:8px"><div style="font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:5px 11px;border-radius:99px">520 kcal</div><div style="font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:5px 11px;border-radius:99px">42g protein</div><div style="font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:5px 11px;border-radius:99px">35 min</div></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px">
+<div style="background:rgba(255,255,255,.055);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:14px;animation:rise .6s cubic-bezier(.32,.72,0,1) .32s both;transition:transform .25s cubic-bezier(.32,.72,0,1),border-color .25s" style-hover="transform:translateY(-2px);border-color:rgba(255,255,255,.18)">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:15px">Weather</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Whitewater, WI</div></div>
+<div style="display:flex;align-items:center;gap:14px"><div style="font-size:34px;color:#ffd60a;animation:sunspin 20s linear infinite;line-height:1">☼</div><div style="color:#fff;font-size:44px;font-weight:700;letter-spacing:-.03em">74°</div><div style="font-size:13px;color:rgba(255,255,255,.5)">Sunny<br>H 81° L 58°</div></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.5)"><span>Thu ☼ 79°</span><span>Fri ☼ 82°</span><span>Sat ⛅ 75°</span><span>Sun ☂ 68°</span></div>
+</div>
+<div style="background:rgba(255,255,255,.055);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:12px;animation:rise .6s cubic-bezier(.32,.72,0,1) .4s both;transition:transform .25s cubic-bezier(.32,.72,0,1),border-color .25s" style-hover="transform:translateY(-2px);border-color:rgba(255,255,255,.18)">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:15px">Photos</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Ivy at the lake · 18 new</div></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div style="height:70px;border-radius:12px;overflow:hidden"><div class="ph" style="height:100%;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66;animation:kenburns 12s ease-in-out infinite">photo</div></div><div style="height:70px;border-radius:12px;overflow:hidden"><div class="ph" style="height:100%;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66;animation:kenburns 12s ease-in-out 4s infinite">photo</div></div><div style="height:70px;border-radius:12px;overflow:hidden"><div class="ph" style="height:100%;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66;animation:kenburns 12s ease-in-out 8s infinite">photo</div></div></div>
+</div>
+<div style="background:rgba(255,255,255,.055);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:12px;animation:rise .6s cubic-bezier(.32,.72,0,1) .48s both;transition:transform .25s cubic-bezier(.32,.72,0,1),border-color .25s" style-hover="transform:translateY(-2px);border-color:rgba(255,255,255,.18)">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:15px">Local news</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Whitewater</div></div>
+<div style="font-size:13px;color:rgba(255,255,255,.75);font-weight:500;line-height:1.4;border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:10px">Farmers market moves to City Market grounds this Saturday</div>
+<div style="font-size:13px;color:rgba(255,255,255,.75);font-weight:500;line-height:1.4">UW-Whitewater fall move-in begins next week</div>
+</div>
+</div>
+<div style="display:flex;justify-content:center;animation:rise .6s cubic-bezier(.32,.72,0,1) .56s both"><div style="font-size:12px;color:rgba(255,255,255,.35);border:1px dashed rgba(255,255,255,.15);padding:8px 18px;border-radius:99px;transition:color .2s,border-color .2s" style-hover="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.35)">+ Edit widgets · drag to rearrange</div></div>
+</div>
+</div></div>
+</div>
+<p class="dv-next">Try next: "slow the aurora down" · "add the claim-button success morph demo" · "animate the wall display too"</p>
+</section>
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Committed direction — dark-first glass (<a class="dv-oid" href="#1a">1a</a> × <a class="dv-oid" href="#1c">1c</a>), blue accent, airy · Garthwaite family · Whitewater, WI</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2a"><div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Dashboard — desktop, default widgets</div>
+<div class="dv-card" style="width:1140px;background:#0c0d10;position:relative">
+<div style="position:absolute;inset:0;background:radial-gradient(700px 340px at 12% -5%,rgba(10,132,255,.18),transparent 70%),radial-gradient(560px 300px at 95% 8%,rgba(10,132,255,.08),transparent 70%);pointer-events:none"></div>
+<div style="position:relative;padding:28px 40px 40px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:32px;height:32px;border-radius:10px;background:#0a84ff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px">H</div><div style="color:#fff;font-weight:600;font-size:15px;letter-spacing:-.01em">Hearth</div></div>
+<div style="display:flex;gap:24px;font-size:13px;color:rgba(255,255,255,.45);font-weight:500"><span style="color:#fff">Home</span><span>Meals</span><span>Calendar</span><span>Chores</span><span>Ivy</span><span>Photos</span></div>
+<div style="display:flex;gap:10px;align-items:center"><div style="font-size:12px;color:rgba(255,255,255,.7);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);padding:6px 12px;border-radius:99px">☼ 74° · Whitewater, WI</div><div style="display:flex"><div style="width:28px;height:28px;border-radius:99px;background:#b6e6b0;border:2px solid #0c0d10"></div><div style="width:28px;height:28px;border-radius:99px;background:#f3b3d4;border:2px solid #0c0d10;margin-left:-8px"></div><div style="width:28px;height:28px;border-radius:99px;background:#ffd08a;border:2px solid #0c0d10;margin-left:-8px"></div></div></div>
+</div>
+<div><div style="color:#fff;font-size:42px;font-weight:700;letter-spacing:-.03em;line-height:1.08">Good evening, Cody.</div><div style="font-size:15px;color:rgba(255,255,255,.5);margin-top:8px">Wednesday, August 26 · 2 events left · dinner at 6:30 · Ivy napped 1h 40m</div></div>
+<div style="display:grid;grid-template-columns:1.25fr 1fr;gap:18px">
+<div style="background:rgba(255,255,255,.055);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:26px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:15px">Today</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Google · HEY</div></div>
+<div style="display:flex;gap:14px;align-items:center"><div style="width:4px;height:40px;border-radius:2px;background:#0a84ff"></div><div style="flex:1"><div style="color:#fff;font-size:15px;font-weight:600">Elizabeth — book club</div><div style="font-size:13px;color:rgba(255,255,255,.45)">7:00 PM · Google</div></div><div style="width:11px;height:11px;border-radius:99px;background:#f3b3d4"></div></div>
+<div style="display:flex;gap:14px;align-items:center"><div style="width:4px;height:40px;border-radius:2px;background:rgba(10,132,255,.5)"></div><div style="flex:1"><div style="color:#fff;font-size:15px;font-weight:600">Ivy — bedtime routine</div><div style="font-size:13px;color:rgba(255,255,255,.45)">7:30 PM · bath → book → bed</div></div><div style="width:11px;height:11px;border-radius:99px;background:#ffd08a"></div></div>
+<div style="display:flex;gap:14px;align-items:center;opacity:.45"><div style="width:4px;height:40px;border-radius:2px;background:rgba(255,255,255,.3)"></div><div style="flex:1"><div style="color:#fff;font-size:15px;font-weight:600;text-decoration:line-through">Cody — dentist</div><div style="font-size:13px;color:rgba(255,255,255,.45)">2:00 PM · HEY · done</div></div></div>
+</div>
+<div style="background:linear-gradient(145deg,rgba(10,132,255,.16),rgba(10,132,255,.04));backdrop-filter:blur(20px);border:1px solid rgba(10,132,255,.25);border-radius:24px;padding:26px;display:flex;flex-direction:column;justify-content:space-between;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:15px">Tonight's dinner</div><div style="font-size:12px;color:#6fb4ff;font-weight:700">Cook mode →</div></div>
+<div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15">Sheet-pan lemon chicken</div>
+<div style="display:flex;gap:8px"><div style="font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:5px 11px;border-radius:99px">520 kcal</div><div style="font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:5px 11px;border-radius:99px">42g protein</div><div style="font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:5px 11px;border-radius:99px">35 min</div></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px">
+<div style="background:rgba(255,255,255,.055);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:15px">Weather</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Whitewater, WI</div></div>
+<div style="display:flex;align-items:baseline;gap:10px"><div style="color:#fff;font-size:44px;font-weight:700;letter-spacing:-.03em">74°</div><div style="font-size:13px;color:rgba(255,255,255,.5)">Sunny · H 81° L 58°</div></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.5)"><span>Thu ☼ 79°</span><span>Fri ☼ 82°</span><span>Sat ⛅ 75°</span><span>Sun ☂ 68°</span></div>
+</div>
+<div style="background:rgba(255,255,255,.055);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:15px">Photos</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Ivy at the lake · 18 new</div></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div class="ph" style="height:70px;border-radius:12px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div class="ph" style="height:70px;border-radius:12px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div class="ph" style="height:70px;border-radius:12px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div></div>
+</div>
+<div style="background:rgba(255,255,255,.055);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:15px">Local news</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Whitewater</div></div>
+<div style="font-size:13px;color:rgba(255,255,255,.75);font-weight:500;line-height:1.4;border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:10px">Farmers market moves to City Market grounds this Saturday</div>
+<div style="font-size:13px;color:rgba(255,255,255,.75);font-weight:500;line-height:1.4">UW-Whitewater fall move-in begins next week — expect traffic on Main St</div>
+</div>
+</div>
+<div style="display:flex;justify-content:center"><div style="font-size:12px;color:rgba(255,255,255,.35);border:1px dashed rgba(255,255,255,.15);padding:8px 18px;border-radius:99px">+ Edit widgets · drag to rearrange</div></div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="2b"><div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Meal planner — desktop</div>
+<div class="dv-card" style="width:1140px;background:#0c0d10">
+<div style="padding:30px 40px 40px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><div style="color:#fff;font-size:30px;font-weight:700;letter-spacing:-.02em">This week's meals</div><div style="font-size:13px;color:rgba(255,255,255,.45);margin-top:5px">Aug 24–30 · Ivy: toddler portions auto-scaled</div></div>
+<div style="display:flex;gap:10px"><div style="font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);padding:10px 16px;border-radius:99px">Import from URL</div><div style="font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);padding:10px 16px;border-radius:99px">+ Add recipe</div><div style="font-size:13px;font-weight:700;background:#0a84ff;color:#fff;padding:10px 18px;border-radius:99px">✦ Generate plan</div></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px">
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);text-align:center">MON</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px"><div class="ph" style="height:56px;border-radius:10px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div style="color:#fff;font-size:12.5px;font-weight:600;line-height:1.25">Turkey chili</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">480 kcal · 38g P</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);text-align:center">TUE</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px"><div class="ph" style="height:56px;border-radius:10px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div style="color:#fff;font-size:12.5px;font-weight:600;line-height:1.25">Salmon bowls</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">610 kcal · 44g P</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:#6fb4ff;text-align:center">WED · today</div><div style="background:rgba(10,132,255,.12);border:1.5px solid #0a84ff;border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px"><div class="ph" style="height:56px;border-radius:10px;background:repeating-linear-gradient(45deg,#1b2536,#1b2536 8px,#20304a 8px,#20304a 16px);color:#5d7ba3">photo</div><div style="color:#fff;font-size:12.5px;font-weight:600;line-height:1.25">Lemon chicken</div><div style="font-size:10.5px;color:rgba(255,255,255,.5)">520 kcal · 42g P</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);text-align:center">THU</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px"><div class="ph" style="height:56px;border-radius:10px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div style="color:#fff;font-size:12.5px;font-weight:600;line-height:1.25">Veggie stir-fry</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">430 kcal · 22g P</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);text-align:center">FRI</div><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px"><div class="ph" style="height:56px;border-radius:10px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div style="color:#fff;font-size:12.5px;font-weight:600;line-height:1.25">Pizza night</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">homemade dough</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);text-align:center">SAT</div><div style="border:1.5px dashed rgba(255,255,255,.18);border-radius:16px;padding:10px;display:flex;align-items:center;justify-content:center;min-height:126px"><div style="font-size:12px;font-weight:600;color:#6fb4ff">+ Add meal</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);text-align:center">SUN</div><div style="border:1.5px dashed rgba(255,255,255,.18);border-radius:16px;padding:10px;display:flex;align-items:center;justify-content:center;min-height:126px"><div style="font-size:12px;font-weight:600;color:#6fb4ff">+ Add meal</div></div></div>
+</div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px">
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px 22px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px"><div style="color:#fff;font-weight:600;font-size:14px">Recipe database</div><div style="font-size:12px;color:rgba(255,255,255,.4)">128 recipes · dinner · &lt;40 min</div></div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px"><div class="ph" style="height:50px;border-radius:8px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div style="color:#fff;font-size:12px;font-weight:600;margin-top:8px">Beef tacos</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">560 kcal · ★ fav</div></div>
+<div style="flex:1;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px"><div class="ph" style="height:50px;border-radius:8px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div style="color:#fff;font-size:12px;font-weight:600;margin-top:8px">Pesto gnocchi</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">640 kcal · 20 min</div></div>
+<div style="flex:1;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px"><div class="ph" style="height:50px;border-radius:8px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div style="color:#fff;font-size:12px;font-weight:600;margin-top:8px">Miso salmon</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">490 kcal · high P</div></div>
+<div style="flex:1;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px"><div class="ph" style="height:50px;border-radius:8px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div style="color:#fff;font-size:12px;font-weight:600;margin-top:8px">Greek bowls</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">470 kcal · veg</div></div>
+</div></div>
+<div style="background:linear-gradient(145deg,rgba(10,132,255,.16),rgba(10,132,255,.04));border:1px solid rgba(10,132,255,.25);border-radius:20px;padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+<div style="color:#fff;font-weight:600;font-size:14px">✦ Generated for you</div>
+<div style="font-size:12.5px;color:rgba(255,255,255,.6);line-height:1.5">96% of protein target, no repeats from last 2 weeks, Friday kept free for pizza night. Grocery list: 32 items, est. $118.</div>
+<div style="display:flex;gap:8px"><div style="font-size:12px;font-weight:700;background:#fff;color:#0c0d10;padding:8px 14px;border-radius:99px">Accept week</div><div style="font-size:12px;font-weight:600;color:#fff;border:1px solid rgba(255,255,255,.25);padding:8px 14px;border-radius:99px">Shuffle</div></div>
+</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="2c"><div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a>Calendar — desktop, week grid + agenda rail (Google + HEY)</div>
+<div class="dv-card" style="width:1140px;background:#0c0d10">
+<div style="padding:30px 40px 40px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="display:flex;align-items:baseline;gap:14px"><div style="color:#fff;font-size:30px;font-weight:700;letter-spacing:-.02em">August 2026</div><div style="font-size:13px;color:rgba(255,255,255,.4)">Week 35</div></div>
+<div style="display:flex;gap:14px;align-items:center">
+<div style="display:flex;gap:6px;font-size:12px"><div style="display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.6)"><div style="width:8px;height:8px;border-radius:99px;background:#b6e6b0"></div>Cody</div><div style="display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.6);margin-left:8px"><div style="width:8px;height:8px;border-radius:99px;background:#f3b3d4"></div>Elizabeth</div><div style="display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.6);margin-left:8px"><div style="width:8px;height:8px;border-radius:99px;background:#ffd08a"></div>Ivy</div></div>
+<div style="display:flex;background:rgba(255,255,255,.08);border-radius:99px;padding:3px"><div style="font-size:12px;font-weight:700;background:#fff;color:#0c0d10;padding:6px 14px;border-radius:99px">Week</div><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.6);padding:6px 14px">Month</div></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:2.4fr 1fr;gap:18px">
+<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;overflow:hidden">
+<div style="display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid rgba(255,255,255,.07)">
+<div style="padding:12px;text-align:center;font-size:12px;color:rgba(255,255,255,.4);font-weight:600">MON 24</div><div style="padding:12px;text-align:center;font-size:12px;color:rgba(255,255,255,.4);font-weight:600">TUE 25</div><div style="padding:12px;text-align:center;font-size:12px;font-weight:700;color:#6fb4ff">WED 26</div><div style="padding:12px;text-align:center;font-size:12px;color:rgba(255,255,255,.4);font-weight:600">THU 27</div><div style="padding:12px;text-align:center;font-size:12px;color:rgba(255,255,255,.4);font-weight:600">FRI 28</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);min-height:300px">
+<div style="border-right:1px solid rgba(255,255,255,.06);padding:10px;display:flex;flex-direction:column;gap:8px"><div style="background:rgba(182,230,176,.12);border-left:3px solid #b6e6b0;border-radius:8px;padding:8px 10px"><div style="color:#fff;font-size:11.5px;font-weight:600">Gym</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">6:00a</div></div></div>
+<div style="border-right:1px solid rgba(255,255,255,.06);padding:10px;display:flex;flex-direction:column;gap:8px"><div style="background:rgba(255,208,138,.12);border-left:3px solid #ffd08a;border-radius:8px;padding:8px 10px"><div style="color:#fff;font-size:11.5px;font-weight:600">Ivy — pediatrician</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">10:30a</div></div></div>
+<div style="border-right:1px solid rgba(255,255,255,.06);padding:10px;background:rgba(10,132,255,.05);display:flex;flex-direction:column;gap:8px"><div style="background:rgba(182,230,176,.12);border-left:3px solid #b6e6b0;border-radius:8px;padding:8px 10px"><div style="color:#fff;font-size:11.5px;font-weight:600">Dentist ✓</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">2:00p · HEY</div></div><div style="background:rgba(243,179,212,.12);border-left:3px solid #f3b3d4;border-radius:8px;padding:8px 10px"><div style="color:#fff;font-size:11.5px;font-weight:600">Book club</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">7:00p · Google</div></div><div style="background:rgba(255,208,138,.12);border-left:3px solid #ffd08a;border-radius:8px;padding:8px 10px"><div style="color:#fff;font-size:11.5px;font-weight:600">Ivy bedtime</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">7:30p</div></div></div>
+<div style="border-right:1px solid rgba(255,255,255,.06);padding:10px"></div>
+<div style="padding:10px;display:flex;flex-direction:column;gap:8px"><div style="background:rgba(10,132,255,.14);border-left:3px solid #0a84ff;border-radius:8px;padding:8px 10px"><div style="color:#fff;font-size:11.5px;font-weight:600">Pizza + movie night</div><div style="font-size:10.5px;color:rgba(255,255,255,.4)">6:30p · everyone</div></div></div>
+</div>
+</div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px">
+<div style="color:#fff;font-weight:600;font-size:14px">Agenda</div>
+<div style="display:flex;gap:10px"><div style="font-size:12px;color:rgba(255,255,255,.35);font-variant-numeric:tabular-nums;width:44px">7:00p</div><div><div style="color:#fff;font-size:13px;font-weight:600">Book club</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">Elizabeth · Google</div></div></div>
+<div style="display:flex;gap:10px"><div style="font-size:12px;color:rgba(255,255,255,.35);font-variant-numeric:tabular-nums;width:44px">7:30p</div><div><div style="color:#fff;font-size:13px;font-weight:600">Ivy bedtime routine</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">bath → book → bed</div></div></div>
+<div style="border-top:1px solid rgba(255,255,255,.07);padding-top:12px;font-size:11px;color:rgba(255,255,255,.35);font-weight:600;letter-spacing:.06em">TOMORROW</div>
+<div style="display:flex;gap:10px"><div style="font-size:12px;color:rgba(255,255,255,.35);font-variant-numeric:tabular-nums;width:44px">9:00a</div><div><div style="color:#fff;font-size:13px;font-weight:600">Grocery pickup</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">from meal plan · 32 items</div></div></div>
+<div style="margin-top:auto;font-size:12px;font-weight:700;color:#6fb4ff">+ New event</div>
+</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="2d"><div class="dv-olabel"><a class="dv-oid" href="#2d">2d</a>Chores &amp; rewards — parents now, built for future kids</div>
+<div class="dv-card" style="width:720px;background:#0c0d10">
+<div style="padding:28px 32px 32px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="color:#fff;font-size:24px;font-weight:700;letter-spacing:-.02em">Chores &amp; rewards</div><div style="font-size:13px;font-weight:700;background:#0a84ff;color:#fff;padding:9px 16px;border-radius:99px">+ New chore</div></div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:99px;background:#b6e6b0"></div><div><div style="color:#fff;font-size:13px;font-weight:700">Cody</div><div style="font-size:12px;color:#ffd60a;font-weight:700">★ 38 pts</div></div></div>
+<div style="flex:1;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:99px;background:#f3b3d4"></div><div><div style="color:#fff;font-size:13px;font-weight:700">Elizabeth</div><div style="font-size:12px;color:#ffd60a;font-weight:700">★ 51 pts</div></div></div>
+<div style="flex:1;background:rgba(255,255,255,.03);border:1.5px dashed rgba(255,255,255,.15);border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:99px;background:#ffd08a;display:flex;align-items:center;justify-content:center;font-size:15px">🧸</div><div><div style="color:#fff;font-size:13px;font-weight:700">Ivy</div><div style="font-size:12px;color:rgba(255,255,255,.4)">joins at ~4 yrs</div></div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em">ASSIGNED</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:99px;background:#b6e6b0"></div><div style="flex:1;color:#fff;font-size:13px;font-weight:600">Trash night</div><div style="font-size:12px;color:#ffd60a;font-weight:700">★5</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:99px;background:#f3b3d4"></div><div style="flex:1;color:#fff;font-size:13px;font-weight:600">Ivy's bath</div><div style="font-size:12px;color:#ffd60a;font-weight:700">★8</div></div>
+<div style="display:flex;align-items:center;gap:10px;opacity:.45"><div style="width:22px;height:22px;border-radius:99px;background:#b6e6b0"></div><div style="flex:1;color:#fff;font-size:13px;font-weight:600;text-decoration:line-through">Mow the lawn</div><div style="font-size:12px;color:#34c759;font-weight:700">✓ done</div></div>
+</div>
+<div style="background:rgba(10,132,255,.06);border:1.5px dashed rgba(10,132,255,.45);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+<div style="font-size:12px;font-weight:700;color:#6fb4ff;letter-spacing:.06em">UP FOR GRABS — first to claim</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;color:#fff;font-size:13px;font-weight:600">Fold laundry</div><div style="font-size:12px;font-weight:700;background:#0a84ff;color:#fff;padding:5px 12px;border-radius:99px">Claim ★10</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;color:#fff;font-size:13px;font-weight:600">Water the garden</div><div style="font-size:12px;font-weight:700;background:#0a84ff;color:#fff;padding:5px 12px;border-radius:99px">Claim ★8</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;color:#fff;font-size:13px;font-weight:600">Clean out the car</div><div style="font-size:12px;font-weight:700;background:#0a84ff;color:#fff;padding:5px 12px;border-radius:99px">Claim ★12</div></div>
+</div>
+</div>
+<div style="background:linear-gradient(120deg,rgba(255,214,10,.14),rgba(243,179,212,.12));border:1px solid rgba(255,214,10,.2);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:16px">
+<div style="font-size:28px">🎉</div>
+<div style="flex:1"><div style="color:#fff;font-size:15px;font-weight:700">Elizabeth hit 50 points!</div><div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:2px">Reward unlocked: sleep-in Saturday · confetti plays on redeem</div></div>
+<div style="font-size:13px;font-weight:700;background:#fff;color:#0c0d10;padding:10px 16px;border-radius:99px">Redeem</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="2e"><div class="dv-olabel"><a class="dv-oid" href="#2e">2e</a>Ivy — toddler tracker (naps · milestones · bedtime routine)</div>
+<div class="dv-card" style="width:720px;background:#0c0d10">
+<div style="padding:28px 32px 32px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:14px"><div style="width:44px;height:44px;border-radius:99px;background:#ffd08a;display:flex;align-items:center;justify-content:center;font-size:20px">🧸</div><div><div style="color:#fff;font-size:24px;font-weight:700;letter-spacing:-.02em">Ivy</div><div style="font-size:13px;color:rgba(255,255,255,.45)">2 years, 3 months</div></div></div><div style="font-size:13px;font-weight:700;background:#0a84ff;color:#fff;padding:9px 16px;border-radius:99px">+ Log</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="color:#fff;font-weight:600;font-size:14px">Naps &amp; sleep</div>
+<div style="display:flex;align-items:baseline;gap:8px"><div style="color:#fff;font-size:30px;font-weight:700">1h 40m</div><div style="font-size:12px;color:rgba(255,255,255,.45)">today's nap · 12:45–2:25</div></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-end;height:44px">
+<div style="width:20px;height:70%;border-radius:6px 6px 0 0;background:rgba(10,132,255,.4)"></div><div style="width:20px;height:85%;border-radius:6px 6px 0 0;background:rgba(10,132,255,.4)"></div><div style="width:20px;height:60%;border-radius:6px 6px 0 0;background:rgba(10,132,255,.4)"></div><div style="width:20px;height:90%;border-radius:6px 6px 0 0;background:rgba(10,132,255,.4)"></div><div style="width:20px;height:75%;border-radius:6px 6px 0 0;background:rgba(10,132,255,.4)"></div><div style="width:20px;height:80%;border-radius:6px 6px 0 0;background:rgba(10,132,255,.4)"></div><div style="width:20px;height:82%;border-radius:6px 6px 0 0;background:#0a84ff"></div>
+</div>
+<div style="font-size:11px;color:rgba(255,255,255,.35)">last night: 11h 10m · avg 10h 52m this week</div>
+</div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="color:#fff;font-weight:600;font-size:14px">Bedtime routine · 7:30 PM</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:99px;background:#34c759;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700">✓</div><div style="color:#fff;font-size:13px;font-weight:600;text-decoration:line-through;opacity:.5">Bath</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:99px;border:2px solid #0a84ff"></div><div style="color:#fff;font-size:13px;font-weight:600">Brush teeth</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:99px;border:2px solid rgba(255,255,255,.2)"></div><div style="color:#fff;font-size:13px;font-weight:600">Two books</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:99px;border:2px solid rgba(255,255,255,.2)"></div><div style="color:#fff;font-size:13px;font-weight:600">Lights out + sound machine</div></div>
+</div>
+</div>
+<div style="background:linear-gradient(145deg,rgba(255,208,138,.12),rgba(255,208,138,.03));border:1px solid rgba(255,208,138,.2);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="color:#fff;font-weight:600;font-size:14px">Milestones</div><div style="font-size:12px;color:rgba(255,255,255,.4)">24–30 months</div></div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;background:rgba(255,255,255,.05);border-radius:12px;padding:12px"><div style="font-size:18px">🗣</div><div style="color:#fff;font-size:12.5px;font-weight:600;margin-top:6px">50+ words</div><div style="font-size:11px;color:#34c759;font-weight:700;margin-top:2px">✓ Aug 12</div></div>
+<div style="flex:1;background:rgba(255,255,255,.05);border-radius:12px;padding:12px"><div style="font-size:18px">🪜</div><div style="color:#fff;font-size:12.5px;font-weight:600;margin-top:6px">Climbs stairs</div><div style="font-size:11px;color:#34c759;font-weight:700;margin-top:2px">✓ Jul 30</div></div>
+<div style="flex:1;background:rgba(255,255,255,.05);border-radius:12px;padding:12px"><div style="font-size:18px">✏️</div><div style="color:#fff;font-size:12.5px;font-weight:600;margin-top:6px">Draws a line</div><div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600;margin-top:2px">watching</div></div>
+<div style="flex:1;background:rgba(255,255,255,.05);border-radius:12px;padding:12px"><div style="font-size:18px">👟</div><div style="color:#fff;font-size:12.5px;font-weight:600;margin-top:6px">Jumps in place</div><div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600;margin-top:2px">watching</div></div>
+</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="2f"><div class="dv-olabel"><a class="dv-oid" href="#2f">2f</a>Phone — dashboard, floating dock</div>
+<div class="dv-card" style="width:390px;background:#0c0d10;border-radius:44px">
+<div style="padding:16px 18px 20px;display:flex;flex-direction:column;gap:16px;position:relative;min-height:760px">
+<div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 8px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px"><div><div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em">Good evening</div><div style="font-size:13px;color:rgba(255,255,255,.45)">Wed Aug 26 · ☼ 74° Whitewater</div></div><div style="width:36px;height:36px;border-radius:99px;background:#b6e6b0"></div></div>
+<div style="background:linear-gradient(145deg,rgba(10,132,255,.18),rgba(10,132,255,.05));border:1px solid rgba(10,132,255,.25);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between"><div style="font-size:11px;font-weight:700;color:#6fb4ff;letter-spacing:.06em">TONIGHT · 6:30</div><div style="font-size:12px;color:#6fb4ff;font-weight:700">Cook →</div></div>
+<div style="color:#fff;font-size:20px;font-weight:700;letter-spacing:-.01em">Sheet-pan lemon chicken</div>
+<div style="display:flex;gap:6px"><div style="font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:4px 9px;border-radius:99px">520 kcal</div><div style="font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:4px 9px;border-radius:99px">42g P</div><div style="font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:4px 9px;border-radius:99px">35 min</div></div>
+</div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px">
+<div style="color:#fff;font-weight:600;font-size:14px">Today</div>
+<div style="display:flex;gap:12px;align-items:center"><div style="width:3px;height:32px;border-radius:2px;background:#f3b3d4"></div><div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:600">Book club</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">7:00 PM · Elizabeth</div></div></div>
+<div style="display:flex;gap:12px;align-items:center"><div style="width:3px;height:32px;border-radius:2px;background:#ffd08a"></div><div style="flex:1"><div style="color:#fff;font-size:13px;font-weight:600">Ivy bedtime routine</div><div style="font-size:11.5px;color:rgba(255,255,255,.4)">7:30 PM · 1 of 4 done</div></div></div>
+</div>
+<div style="display:flex;gap:12px">
+<div style="flex:1;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em">IVY'S NAP</div><div style="color:#fff;font-size:22px;font-weight:700;margin-top:6px">1h 40m</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">12:45–2:25</div></div>
+<div style="flex:1;background:rgba(10,132,255,.08);border:1.5px dashed rgba(10,132,255,.4);border-radius:22px;padding:16px"><div style="font-size:11px;font-weight:700;color:#6fb4ff;letter-spacing:.06em">UP FOR GRABS</div><div style="color:#fff;font-size:14px;font-weight:600;margin-top:6px">Fold laundry</div><div style="font-size:12px;color:#6fb4ff;font-weight:700;margin-top:4px">Claim ★10</div></div>
+</div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px;display:flex;gap:8px"><div class="ph" style="flex:1;height:56px;border-radius:10px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div class="ph" style="flex:1;height:56px;border-radius:10px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div><div class="ph" style="flex:1;height:56px;border-radius:10px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div></div>
+<div style="position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:6px;background:rgba(28,29,34,.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:8px;box-shadow:0 8px 30px rgba(0,0,0,.5)">
+<div style="width:48px;height:48px;border-radius:99px;background:#0a84ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><div style="width:6px;height:6px;border-radius:99px;background:#fff"></div><div style="color:#fff;font-size:9px;font-weight:700">Home</div></div>
+<div style="width:48px;height:48px;border-radius:99px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><div style="width:6px;height:6px;border-radius:99px;background:rgba(255,255,255,.4)"></div><div style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600">Meals</div></div>
+<div style="width:48px;height:48px;border-radius:99px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><div style="width:6px;height:6px;border-radius:99px;background:rgba(255,255,255,.4)"></div><div style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600">Cal</div></div>
+<div style="width:48px;height:48px;border-radius:99px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><div style="width:6px;height:6px;border-radius:99px;background:rgba(255,255,255,.4)"></div><div style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600">Chores</div></div>
+<div style="width:48px;height:48px;border-radius:99px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><div style="width:6px;height:6px;border-radius:99px;background:rgba(255,255,255,.4)"></div><div style="color:rgba(255,255,255,.5);font-size:9px;font-weight:600">Ivy</div></div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="2g"><div class="dv-olabel"><a class="dv-oid" href="#2g">2g</a>Phone — meal planner</div>
+<div class="dv-card" style="width:390px;background:#0c0d10;border-radius:44px">
+<div style="padding:16px 18px 20px;display:flex;flex-direction:column;gap:16px;position:relative;min-height:700px">
+<div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 8px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px"><div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em">Meals</div><div style="font-size:12px;font-weight:700;background:#0a84ff;color:#fff;padding:8px 14px;border-radius:99px">✦ Generate</div></div>
+<div style="display:flex;gap:6px;overflow:hidden">
+<div style="flex:none;text-align:center;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.05)"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">MON</div><div style="color:#fff;font-size:15px;font-weight:700">24</div></div>
+<div style="flex:none;text-align:center;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.05)"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">TUE</div><div style="color:#fff;font-size:15px;font-weight:700">25</div></div>
+<div style="flex:none;text-align:center;padding:10px 14px;border-radius:14px;background:#0a84ff"><div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:700">WED</div><div style="color:#fff;font-size:15px;font-weight:700">26</div></div>
+<div style="flex:none;text-align:center;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.05)"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">THU</div><div style="color:#fff;font-size:15px;font-weight:700">27</div></div>
+<div style="flex:none;text-align:center;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.05)"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">FRI</div><div style="color:#fff;font-size:15px;font-weight:700">28</div></div>
+<div style="flex:none;text-align:center;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.05)"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">SAT</div><div style="color:#fff;font-size:15px;font-weight:700">29</div></div>
+</div>
+<div style="background:rgba(10,132,255,.1);border:1px solid rgba(10,132,255,.3);border-radius:22px;padding:16px;display:flex;gap:14px;align-items:center">
+<div class="ph" style="width:76px;height:76px;border-radius:14px;background:repeating-linear-gradient(45deg,#1b2536,#1b2536 8px,#20304a 8px,#20304a 16px);color:#5d7ba3">photo</div>
+<div style="flex:1"><div style="font-size:10.5px;font-weight:700;color:#6fb4ff;letter-spacing:.06em">DINNER · 6:30</div><div style="color:#fff;font-size:16px;font-weight:700;margin-top:3px;line-height:1.2">Sheet-pan lemon chicken</div><div style="display:flex;gap:5px;margin-top:7px"><div style="font-size:10.5px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:3px 8px;border-radius:99px">520 kcal</div><div style="font-size:10.5px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);padding:3px 8px;border-radius:99px">42g P</div></div></div>
+</div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px;display:flex;gap:14px;align-items:center">
+<div class="ph" style="width:56px;height:56px;border-radius:12px;background:repeating-linear-gradient(45deg,#1b1c21,#1b1c21 8px,#22242a 8px,#22242a 16px);color:#585c66">photo</div>
+<div style="flex:1"><div style="font-size:10.5px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em">LUNCH</div><div style="color:#fff;font-size:14px;font-weight:600;margin-top:2px">Greek bowls · leftovers</div></div>
+<div style="font-size:11px;color:rgba(255,255,255,.4)">470 kcal</div>
+</div>
+<div style="border:1.5px dashed rgba(255,255,255,.18);border-radius:22px;padding:16px;text-align:center;font-size:13px;font-weight:600;color:#6fb4ff">+ Add breakfast</div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4)">GROCERIES</div><div style="color:#fff;font-size:15px;font-weight:700;margin-top:4px">32 items</div><div style="font-size:11px;color:rgba(255,255,255,.4)">est. $118 · pickup Thu</div></div>
+<div style="flex:1;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4)">IMPORT</div><div style="color:#fff;font-size:13px;font-weight:600;margin-top:4px">Paste a recipe URL</div><div style="font-size:11px;color:#6fb4ff;font-weight:700;margin-top:2px">Auto-fills macros</div></div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="2h"><div class="dv-olabel"><a class="dv-oid" href="#2h">2h</a>Phone — calendar, agenda</div>
+<div class="dv-card" style="width:390px;background:#0c0d10;border-radius:44px">
+<div style="padding:16px 18px 20px;display:flex;flex-direction:column;gap:16px;min-height:640px">
+<div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 8px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px"><div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em">August</div><div style="display:flex;background:rgba(255,255,255,.08);border-radius:99px;padding:3px"><div style="font-size:11px;font-weight:700;background:#fff;color:#0c0d10;padding:5px 12px;border-radius:99px">Agenda</div><div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.6);padding:5px 12px">Week</div></div></div>
+<div style="display:flex;gap:6px">
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:12px"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">M</div><div style="color:rgba(255,255,255,.7);font-size:14px;font-weight:600">24</div></div>
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:12px"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">T</div><div style="color:rgba(255,255,255,.7);font-size:14px;font-weight:600">25</div></div>
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:12px;background:#0a84ff"><div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:700">W</div><div style="color:#fff;font-size:14px;font-weight:700">26</div></div>
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:12px"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">T</div><div style="color:rgba(255,255,255,.7);font-size:14px;font-weight:600">27</div></div>
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:12px"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">F</div><div style="color:rgba(255,255,255,.7);font-size:14px;font-weight:600">28</div></div>
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:12px"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">S</div><div style="color:rgba(255,255,255,.7);font-size:14px;font-weight:600">29</div></div>
+<div style="flex:1;text-align:center;padding:8px 0;border-radius:12px"><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700">S</div><div style="color:rgba(255,255,255,.7);font-size:14px;font-weight:600">30</div></div>
+</div>
+<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.08em;padding:0 4px">TODAY · WED AUG 26</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px 16px;display:flex;gap:12px;align-items:center;opacity:.45"><div style="width:3px;height:36px;border-radius:2px;background:#b6e6b0"></div><div style="flex:1"><div style="color:#fff;font-size:14px;font-weight:600;text-decoration:line-through">Cody — dentist</div><div style="font-size:12px;color:rgba(255,255,255,.4)">2:00 PM · HEY</div></div></div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px 16px;display:flex;gap:12px;align-items:center"><div style="width:3px;height:36px;border-radius:2px;background:#f3b3d4"></div><div style="flex:1"><div style="color:#fff;font-size:14px;font-weight:600">Elizabeth — book club</div><div style="font-size:12px;color:rgba(255,255,255,.4)">7:00 PM · Google</div></div><div style="width:9px;height:9px;border-radius:99px;background:#f3b3d4"></div></div>
+<div style="background:rgba(255,208,138,.08);border:1px solid rgba(255,208,138,.2);border-radius:18px;padding:14px 16px;display:flex;gap:12px;align-items:center"><div style="width:3px;height:36px;border-radius:2px;background:#ffd08a"></div><div style="flex:1"><div style="color:#fff;font-size:14px;font-weight:600">Ivy — bedtime routine</div><div style="font-size:12px;color:rgba(255,255,255,.4)">7:30 PM · bath → book → bed</div></div><div style="font-size:11px;color:#ffd08a;font-weight:700">1/4</div></div>
+</div>
+<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.08em;padding:0 4px">TOMORROW</div>
+<div style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px 16px;display:flex;gap:12px;align-items:center"><div style="width:3px;height:36px;border-radius:2px;background:#0a84ff"></div><div style="flex:1"><div style="color:#fff;font-size:14px;font-weight:600">Grocery pickup</div><div style="font-size:12px;color:rgba(255,255,255,.4)">9:00 AM · from meal plan</div></div></div>
+<div style="margin-top:auto;align-self:center;font-size:13px;font-weight:700;background:#0a84ff;color:#fff;padding:12px 28px;border-radius:99px">+ New event</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="2i"><div class="dv-olabel"><a class="dv-oid" href="#2i">2i</a>Wall display — kitchen tablet, landscape, glanceable</div>
+<div class="dv-card" style="width:1140px;background:#08090c">
+<div style="padding:44px 52px;display:flex;flex-direction:column;gap:32px;position:relative">
+<div style="position:absolute;inset:0;background:radial-gradient(800px 400px at 50% -10%,rgba(10,132,255,.14),transparent 70%);pointer-events:none"></div>
+<div style="position:relative;display:flex;justify-content:space-between;align-items:flex-end">
+<div><div style="color:#fff;font-size:64px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums">6:12</div><div style="font-size:17px;color:rgba(255,255,255,.5);margin-top:8px">Wednesday, August 26</div></div>
+<div style="text-align:right"><div style="color:#fff;font-size:44px;font-weight:700;letter-spacing:-.02em">74° ☼</div><div style="font-size:15px;color:rgba(255,255,255,.5);margin-top:4px">Whitewater · H 81° L 58°</div></div>
+</div>
+<div style="position:relative;display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:22px">
+<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:26px;padding:28px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:13px;font-weight:700;color:#6fb4ff;letter-spacing:.08em">DINNER · 6:30</div>
+<div style="color:#fff;font-size:32px;font-weight:700;letter-spacing:-.02em;line-height:1.12">Sheet-pan lemon chicken</div>
+<div style="font-size:15px;color:rgba(255,255,255,.5)">520 kcal · 42g protein · ready in 35 min</div>
+</div>
+<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:26px;padding:28px;display:flex;flex-direction:column;gap:16px">
+<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.08em">UP NEXT</div>
+<div><div style="color:#fff;font-size:20px;font-weight:600">Book club</div><div style="font-size:14px;color:rgba(255,255,255,.45)">7:00 · Elizabeth</div></div>
+<div><div style="color:#fff;font-size:20px;font-weight:600">Ivy's bedtime</div><div style="font-size:14px;color:rgba(255,255,255,.45)">7:30 · bath done ✓</div></div>
+</div>
+<div style="background:rgba(10,132,255,.08);border:1.5px dashed rgba(10,132,255,.4);border-radius:26px;padding:28px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:13px;font-weight:700;color:#6fb4ff;letter-spacing:.08em">UP FOR GRABS</div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="color:#fff;font-size:19px;font-weight:600">Fold laundry</div><div style="font-size:15px;color:#ffd60a;font-weight:800">★10</div></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="color:#fff;font-size:19px;font-weight:600">Water garden</div><div style="font-size:15px;color:#ffd60a;font-weight:800">★8</div></div>
+<div style="font-size:13px;color:rgba(255,255,255,.35)">tap your avatar to claim</div>
+</div>
+</div>
+<div style="position:relative;display:flex;justify-content:space-between;align-items:center">
+<div style="display:flex;gap:14px;align-items:center"><div style="width:40px;height:40px;border-radius:99px;background:#b6e6b0"></div><div style="width:40px;height:40px;border-radius:99px;background:#f3b3d4"></div><div style="width:40px;height:40px;border-radius:99px;background:#ffd08a"></div><div style="font-size:14px;color:rgba(255,255,255,.4);margin-left:6px">Garthwaite family</div></div>
+<div style="font-size:14px;color:rgba(255,255,255,.4)">Ivy napped 1h 40m · 18 new photos · groceries Thu 9a</div>
+</div>
+</div>
+</div></div>
+
+</div>
+<p class="dv-next">Try next: "light-theme versions of <a class="dv-oid" href="#2a">2a</a>" · "mock the widget-edit drawer" · "recipe detail page with import-from-URL flow"</p>
+</section>
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Hearth — family hub · dashboard directions + key screens</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Dashboard — Aurora glass · light, frosted, Apple-clean</div>
+<div class="dv-card" style="width:1140px;background:#f5f5f7;position:relative">
+<div style="position:absolute;inset:0;background:radial-gradient(600px 300px at 15% 0%,rgba(120,170,255,.25),transparent 70%),radial-gradient(500px 280px at 90% 10%,rgba(140,235,190,.22),transparent 70%);pointer-events:none"></div>
+<div style="position:relative;padding:28px 36px 36px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:14px"><div style="width:34px;height:34px;border-radius:10px;background:#1d1d1f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px">H</div><div style="font-weight:600;font-size:15px;letter-spacing:-.01em">Hearth</div></div>
+<div style="display:flex;gap:22px;font-size:13px;color:#6e6e73;font-weight:500"><span style="color:#1d1d1f">Home</span><span>Meals</span><span>Calendar</span><span>Chores</span><span>Photos</span><span>Budget</span></div>
+<div style="display:flex;gap:8px;align-items:center"><div style="font-size:12px;color:#6e6e73;background:rgba(255,255,255,.7);border:1px solid rgba(0,0,0,.06);padding:6px 12px;border-radius:99px">☼ 72° Sunny · Boise</div><div style="display:flex"><div style="width:28px;height:28px;border-radius:99px;background:#ffd08a;border:2px solid #f5f5f7"></div><div style="width:28px;height:28px;border-radius:99px;background:#9ad0ff;border:2px solid #f5f5f7;margin-left:-8px"></div><div style="width:28px;height:28px;border-radius:99px;background:#b6e6b0;border:2px solid #f5f5f7;margin-left:-8px"></div><div style="width:28px;height:28px;border-radius:99px;background:#f3b3d4;border:2px solid #f5f5f7;margin-left:-8px"></div></div></div>
+</div>
+<div><div style="font-size:38px;font-weight:700;letter-spacing:-.03em;line-height:1.1">Good morning, Parkers.</div><div style="font-size:15px;color:#6e6e73;margin-top:6px">Wednesday, August 26 · 3 events · dinner is planned · 2 chores up for grabs</div></div>
+<div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:16px">
+<div style="background:rgba(255,255,255,.75);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.05);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-weight:600;font-size:14px">Today</div><div style="font-size:11px;color:#6e6e73">Google · HEY</div></div>
+<div style="display:flex;gap:12px;align-items:center"><div style="width:4px;height:36px;border-radius:2px;background:#0a84ff"></div><div style="flex:1"><div style="font-size:13px;font-weight:600">Maya — soccer practice</div><div style="font-size:12px;color:#6e6e73">4:00–5:30 PM · Ridge Park</div></div><div style="width:10px;height:10px;border-radius:99px;background:#9ad0ff"></div></div>
+<div style="display:flex;gap:12px;align-items:center"><div style="width:4px;height:36px;border-radius:2px;background:#af52de"></div><div style="flex:1"><div style="font-size:13px;font-weight:600">Dad — dentist</div><div style="font-size:12px;color:#6e6e73">2:00 PM · HEY</div></div><div style="width:10px;height:10px;border-radius:99px;background:#b6e6b0"></div></div>
+<div style="display:flex;gap:12px;align-items:center"><div style="width:4px;height:36px;border-radius:2px;background:#ff9f0a"></div><div style="flex:1"><div style="font-size:13px;font-weight:600">Family movie night</div><div style="font-size:12px;color:#6e6e73">7:30 PM · living room</div></div><div style="display:flex"><div style="width:10px;height:10px;border-radius:99px;background:#ffd08a"></div><div style="width:10px;height:10px;border-radius:99px;background:#f3b3d4;margin-left:-3px"></div></div></div>
+</div>
+<div style="background:rgba(255,255,255,.75);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.05);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-weight:600;font-size:14px">Tonight's dinner</div><div style="font-size:11px;color:#0a6cd6;font-weight:600">Cook mode →</div></div>
+<div class="ph" style="height:96px;border-radius:12px">recipe photo</div>
+<div style="font-size:14px;font-weight:600">Sheet-pan lemon chicken</div>
+<div style="display:flex;gap:6px"><div style="font-size:11px;font-weight:600;background:#eef6ee;color:#2f7d3b;padding:4px 8px;border-radius:99px">520 kcal</div><div style="font-size:11px;font-weight:600;background:#eef2fb;color:#2b5fb8;padding:4px 8px;border-radius:99px">42g protein</div><div style="font-size:11px;font-weight:600;background:#fbf3ea;color:#a3691f;padding:4px 8px;border-radius:99px">35 min</div></div>
+</div>
+<div style="background:rgba(255,255,255,.75);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.05);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-weight:600;font-size:14px">Chores</div><div style="font-size:11px;color:#6e6e73">2 up for grabs</div></div>
+<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:12px;padding:10px 12px"><div style="width:24px;height:24px;border-radius:99px;background:#ffd08a"></div><div style="flex:1;font-size:13px;font-weight:500">Feed the dog</div><div style="font-size:11px;color:#6e6e73">Maya · ★ 5</div></div>
+<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px dashed rgba(0,0,0,.18);border-radius:12px;padding:10px 12px"><div style="width:24px;height:24px;border-radius:99px;border:1.5px dashed #b9b6ae"></div><div style="flex:1;font-size:13px;font-weight:500">Take out recycling</div><div style="font-size:11px;font-weight:700;color:#0a6cd6">Claim · ★ 10</div></div>
+<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px dashed rgba(0,0,0,.18);border-radius:12px;padding:10px 12px"><div style="width:24px;height:24px;border-radius:99px;border:1.5px dashed #b9b6ae"></div><div style="flex:1;font-size:13px;font-weight:500">Water the garden</div><div style="font-size:11px;font-weight:700;color:#0a6cd6">Claim · ★ 8</div></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:16px">
+<div style="background:rgba(255,255,255,.75);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.05);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px">
+<div style="font-weight:600;font-size:14px">Habits</div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px">Reading · Leo</div><div style="display:flex;gap:3px"><div style="width:10px;height:10px;border-radius:3px;background:#34c759"></div><div style="width:10px;height:10px;border-radius:3px;background:#34c759"></div><div style="width:10px;height:10px;border-radius:3px;background:#34c759"></div><div style="width:10px;height:10px;border-radius:3px;background:#34c759"></div><div style="width:10px;height:10px;border-radius:3px;background:#e3e1dc"></div><div style="width:10px;height:10px;border-radius:3px;background:#e3e1dc"></div><div style="width:10px;height:10px;border-radius:3px;background:#e3e1dc"></div></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px">Run 5k · Mom</div><div style="display:flex;gap:3px"><div style="width:10px;height:10px;border-radius:3px;background:#34c759"></div><div style="width:10px;height:10px;border-radius:3px;background:#e3e1dc"></div><div style="width:10px;height:10px;border-radius:3px;background:#34c759"></div><div style="width:10px;height:10px;border-radius:3px;background:#e3e1dc"></div><div style="width:10px;height:10px;border-radius:3px;background:#34c759"></div><div style="width:10px;height:10px;border-radius:3px;background:#e3e1dc"></div><div style="width:10px;height:10px;border-radius:3px;background:#e3e1dc"></div></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px">No soda · Dad</div><div style="font-size:12px;font-weight:700;color:#ff9500">🔥 12-day streak</div></div>
+</div>
+<div style="background:rgba(255,255,255,.75);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.05);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-weight:600;font-size:14px">Budget · August</div><div style="font-size:11px;color:#6e6e73">$1,240 left</div></div>
+<div><div style="display:flex;justify-content:space-between;font-size:12px;color:#6e6e73;margin-bottom:4px"><span>Groceries</span><span>$620 / $800</span></div><div style="height:6px;border-radius:99px;background:#e8e6e1"><div style="width:77%;height:100%;border-radius:99px;background:#0a84ff"></div></div></div>
+<div><div style="display:flex;justify-content:space-between;font-size:12px;color:#6e6e73;margin-bottom:4px"><span>Eating out</span><span>$180 / $200</span></div><div style="height:6px;border-radius:99px;background:#e8e6e1"><div style="width:90%;height:100%;border-radius:99px;background:#ff9500"></div></div></div>
+<div><div style="display:flex;justify-content:space-between;font-size:12px;color:#6e6e73;margin-bottom:4px"><span>Kids allowance</span><span>$45 / $60</span></div><div style="height:6px;border-radius:99px;background:#e8e6e1"><div style="width:75%;height:100%;border-radius:99px;background:#34c759"></div></div></div>
+</div>
+<div style="background:rgba(255,255,255,.75);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.05);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-weight:600;font-size:14px">Photos</div><div style="font-size:11px;color:#6e6e73">Lake trip · 34 new</div></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><div class="ph" style="height:64px;border-radius:10px">photo</div><div class="ph" style="height:64px;border-radius:10px">photo</div><div class="ph" style="height:64px;border-radius:10px">photo</div><div class="ph" style="height:64px;border-radius:10px">photo</div></div>
+</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Dashboard — Ink editorial · huge type, hairlines, calm</div>
+<div class="dv-card" style="width:1140px;background:#faf9f7">
+<div style="padding:32px 40px 40px;display:flex;flex-direction:column;gap:0">
+<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:24px;border-bottom:1px solid #1d1d1f">
+<div style="font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Hearth</div>
+<div style="display:flex;gap:26px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#8a877f"><span style="color:#1d1d1f;border-bottom:1.5px solid #1d1d1f;padding-bottom:2px">Today</span><span>Meals</span><span>Calendar</span><span>Chores</span><span>Budget</span></div>
+<div style="font-size:12px;color:#8a877f">Wed Aug 26 · 72° ☼</div>
+</div>
+<div style="padding:36px 0 28px;border-bottom:1px solid rgba(0,0,0,.12)"><div style="font-size:56px;font-weight:600;letter-spacing:-.04em;line-height:1.02">Three events.<br>Dinner's planned.<br><span style="color:#8a877f">Two chores open.</span></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
+<div style="padding:24px 28px 24px 0;border-right:1px solid rgba(0,0,0,.12)">
+<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a877f;margin-bottom:16px">Schedule</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:12px;align-items:baseline"><div style="font-size:13px;font-variant-numeric:tabular-nums;color:#8a877f;width:56px">2:00p</div><div style="font-size:14px;font-weight:600">Dad — dentist</div></div>
+<div style="display:flex;gap:12px;align-items:baseline"><div style="font-size:13px;font-variant-numeric:tabular-nums;color:#8a877f;width:56px">4:00p</div><div style="font-size:14px;font-weight:600">Maya — soccer</div></div>
+<div style="display:flex;gap:12px;align-items:baseline"><div style="font-size:13px;font-variant-numeric:tabular-nums;color:#8a877f;width:56px">7:30p</div><div style="font-size:14px;font-weight:600">Movie night</div></div>
+</div></div>
+<div style="padding:24px 28px;border-right:1px solid rgba(0,0,0,.12)">
+<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a877f;margin-bottom:16px">Dinner</div>
+<div style="font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.2">Sheet-pan lemon chicken</div>
+<div style="font-size:13px;color:#8a877f;margin-top:8px">520 kcal · 42g protein · 35 min</div>
+<div style="font-size:13px;font-weight:600;margin-top:14px;text-decoration:underline;text-underline-offset:3px">Enter cook mode</div>
+</div>
+<div style="padding:24px 0 24px 28px">
+<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a877f;margin-bottom:16px">Chores</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-weight:600">Feed the dog</span><span style="color:#8a877f">Maya · ★5</span></div>
+<div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-weight:600">Recycling</span><span style="font-weight:700">Claim ★10</span></div>
+<div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-weight:600">Water garden</span><span style="font-weight:700">Claim ★8</span></div>
+</div></div>
+</div>
+<div style="border-top:1px solid rgba(0,0,0,.12);padding-top:20px;display:flex;justify-content:space-between;align-items:center">
+<div style="font-size:13px;color:#8a877f">Budget · $1,240 left this month</div>
+<div style="display:flex;gap:20px;font-size:13px;color:#8a877f"><span>Leo 🔥 4-day reading streak</span><span>34 new lake-trip photos</span></div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Dashboard — Bento dark · vivid tiles, wall-display friendly</div>
+<div class="dv-card" style="width:1140px;background:#0e0e10">
+<div style="padding:28px 32px 32px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="color:#fff;font-weight:700;font-size:15px;letter-spacing:-.01em">● Hearth</div><div style="display:flex;gap:20px;font-size:13px;color:rgba(255,255,255,.45);font-weight:500"><span style="color:#fff">Home</span><span>Meals</span><span>Calendar</span><span>Chores</span><span>Photos</span></div><div style="font-size:12px;color:rgba(255,255,255,.55)">Wed · 72° ☼</div></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:150px;gap:14px">
+<div style="grid-column:span 2;grid-row:span 2;background:linear-gradient(140deg,#1a2b4a,#0f1524);border-radius:22px;padding:24px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="color:rgba(255,255,255,.55);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Tonight</div>
+<div><div style="color:#fff;font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1">Sheet-pan lemon chicken</div><div style="display:flex;gap:8px;margin-top:14px"><div style="font-size:12px;font-weight:600;color:#8fe3a8;background:rgba(143,227,168,.14);padding:5px 10px;border-radius:99px">520 kcal</div><div style="font-size:12px;font-weight:600;color:#8ab8ff;background:rgba(138,184,255,.14);padding:5px 10px;border-radius:99px">42g protein</div><div style="font-size:12px;font-weight:600;color:#ffcf8a;background:rgba(255,207,138,.14);padding:5px 10px;border-radius:99px">35 min</div></div></div>
+<div style="color:#8ab8ff;font-size:13px;font-weight:700">Cook mode →</div>
+</div>
+<div style="background:#17171a;border-radius:22px;padding:20px;display:flex;flex-direction:column;justify-content:space-between"><div style="color:rgba(255,255,255,.55);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Next up</div><div><div style="color:#fff;font-size:17px;font-weight:600">Dad — dentist</div><div style="color:rgba(255,255,255,.45);font-size:13px;margin-top:4px">2:00 PM · HEY</div></div></div>
+<div style="background:#17171a;border-radius:22px;padding:20px;display:flex;flex-direction:column;justify-content:space-between"><div style="color:rgba(255,255,255,.55);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Up for grabs</div><div><div style="color:#fff;font-size:17px;font-weight:600">Recycling · ★10</div><div style="color:#ffd60a;font-size:13px;font-weight:700;margin-top:4px">Tap to claim</div></div></div>
+<div style="background:linear-gradient(140deg,#3a2a12,#1c1408);border-radius:22px;padding:20px;display:flex;flex-direction:column;justify-content:space-between"><div style="color:rgba(255,255,255,.55);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Streak</div><div><div style="color:#ffd60a;font-size:26px;font-weight:800">🔥 12 days</div><div style="color:rgba(255,255,255,.5);font-size:13px;margin-top:2px">Dad · no soda</div></div></div>
+<div style="background:#17171a;border-radius:22px;padding:20px;display:flex;flex-direction:column;justify-content:space-between"><div style="color:rgba(255,255,255,.55);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Budget</div><div><div style="color:#fff;font-size:22px;font-weight:700">$1,240</div><div style="color:rgba(255,255,255,.45);font-size:13px">left in August</div><div style="height:5px;border-radius:99px;background:rgba(255,255,255,.1);margin-top:10px"><div style="width:62%;height:100%;border-radius:99px;background:#34c759"></div></div></div></div>
+<div style="grid-column:span 2;background:#17171a;border-radius:22px;padding:20px;display:flex;gap:12px;align-items:stretch">
+<div style="display:flex;flex-direction:column;justify-content:space-between"><div style="color:rgba(255,255,255,.55);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Photos</div><div style="color:rgba(255,255,255,.45);font-size:13px">Lake trip<br>34 new</div></div>
+<div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div class="ph" style="border-radius:12px;background:repeating-linear-gradient(45deg,#232327,#232327 8px,#2b2b30 8px,#2b2b30 16px);color:#6a6a72">photo</div><div class="ph" style="border-radius:12px;background:repeating-linear-gradient(45deg,#232327,#232327 8px,#2b2b30 8px,#2b2b30 16px);color:#6a6a72">photo</div><div class="ph" style="border-radius:12px;background:repeating-linear-gradient(45deg,#232327,#232327 8px,#2b2b30 8px,#2b2b30 16px);color:#6a6a72">photo</div></div>
+</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1d"><div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Meal planner — week view + plan generation (style of <a class="dv-oid" href="#1a">1a</a>)</div>
+<div class="dv-card" style="width:1140px;background:#f5f5f7">
+<div style="padding:28px 36px 36px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><div style="font-size:28px;font-weight:700;letter-spacing:-.02em">This week's meals</div><div style="font-size:13px;color:#6e6e73;margin-top:4px">Aug 24–30 · targets: 2,000 kcal · 120g protein / person</div></div>
+<div style="display:flex;gap:10px"><div style="font-size:13px;font-weight:600;background:#fff;border:1px solid rgba(0,0,0,.1);padding:10px 16px;border-radius:99px">Import from URL</div><div style="font-size:13px;font-weight:600;background:#fff;border:1px solid rgba(0,0,0,.1);padding:10px 16px;border-radius:99px">+ Add recipe</div><div style="font-size:13px;font-weight:700;background:#1d1d1f;color:#fff;padding:10px 18px;border-radius:99px">✦ Generate plan</div></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px">
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:#6e6e73;text-align:center">MON 24</div><div style="background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px"><div class="ph" style="height:52px;border-radius:8px">photo</div><div style="font-size:12px;font-weight:600;line-height:1.25">Turkey chili</div><div style="font-size:10.5px;color:#6e6e73">480 kcal · 38g P</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:#6e6e73;text-align:center">TUE 25</div><div style="background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px"><div class="ph" style="height:52px;border-radius:8px">photo</div><div style="font-size:12px;font-weight:600;line-height:1.25">Salmon bowls</div><div style="font-size:10.5px;color:#6e6e73">610 kcal · 44g P</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:#0a6cd6;text-align:center">WED 26</div><div style="background:#fff;border:2px solid #0a84ff;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 14px rgba(10,132,255,.15)"><div class="ph" style="height:52px;border-radius:8px">photo</div><div style="font-size:12px;font-weight:600;line-height:1.25">Lemon chicken</div><div style="font-size:10.5px;color:#6e6e73">520 kcal · 42g P</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:#6e6e73;text-align:center">THU 27</div><div style="background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px"><div class="ph" style="height:52px;border-radius:8px">photo</div><div style="font-size:12px;font-weight:600;line-height:1.25">Veggie stir-fry</div><div style="font-size:10.5px;color:#6e6e73">430 kcal · 22g P</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:#6e6e73;text-align:center">FRI 28</div><div style="background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px"><div class="ph" style="height:52px;border-radius:8px">photo</div><div style="font-size:12px;font-weight:600;line-height:1.25">Pizza night 🎉</div><div style="font-size:10.5px;color:#6e6e73">homemade dough</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:#6e6e73;text-align:center">SAT 29</div><div style="border:1.5px dashed rgba(0,0,0,.18);border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:center;min-height:118px"><div style="font-size:12px;font-weight:600;color:#0a6cd6">+ Add meal</div></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;color:#6e6e73;text-align:center">SUN 30</div><div style="border:1.5px dashed rgba(0,0,0,.18);border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:center;min-height:118px"><div style="font-size:12px;font-weight:600;color:#0a6cd6">+ Add meal</div></div></div>
+</div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px">
+<div style="background:rgba(255,255,255,.8);border:1px solid rgba(0,0,0,.05);border-radius:18px;padding:18px 20px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><div style="font-weight:600;font-size:14px">Recipe database</div><div style="font-size:12px;color:#6e6e73">128 recipes · filter: dinner, &lt;40 min</div></div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;border:1px solid rgba(0,0,0,.06);border-radius:12px;padding:10px"><div class="ph" style="height:48px;border-radius:8px">photo</div><div style="font-size:12px;font-weight:600;margin-top:8px">Beef tacos</div><div style="font-size:10.5px;color:#6e6e73">560 kcal · ★ family fav</div></div>
+<div style="flex:1;border:1px solid rgba(0,0,0,.06);border-radius:12px;padding:10px"><div class="ph" style="height:48px;border-radius:8px">photo</div><div style="font-size:12px;font-weight:600;margin-top:8px">Pesto gnocchi</div><div style="font-size:10.5px;color:#6e6e73">640 kcal · 20 min</div></div>
+<div style="flex:1;border:1px solid rgba(0,0,0,.06);border-radius:12px;padding:10px"><div class="ph" style="height:48px;border-radius:8px">photo</div><div style="font-size:12px;font-weight:600;margin-top:8px">Miso salmon</div><div style="font-size:10.5px;color:#6e6e73">490 kcal · high protein</div></div>
+<div style="flex:1;border:1px solid rgba(0,0,0,.06);border-radius:12px;padding:10px"><div class="ph" style="height:48px;border-radius:8px">photo</div><div style="font-size:12px;font-weight:600;margin-top:8px">Greek bowls</div><div style="font-size:10.5px;color:#6e6e73">470 kcal · veg option</div></div>
+</div></div>
+<div style="background:#1d1d1f;border-radius:18px;padding:18px 20px;color:#fff;display:flex;flex-direction:column;gap:10px">
+<div style="font-weight:600;font-size:14px">✦ Generated for you</div>
+<div style="font-size:12.5px;color:rgba(255,255,255,.65);line-height:1.5">Week hits 96% of protein target, no repeats from last 2 weeks, keeps Friday free for pizza night. Grocery list: 32 items, est. $118.</div>
+<div style="display:flex;gap:8px"><div style="font-size:12px;font-weight:700;background:#fff;color:#1d1d1f;padding:8px 14px;border-radius:99px">Accept week</div><div style="font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.3);padding:8px 14px;border-radius:99px">Shuffle</div></div>
+</div>
+</div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1e"><div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Cook mode + macro card — phone PWA</div>
+<div class="dv-card" style="width:390px;background:#0e0e10;border-radius:44px;border:1px solid rgba(0,0,0,.2)">
+<div style="padding:16px 20px 28px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.9);font-size:13px;font-weight:600;padding:4px 8px"><span>9:41</span><div style="width:110px;height:26px;background:#000;border-radius:99px"></div><span>◧ ⌁</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="color:rgba(255,255,255,.5);font-size:13px;font-weight:600">✕ Exit</div><div style="color:#fff;font-size:14px;font-weight:700">Cook mode</div><div style="color:rgba(255,255,255,.5);font-size:13px;font-weight:600">Step 3/8</div></div>
+<div style="display:flex;gap:4px"><div style="flex:1;height:3px;border-radius:99px;background:#34c759"></div><div style="flex:1;height:3px;border-radius:99px;background:#34c759"></div><div style="flex:1;height:3px;border-radius:99px;background:#fff"></div><div style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.15)"></div><div style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.15)"></div><div style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.15)"></div><div style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.15)"></div><div style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.15)"></div></div>
+<div style="color:#fff;font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.25;padding:8px 0">Roast the chicken and lemons at 425° until golden.</div>
+<div style="background:#17171a;border-radius:24px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:8px">
+<div style="color:#fff;font-size:52px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em">22:14</div>
+<div style="color:rgba(255,255,255,.45);font-size:13px">of 25:00 · oven timer</div>
+<div style="display:flex;gap:10px;margin-top:8px"><div style="font-size:13px;font-weight:700;background:#fff;color:#000;padding:10px 22px;border-radius:99px">Pause</div><div style="font-size:13px;font-weight:600;color:#fff;border:1px solid rgba(255,255,255,.25);padding:10px 22px;border-radius:99px">+1 min</div></div>
+</div>
+<div style="background:linear-gradient(140deg,#14231a,#0f1712);border:1px solid rgba(143,227,168,.2);border-radius:20px;padding:18px 20px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><div style="color:#8fe3a8;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Macro card · per serving</div><div style="color:rgba(255,255,255,.4);font-size:11px">serves 4</div></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center">
+<div><div style="color:#fff;font-size:20px;font-weight:700">520</div><div style="color:rgba(255,255,255,.45);font-size:11px">kcal</div></div>
+<div><div style="color:#8ab8ff;font-size:20px;font-weight:700">42g</div><div style="color:rgba(255,255,255,.45);font-size:11px">protein</div></div>
+<div><div style="color:#ffcf8a;font-size:20px;font-weight:700">28g</div><div style="color:rgba(255,255,255,.45);font-size:11px">carbs</div></div>
+<div><div style="color:#f3a3c0;font-size:20px;font-weight:700">24g</div><div style="color:rgba(255,255,255,.45);font-size:11px">fat</div></div>
+</div>
+</div>
+<div style="display:flex;gap:10px"><div style="flex:1;text-align:center;font-size:15px;font-weight:600;color:#fff;border:1px solid rgba(255,255,255,.25);padding:14px;border-radius:16px">← Back</div><div style="flex:2;text-align:center;font-size:15px;font-weight:700;background:#fff;color:#000;padding:14px;border-radius:16px">Next step →</div></div>
+</div>
+</div></div>
+
+<div class="dv-opt" id="1f"><div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Chores &amp; rewards — assign, claim, celebrate (style of <a class="dv-oid" href="#1a">1a</a>)</div>
+<div class="dv-card" style="width:700px;background:#f5f5f7">
+<div style="padding:26px 30px 30px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:24px;font-weight:700;letter-spacing:-.02em">Chores &amp; rewards</div><div style="font-size:13px;font-weight:600;background:#1d1d1f;color:#fff;padding:9px 16px;border-radius:99px">+ New chore</div></div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.05);border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:99px;background:#ffd08a"></div><div><div style="font-size:13px;font-weight:700">Maya</div><div style="font-size:12px;color:#ff9500;font-weight:700">★ 45 pts</div></div></div>
+<div style="flex:1;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.05);border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:99px;background:#9ad0ff"></div><div><div style="font-size:13px;font-weight:700">Leo</div><div style="font-size:12px;color:#ff9500;font-weight:700">★ 62 pts</div></div></div>
+<div style="flex:1;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.05);border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:99px;background:#b6e6b0"></div><div><div style="font-size:13px;font-weight:700">Dad</div><div style="font-size:12px;color:#6e6e73">parent</div></div></div>
+<div style="flex:1;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.05);border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:99px;background:#f3b3d4"></div><div><div style="font-size:13px;font-weight:700">Mom</div><div style="font-size:12px;color:#6e6e73">parent</div></div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div style="background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.05);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+<div style="font-size:13px;font-weight:700;color:#6e6e73">ASSIGNED</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:99px;background:#ffd08a"></div><div style="flex:1;font-size:13px;font-weight:600">Feed the dog</div><div style="font-size:12px;color:#ff9500;font-weight:700">★5</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:22px;height:22px;border-radius:99px;background:#9ad0ff"></div><div style="flex:1;font-size:13px;font-weight:600">Empty dishwasher</div><div style="font-size:12px;color:#ff9500;font-weight:700">★8</div></div>
+<div style="display:flex;align-items:center;gap:10px;opacity:.5"><div style="width:22px;height:22px;border-radius:99px;background:#9ad0ff"></div><div style="flex:1;font-size:13px;font-weight:600;text-decoration:line-through">Make bed</div><div style="font-size:12px;color:#34c759;font-weight:700">✓ done</div></div>
+</div>
+<div style="background:rgba(255,255,255,.85);border:1.5px dashed rgba(10,132,255,.4);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+<div style="font-size:13px;font-weight:700;color:#0a6cd6">UP FOR GRABS — first to claim</div>
+<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;font-size:13px;font-weight:600">Take out recycling</div><div style="font-size:12px;font-weight:700;background:#0a84ff;color:#fff;padding:5px 12px;border-radius:99px">Claim ★10</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;font-size:13px;font-weight:600">Water the garden</div><div style="font-size:12px;font-weight:700;background:#0a84ff;color:#fff;padding:5px 12px;border-radius:99px">Claim ★8</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;font-size:13px;font-weight:600">Vacuum the den</div><div style="font-size:12px;font-weight:700;background:#0a84ff;color:#fff;padding:5px 12px;border-radius:99px">Claim ★12</div></div>
+</div>
+</div>
+<div style="background:linear-gradient(120deg,#fff3d6,#ffe3ef);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:16px">
+<div style="font-size:30px">🎉</div>
+<div style="flex:1"><div style="font-size:15px;font-weight:700">Leo hit 60 points!</div><div style="font-size:13px;color:#6e6e73;margin-top:2px">Reward unlocked: pick Friday's movie · confetti + sound plays on redeem</div></div>
+<div style="font-size:13px;font-weight:700;background:#1d1d1f;color:#fff;padding:10px 16px;border-radius:99px">Redeem</div>
+</div>
+</div>
+</div></div>
+
+</div>
+<p class="dv-next">Try next: "commit to <a class="dv-oid" href="#1a">1a</a> and mock calendar + photos + budget" · "phone versions of the dashboard" · "mix <a class="dv-oid" href="#1c">1c</a>'s bento grid with <a class="dv-oid" href="#1a">1a</a>'s light palette"</p>
+</section>
+</x-dc>
+</body>
+</html>

@@ -100,7 +100,7 @@ function SetPinForm({ memberId }: { memberId: string }) {
           </p>
         ) : null}
         <div>
-          <Button type="submit" variant="outline" disabled={pending}>
+          <Button type="submit" variant="secondary" disabled={pending}>
             {pending ? "Saving…" : "Save pin"}
           </Button>
         </div>

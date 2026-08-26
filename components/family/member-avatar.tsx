@@ -13,7 +13,10 @@
  *    itself gets `role="img"` and an `aria-label` of the member's name.
  */
 
-const SIZE_PX = { sm: 40, md: 64, lg: 96 } as const;
+// Design-Spec §6: avatars are circles at the member's identity colour, with the initial
+// shown at >= 36px. `xs` exists for the top bar's overlapping stack (§5), which sits below
+// that threshold and therefore renders as a plain colour disc with no initial.
+const SIZE_PX = { xs: 28, sm: 40, md: 64, lg: 96, xl: 128 } as const;
 
 export type MemberAvatarSize = keyof typeof SIZE_PX;
 
@@ -23,6 +26,12 @@ export type MemberAvatarProps = {
   avatarUrl?: string | null;
   size?: MemberAvatarSize;
   ariaHidden?: boolean;
+  /**
+   * Renders the avatar at reduced opacity -- used by the top bar's family stack to show who
+   * is NOT the currently-attributed member. Never the only signal: the active member is also
+   * named in the account sheet, per spec §10 ("Member color is never the only signal").
+   */
+  dimmed?: boolean;
 };
 
 // The site's light-theme ink and a plain white -- fixed literals, not theme tokens. This
@@ -81,6 +90,7 @@ export function MemberAvatar({
   avatarUrl = null,
   size = "md",
   ariaHidden = false,
+  dimmed = false,
 }: MemberAvatarProps) {
   const px = SIZE_PX[size];
   // Spreading the string (not `.charAt(0)`) iterates by Unicode code point, so a name starting
@@ -94,8 +104,15 @@ export function MemberAvatar({
   return (
     <span
       {...a11yProps}
-      style={{ width: px, height: px, backgroundColor: color, color: foreground, fontSize: Math.round(px * 0.4) }}
-      className="relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full"
+      style={{
+        width: px,
+        height: px,
+        backgroundColor: color,
+        color: foreground,
+        fontSize: Math.round(px * 0.4),
+        opacity: dimmed ? 0.45 : 1,
+      }}
+      className="relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full font-semibold"
     >
       {/* The color fill above is unconditional -- not just the `avatarUrl`-absent branch's
           background -- so a broken/unreachable avatarUrl degrades to the same colored-initial
@@ -112,9 +129,11 @@ export function MemberAvatar({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={avatarUrl} alt="" width={px} height={px} className="h-full w-full object-cover" />
       ) : (
-        <span aria-hidden="true" className="font-medium">
-          {initial}
-        </span>
+        // §6: "initial optional at >= 36px". Below that there is no room for a legible glyph,
+        // and a squeezed one reads as noise rather than identity -- the disc alone is the avatar.
+        px >= 36 ? (
+          <span aria-hidden="true">{initial}</span>
+        ) : null
       )}
     </span>
   );

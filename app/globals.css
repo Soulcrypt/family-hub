@@ -2,230 +2,366 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* Hearth is DARK-FIRST (Design-Spec §1.2, §2.1): bare `:root` carries the dark palette so the
+   pre-hydration paint is dark, and `.light` overrides it. next-themes (attribute="class",
+   defaultTheme="system") stamps an explicit `light`/`dark` class after hydration, so the bare
+   `:root` values are what a viewer sees for the first frame only -- which is exactly why they
+   must be the dark ones. `.dark` is declared as an alias of :root rather than left implicit, so
+   an explicit dark choice and the default resolve identically. */
+@custom-variant dark (&:where(:root, .dark, .dark *));
+@custom-variant light (&:where(.light, .light *));
 
 :root {
-  --color-bg: #FBF7F1;
-  --color-surface: #FFFFFF;
-  --color-sunken: #F4EDE3;
-  --color-ink: #2A2520;
-  --color-muted: #8A7F73;
-  --color-accent: #C4643C;
-  --color-border: #EDE4D8;
+  color-scheme: dark;
 
-  --radius-card: 16px;
-  --radius-control: 12px;
+  /* --- Backgrounds (§2.1) --- */
+  --color-base: #0C0D10;
+  --color-base-deep: #08090C; /* wall mode only; the darkest surface in the app */
+
+  /* --- Glass surfaces (§2.1, §4). Alpha values, composited over base + aurora. --- */
+  --color-glass: rgba(255, 255, 255, 0.055);
+  --color-glass-hover: rgba(255, 255, 255, 0.08);
+  --color-inset: rgba(255, 255, 255, 0.05);
+  --color-hairline: rgba(255, 255, 255, 0.08);
+  --color-dashed: rgba(255, 255, 255, 0.18);
+
+  /* --- Text (§2.1). Measured against glass-over-BRIGHTEST-aurora, the worst case:
+         primary 13.74:1 · secondary 4.61:1 · tertiary 3.02:1.
+         `--color-text-tertiary` does NOT reach 4.5:1 and cannot be used for information that
+         appears nowhere else on screen. Spec §10 reserves it for non-essential meta; that is a
+         usage rule, not a suggestion, because the value itself cannot carry essential text. --- */
+  --color-text: #FFFFFF;
+  --color-text-secondary: rgba(255, 255, 255, 0.5);
+  --color-text-tertiary: rgba(255, 255, 255, 0.35);
+
+  /* --- Accent (§2.1). One accent, three roles, because one value cannot serve all three:
+         --color-accent      #0A84FF  identity: borders, rings, indicators, small fills.
+                                      3.77:1 on glass -- clears WCAG 1.4.11's 3:1 for non-text
+                                      UI, fails 4.5:1 for text. Never use it AS text.
+         --color-accent-text #6FB4FF  links and text-weight accent. 6.31:1 on glass.
+         --color-accent-strong #0073E8 fill behind WHITE text (the primary button).
+                                      The spec asks for white 13/700 on #0A84FF, which measures
+                                      3.65:1 -- a real AA failure at that size, and §10's own
+                                      "all text >= 4.5:1" rule contradicts it. Darkened along the
+                                      same hue until white clears: 4.53:1. --- */
+  --color-accent: #0A84FF;
+  --color-accent-text: #6FB4FF;
+  --color-accent-strong: #0073E8;
+  --color-on-accent: #FFFFFF;
+  --color-accent-tint-from: rgba(10, 132, 255, 0.16);
+  --color-accent-tint-to: rgba(10, 132, 255, 0.04);
+  --color-accent-tint-border: rgba(10, 132, 255, 0.25);
+  --color-accent-ring: rgba(10, 132, 255, 0.25);
+
+  /* --- Semantic (§2.1). Same split: the specced value for fills/borders, a lightened
+         derivative where the colour has to carry text on glass.
+         danger #FF453A measures 4.03:1 as text (fine as a 3:1 border, short as text). --- */
+  --color-success: #34C759;
+  --color-warning: #FF9500;
+  --color-danger: #FF453A;
+  --color-danger-text: #FF5D54; /* 4.54:1 on glass */
+  --color-star: #FFD60A;
+
+  /* --- Aurora (§2.1, §7.2). Two radial glows over the base; they drift, never the text. --- */
+  --aurora-a: rgba(10, 132, 255, 0.18);
+  --aurora-b: rgba(10, 132, 255, 0.08);
+
+  /* --- Shape (§4) --- */
+  --radius-event: 8px;
+  --radius-inset: 12px;
+  --radius-tile: 16px;
+  --radius-card: 24px;
+  --radius-wall: 26px;
+  --radius-pill: 99px;
   --tap-min: 44px;
-  color-scheme: light;
-  /* shadcn semantic tokens, remapped onto Task 2's warm palette so every
-     installed primitive themes automatically instead of rendering in
-     shadcn's neutral grey defaults. */
-  --background: var(--color-bg);
-  --foreground: var(--color-ink);
-  --card: var(--color-surface);
-  --card-foreground: var(--color-ink);
-  --popover: var(--color-surface);
-  --popover-foreground: var(--color-ink);
+  --tap-wall: 56px;
+
+  /* --- Motion (§7.1). One spring, used everywhere. --- */
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-spring: 300ms;
+  --dur-micro: 150ms;
+
+  /* --- Depth (§4): borders carry depth on dark, not shadows. --- */
+  --shadow-card: none;
+  --shadow-dock: 0 8px 30px rgba(0, 0, 0, 0.5);
+
+  /* --- shadcn semantic tokens remapped onto Hearth, so every installed primitive
+         (Dialog, Select, Button, Input) themes automatically instead of rendering in
+         shadcn's neutral grey defaults. --- */
+  --background: var(--color-base);
+  --foreground: var(--color-text);
+  --card: var(--color-glass);
+  --card-foreground: var(--color-text);
+  --popover: #16171B; /* popovers/menus are opaque: they float over arbitrary content */
+  --popover-foreground: var(--color-text);
   --primary: var(--color-accent-strong);
   --primary-foreground: var(--color-on-accent);
-  --secondary: var(--color-sunken);
-  --secondary-foreground: var(--color-ink);
-  --muted: var(--color-sunken);
-  --muted-foreground: var(--color-muted-strong);
-  --accent: var(--color-accent);
-  --accent-foreground: #FFFFFF;
-  --destructive: #9B4A38;
-  /* Soft tinted background for inline error banners -- pairs with --destructive text at
-     4.76:1 (light). See the dark override below for why this can't just reuse --destructive
-     itself as a background. */
-  --color-destructive-bg: #F5DEDA;
-  /* Text/icon color for content that sits ON a --destructive-colored surface (the destructive
-     button variant). White in light mode; see the dark override for why dark mode needs a
-     different value entirely, mirroring --color-on-accent's light/dark split. */
-  --color-on-destructive: #FFFFFF;
-  --border: var(--color-border);
-  --input: var(--color-border);
+  --secondary: var(--color-glass-hover);
+  --secondary-foreground: var(--color-text);
+  --muted: var(--color-inset);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-glass-hover);
+  --accent-foreground: var(--color-text);
+  --destructive: var(--color-danger);
+  --destructive-foreground: var(--color-on-accent);
+  --border: var(--color-hairline);
+  --input: var(--color-hairline);
   --ring: var(--color-accent);
-  /* WCAG-AA-legible derivatives of the pinned palette. --color-accent and
-     --color-muted stay exactly as specced (correct for icons, borders,
-     focus rings, indicators — non-text 3:1 uses); these are what
-     text-bearing surfaces use instead so normal text clears 4.5:1. */
-  --color-accent-strong: #A9522F;
-  --color-on-accent: #FFFFFF;
-  --color-muted-strong: #6F6459;
-  /* Warm elevation shadow -- offset + blur (never a zero-offset halo), tinted from the
-     light theme's own ink color rather than neutral black so surfaces read as "warm dark",
-     matching the rest of the palette. */
-  --shadow-elevation: 0 2px 6px 0 rgba(42, 37, 32, 0.10), 0 1px 2px 0 rgba(42, 37, 32, 0.06);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 24px;
 }
 
 .dark {
-  --color-bg: #1A1614;
-  --color-surface: #221D1A;
-  --color-sunken: #2A2320;
-  --color-ink: #F0E9E1;
-  --color-muted: #A89B8E;
-  --color-accent: #E08B5F;
-  --color-border: #332B26;
   color-scheme: dark;
-  --background: var(--color-bg);
-  --foreground: var(--color-ink);
-  --card: var(--color-surface);
-  --card-foreground: var(--color-ink);
-  --popover: var(--color-surface);
-  --popover-foreground: var(--color-ink);
-  --primary: var(--color-accent-strong);
-  --primary-foreground: var(--color-on-accent);
-  --secondary: var(--color-sunken);
-  --secondary-foreground: var(--color-ink);
-  --muted: var(--color-sunken);
-  --muted-foreground: var(--color-muted-strong);
-  --accent: var(--color-accent);
-  --accent-foreground: #FFFFFF;
-  /* #9B4A38 (the light-mode value) only reaches 2.93:1 on the dark bg -- fails WCAG AA's 4.5:1
-     for text. #E2836A is the same warm-red hue lightened for a dark ground: 6.58:1 on
-     --color-bg (#1A1614), 6.11:1 on --color-surface (#221D1A). See the design-fix report for
-     the full candidate list this was picked from. */
-  --destructive: #E2836A;
-  /* A dark warm-maroon tint (not a lightened version of the light bg) so the banner reads as
-     a distinct surface -- --destructive text on it measures 5.43:1. */
-  --color-destructive-bg: #3A211D;
-  /* White-on-#E2836A is only 2.73:1 -- fails. The dark ink (matching --color-on-accent's own
-     dark-mode value, since both are light/saturated warm surfaces needing a dark foreground)
-     measures 5.56:1. */
-  --color-on-destructive: #2A2520;
-  --border: var(--color-border);
-  --input: var(--color-border);
-  --ring: var(--color-accent);
-  --color-accent-strong: #E08B5F;
-  --color-on-accent: #2A2520;
-  --color-muted-strong: #A89B8E;
-  /* Dark surfaces need a darker, more opaque shadow to read against an already-dark ground --
-     tinted from the dark theme's own near-black bg components (26,22,20), never pure black. */
-  --shadow-elevation: 0 2px 8px 0 rgba(10, 8, 7, 0.45), 0 1px 3px 0 rgba(10, 8, 7, 0.3);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+}
+
+.light {
+  color-scheme: light;
+
+  --color-base: #F5F5F7;
+  --color-base-deep: #F5F5F7;
+
+  --color-glass: rgba(255, 255, 255, 0.75);
+  --color-glass-hover: rgba(255, 255, 255, 0.9);
+  --color-inset: #FFFFFF;
+  --color-hairline: rgba(0, 0, 0, 0.05);
+  --color-dashed: rgba(0, 0, 0, 0.18);
+
+  /* Measured on glass-over-aurora (light): primary 15.79:1 · secondary 4.76:1 · tertiary 3.37:1.
+     Tertiary carries the same non-essential-meta-only restriction as in dark. */
+  --color-text: #1D1D1F;
+  --color-text-secondary: #6E6E73;
+  --color-text-tertiary: #8A877F;
+
+  --color-accent: #0A84FF;
+  --color-accent-text: #0A6CD6; /* 4.77:1 as text on light glass */
+  --color-accent-strong: #0073E8;
+  --color-on-accent: #FFFFFF;
+  --color-accent-tint-from: #EEF2FB;
+  --color-accent-tint-to: #EEF2FB;
+  --color-accent-tint-border: rgba(10, 132, 255, 0.3);
+
+  --color-success: #2F7D3B;
+  --color-warning: #9D651E; /* spec's #A3691F measures 4.28:1 as text; darkened to 4.58:1 */
+  --color-danger: #D70015;
+  --color-danger-text: #D70015; /* 5.05:1 on light glass -- no derivative needed */
+  --color-star: #FF9500;
+
+  --aurora-a: rgba(120, 170, 255, 0.25);
+  --aurora-b: rgba(140, 235, 190, 0.22);
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-dock: 0 8px 30px rgba(0, 0, 0, 0.12);
+
+  --popover: #FFFFFF;
 }
 
 @theme inline {
-  --color-bg: var(--color-bg);
-  --color-surface: var(--color-surface);
-  --color-sunken: var(--color-sunken);
-  --color-ink: var(--color-ink);
-  /* "muted" (bg-muted/text-muted/etc.) is shadcn's subtle-surface role and
-     now resolves to the sunken surface, matching the shadcn convention
-     later tasks will expect. The pinned --color-muted ink tone is still
-     declared (tokens test covers it) and stays reachable for text via
-     muted-foreground / muted-strong below — it no longer backs the bare
-     "muted" utility name, to avoid two roles sharing one name. */
-  --color-muted: var(--muted);
+  /* Every name here is distinct from a shadcn role name. The one time this file reused a role
+     name for a different concept (`--color-muted` pointing at a surface while `text-muted`
+     read as text) it shipped invisible 1.09:1 text, so: surfaces are named for surfaces, text
+     tokens are named for text, and nothing is named twice. */
+  --color-base: var(--color-base);
+  --color-base-deep: var(--color-base-deep);
+  --color-glass: var(--color-glass);
+  --color-glass-hover: var(--color-glass-hover);
+  --color-inset: var(--color-inset);
+  --color-hairline: var(--color-hairline);
+  --color-dashed: var(--color-dashed);
+
+  --color-text: var(--color-text);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+
   --color-accent: var(--color-accent);
+  --color-accent-text: var(--color-accent-text);
   --color-accent-strong: var(--color-accent-strong);
   --color-on-accent: var(--color-on-accent);
-  --color-muted-strong: var(--color-muted-strong);
-  --color-border: var(--color-border);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-destructive: var(--destructive);
-  --color-destructive-bg: var(--color-destructive-bg);
-  --color-on-destructive: var(--color-on-destructive);
-  --shadow-elevation: var(--shadow-elevation);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
+  --color-accent-ring: var(--color-accent-ring);
+
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-danger-text: var(--color-danger-text);
+  --color-star: var(--color-star);
+
+  --radius-event: var(--radius-event);
+  --radius-inset: var(--radius-inset);
+  --radius-tile: var(--radius-tile);
+  --radius-card: var(--radius-card);
+  --radius-wall: var(--radius-wall);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-dock: var(--shadow-dock);
+
+  --ease-spring: var(--ease-spring);
+
+  /* System stack only -- Design-Spec §3 is explicit: "No webfonts." */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui,
+    sans-serif;
+
+  /* shadcn primitives read these names. */
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: var(--radius-event);
+  --radius-md: var(--radius-inset);
+  --radius-lg: var(--radius-tile);
+  --radius-xl: var(--radius-card);
 }
 
 @layer base {
+  html {
+    @apply font-sans;
+  }
+
   body {
-    background-color: var(--color-bg);
-    color: var(--color-ink);
+    background-color: var(--color-base);
+    color: var(--color-text);
     font-family: var(--font-sans);
-    /* Kills the default ~300ms tap delay on touch devices (this app is built for shared
-       kitchen/wall tablets) and suppresses the grey/blue flash Chrome/Android paints on tap,
-       which otherwise shows through even where a component supplies its own :active state. */
+    /* Kills the ~300ms tap delay and the grey tap flash on shared kitchen/wall tablets. */
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
-  h1, h2, h3 {
-    font-family: var(--font-display);
-    letter-spacing: -0.02em;
+
+  /* §3: times, timers and money are tabular so digits stop jittering as they count up. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
+
+  /* §6: "Never remove focus outlines." Accent ring, on every focusable thing. */
   :focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
+
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
-  /* Gates every tw-animate-css enter/exit animation (Dialog, Select, etc. all animate purely
-     via the data-open/data-closed animate-in/animate-out utilities) and this file's own
-     transition-colors utilities behind the user's motion preference, in one place rather than
-     a `motion-reduce:` variant on every animated component. */
+
+  /* §7.4 + §10: kill ambient motion and staggers, keep short opacity fades. */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
   }
-  html {
-    @apply font-sans;
+
+  /* §10: "Reduced transparency: glass surfaces fall back to solid #16171B / #FFFFFF."
+     Without this, a viewer who has asked their OS to reduce transparency still gets blur and
+     translucency everywhere -- the setting exists for people who find it hard to read. */
+  @media (prefers-reduced-transparency: reduce) {
+    :root {
+      --color-glass: #16171B;
+      --color-glass-hover: #1E1F24;
+      --color-inset: #1E1F24;
+      --aurora-a: transparent;
+      --aurora-b: transparent;
+    }
+    .light {
+      --color-glass: #FFFFFF;
+      --color-glass-hover: #FFFFFF;
+      --color-inset: #FFFFFF;
+    }
+    .glass,
+    .glass-strong {
+      backdrop-filter: none !important;
+    }
+  }
+}
+
+@layer components {
+  /* §2.1 + §4: the standard surface. Translucent fill, hairline border, 20px backdrop blur.
+     `isolation: isolate` so a card's own backdrop-filter samples the aurora behind it rather
+     than compositing with sibling cards. */
+  .glass {
+    background-color: var(--color-glass);
+    border: 1px solid var(--color-hairline);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* §6 featured card: the one accent-tinted widget per screen (dashboard = Tonight's dinner). */
+  .glass-tint {
+    background-image: linear-gradient(
+      135deg,
+      var(--color-accent-tint-from),
+      var(--color-accent-tint-to)
+    );
+    border: 1px solid var(--color-accent-tint-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* §6 empty states: dashed, never an illustration. */
+  .dashed {
+    border: 1.5px dashed var(--color-dashed);
+  }
+}
+
+/* §7.2 aurora drift: ~30s loop, +/-4%, translate+scale only -- it must never move text, so it
+   lives on a fixed background layer behind everything, not on a content wrapper. */
+@keyframes aurora-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, 2%, 0) scale(1.04);
+  }
+}
+
+@keyframes aurora-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-3%, 1.5%, 0) scale(1.03);
+  }
+}
+
+/* §7.3 staggered widget entrance: fade + 12px rise. The 40ms stagger is applied per-card. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* §7.2 live dot: a 3s breathing cycle next to the title on realtime-connected screens. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
   }
 }

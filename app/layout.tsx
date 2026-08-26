@@ -1,32 +1,45 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Aurora } from "@/components/shell/aurora";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap" });
-
+/**
+ * No `next/font` imports. Design-Spec §3 is explicit — "system stack ... No webfonts." — so
+ * the stack lives in `--font-sans` (app/globals.css) and nothing is fetched at runtime. This
+ * replaced Fraunces + Inter, which is also why the app no longer pays two font requests before
+ * first paint on a cold kitchen tablet.
+ */
 export const metadata: Metadata = {
-  title: "Family Hub",
-  description: "One home for your family’s meals, plans, and days.",
+  title: "Hearth",
+  description: "Your family, in one calm place.",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Hearth" },
 };
 
-// Matches app/globals.css's --color-bg exactly (light :root / .dark) so the browser
-// UI (address bar, task-switcher chrome, etc.) tints to whichever theme is actually
-// rendering, instead of defaulting to white/black regardless of it.
+/**
+ * Matches app/globals.css's `--color-base` exactly in each scope, so the browser chrome
+ * (address bar, task switcher, PWA splash) tints to whatever the page is actually painting.
+ *
+ * Dark is listed first and is the app's default: Hearth is dark-first (spec §1.2), and a viewer
+ * with no explicit preference should get the dark chrome rather than a white flash.
+ */
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FBF7F1" },
-    { media: "(prefers-color-scheme: dark)", color: "#1A1614" },
+    { media: "(prefers-color-scheme: dark)", color: "#0C0D10" },
+    { media: "(prefers-color-scheme: light)", color: "#F5F5F7" },
   ],
+  // The dock and wall mode both sit against the display edges (spec §5, §9).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <Aurora />
+          {children}
+        </ThemeProvider>
         <RegisterServiceWorker />
       </body>
     </html>

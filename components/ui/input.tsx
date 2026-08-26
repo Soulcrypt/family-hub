@@ -2,13 +2,32 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Design-Spec §6 "Forms & inputs": `surface/inset` fill, hairline border, radius 14, height 48
+ * (44 on desktop), 15px text, placeholder in `text/tertiary`.
+ *
+ * Focus is the spec's exact recipe — a 1.5px accent border plus a 3px `rgba(10,132,255,.25)`
+ * ring — and the spec is emphatic about it: "Never remove focus outlines." That is why the
+ * ring is on the element itself rather than left to the global `:focus-visible` outline: an
+ * input's focus state has to read as *this field is live*, not just *something has focus*.
+ *
+ * 16px on phones is deliberate and is not a design choice — iOS Safari zooms the viewport when
+ * a focused input's text is under 16px, which on a form would jump the whole page. The spec's
+ * 15px applies from `sm` up, where no such zoom happens.
+ */
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <input
       type={type}
       data-slot="input"
       className={cn(
-        "min-h-[44px] w-full min-w-0 rounded-[12px] border border-[var(--color-muted)] bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+        "h-12 w-full min-w-0 rounded-[14px] border border-hairline bg-inset px-4 text-base outline-none",
+        "text-text placeholder:text-text-tertiary",
+        "transition-[border-color,box-shadow] duration-150",
+        "focus-visible:border-[1.5px] focus-visible:border-accent focus-visible:ring-[3px] focus-visible:ring-accent-ring",
+        "aria-invalid:border-danger aria-invalid:ring-[3px] aria-invalid:ring-danger/25",
+        "disabled:pointer-events-none disabled:opacity-40",
+        "sm:h-11 sm:text-[15px]",
         className
       )}
       {...props}

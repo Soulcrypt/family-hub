@@ -2,14 +2,17 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { getAccountMembership, getActiveMember } from "@/lib/auth/active-member";
-import { navItemsFor } from "@/components/shell/nav-items";
-import { Sidebar } from "@/components/shell/sidebar";
-import { BottomNav } from "@/components/shell/bottom-nav";
+import { dockItemsFor, navItemsFor } from "@/components/shell/nav-items";
+import { TopBar } from "@/components/shell/top-bar";
+import { Dock } from "@/components/shell/dock";
 import { parseEnabledFeatures } from "@/lib/constants/features";
 
 /**
- * The frame every screen under (app) renders inside -- sidebar on md+ screens, a bottom tab
- * bar below that, both driven by the same feature-gated nav list.
+ * The frame every screen under (app) renders inside -- Design-Spec §5: a transparent top bar
+ * over the aurora on md+ screens, a floating pill dock below that. Both are driven by the same
+ * feature-gated nav list, but they are not the same list: the dock shows a fixed five (Home,
+ * Meals, Cal, Chores, Ivy) while the top bar shows all seven, with everything else reached
+ * through the profile avatar.
  *
  * Auth: no `(app)` route here is in proxy.ts's PUBLIC_PATHS, so an unauthenticated visitor
  * never reaches this render at all -- the proxy already redirected them to /welcome (same
@@ -25,17 +28,6 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   const supabase = await createServerClient();
 
-  // Two explicit queries rather than a single `.select("household_id, households(name)")`
-  // embedded join: supabase-js types a to-one embedded relation inconsistently across
-  // versions (it can come back typed as an array, e.g. `households: { name: string }[]`),
-  // which turns `membership.households?.name` into a fight with the generated types for one
-  // saved round-trip. Not worth it for a value that's rendered once per layout.
-  const { data: household } = await supabase
-    .from("households")
-    .select("name")
-    .eq("id", membership.household_id)
-    .maybeSingle();
-
   const { data: settings } = await supabase
     .from("household_settings")
     .select("enabled_features")
@@ -48,26 +40,38 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // guarantees Home/Family/Settings survive that regardless (see nav-items.ts).
   const features = parseEnabledFeatures(settings?.enabled_features);
   const items = navItemsFor(features);
+  const dockItems = dockItemsFor(features);
 
   // Attribution only -- whose avatar/name the shell shows, never a gate on what renders.
   const activeMember = await getActiveMember();
 
+  // The stacked family avatars in the top bar (§5). Active members only: a removed member
+  // should not reappear in the chrome of every screen.
+  const { data: members } = await supabase
+    .from("household_members")
+    .select("id, display_name, color, avatar_url")
+    .eq("household_id", membership.household_id)
+    .eq("is_active", true)
+    .order("created_at");
+
   return (
-    <div className="min-h-dvh md:flex">
+    <div className="min-h-dvh">
       <a
         href="#main-content"
-        className="sr-only rounded-[12px] bg-accent-strong px-4 py-3 text-sm font-medium text-on-accent focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50"
+        className="sr-only rounded-pill bg-accent-strong px-4 py-3 text-sm font-semibold text-on-accent focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50"
       >
         Skip to content
       </a>
-      <Sidebar items={items} householdName={household?.name ?? "Family Hub"} activeMember={activeMember} />
+      <TopBar items={items} members={members ?? []} activeMemberId={activeMember?.id ?? null} />
       <main
         id="main-content"
-        className="min-w-0 flex-1 pb-[calc(56px+env(safe-area-inset-bottom))] md:pb-0"
+        // §4 phone: "content bottom-padded 96px to clear the dock". The dock is fixed, so
+        // without this the last card sits underneath it and cannot be scrolled clear.
+        className="min-w-0 pb-[calc(96px+env(safe-area-inset-bottom))] md:pb-10"
       >
         {children}
       </main>
-      <BottomNav items={items} />
+      <Dock items={dockItems} />
     </div>
   );
 }

@@ -1,29 +1,31 @@
 /**
- * The household feature catalogue chosen during onboarding (Task 10) and later editable in
- * Settings (Task 15+). `family` and `settings` are always on — every household needs a
- * member roster and a place to change preferences — so they're `locked: true` and rendered
- * as checked, disabled checkboxes rather than real choices.
+ * The household feature catalogue — Design-Spec §5 (navigation) and §8 (screens).
  *
- * Everything past `family`/`settings` has no screens yet (SP2–SP5 build them); they're
- * listed here so a household's choice is recorded now and the navigation lights up the
- * moment those sub-projects land, instead of forcing a second onboarding-style prompt later.
+ * `family` and `settings` are always on: every household needs a member roster and a place to
+ * change preferences, so they're `locked: true` and render as checked, disabled rows during
+ * onboarding rather than as real choices.
  *
- * `hasScreen` records that same fact explicitly — whether THIS codebase actually has a route
- * for the feature yet — independently of `enabled_features` (a household's choice) and
- * `locked` (whether that choice is real). A feature can be enabled with no screen (the
- * everyday state for calendar/meals/chores/habits right now): the choice is still recorded,
- * but nothing that reads this catalogue should ever turn that into a navigable link before
- * the screen exists. `components/shell/nav-items.ts`'s `navItemsFor()` is the consumer this
- * matters for — see its doc comment for what broke when a feature could be "enabled" without
- * `hasScreen` gating the link.
+ * `hasScreen` records whether THIS codebase has built the feature's screen yet, independently
+ * of `enabled_features` (a household's choice) and `locked` (whether that choice is real).
+ *
+ * The three are genuinely independent, and conflating any two of them has already shipped a
+ * bug here: gating nav links purely on "enabled" meant a household that turned Calendar on in
+ * onboarding got a sidebar link straight to a 404. What replaced it is stricter than
+ * `hasScreen` alone — every feature below now has a real route, and the ones that aren't built
+ * render an honest "not yet" screen (`components/shell/coming-soon.tsx`) in the spec's own
+ * empty-state language. So the navigation can show the full spec'd set without ever offering a
+ * link that doesn't resolve, and `hasScreen` decides what that route SAYS rather than whether
+ * the link exists.
  */
 export const FEATURES = [
-  { key: "family", label: "Family", description: "Profiles, roles and birthdays", locked: true, hasScreen: true },
+  { key: "meals", label: "Meals", description: "Recipes, planning and cook mode", locked: false, hasScreen: false },
+  { key: "calendar", label: "Calendar", description: "Everyone's week in one place", locked: false, hasScreen: false },
+  { key: "chores", label: "Chores", description: "Tasks, stars and rewards", locked: false, hasScreen: false },
+  { key: "ivy", label: "Ivy", description: "Naps, milestones and bedtime", locked: false, hasScreen: false },
+  { key: "photos", label: "Photos", description: "The family album", locked: false, hasScreen: false },
+  { key: "budget", label: "Budget", description: "Mirrored from Rocket Money", locked: false, hasScreen: false },
+  { key: "family", label: "Family", description: "Profiles, roles and colours", locked: true, hasScreen: true },
   { key: "settings", label: "Settings", description: "Household preferences", locked: true, hasScreen: true },
-  { key: "calendar", label: "Calendar", description: "Shared family schedule", locked: false, hasScreen: false },
-  { key: "meals", label: "Meals", description: "Recipes and weekly planning", locked: false, hasScreen: false },
-  { key: "chores", label: "Chores", description: "Tasks, points and rewards", locked: false, hasScreen: false },
-  { key: "habits", label: "Habits", description: "Daily streaks", locked: false, hasScreen: false },
 ] as const;
 
 export type FeatureKey = (typeof FEATURES)[number]["key"];
@@ -48,20 +50,26 @@ export function isFeatureEnabled(features: EnabledFeatures, key: FeatureKey): bo
   return features[key] === true;
 }
 
+/** The catalogue entry for a key, or undefined. Callers that need the label/description. */
+export function featureFor(key: FeatureKey) {
+  return FEATURES.find((feature) => feature.key === key);
+}
+
 /**
- * Narrows `household_settings.enabled_features` (a `Json` column — untyped at the database
- * boundary) into `EnabledFeatures` without an `any`/unsafe cast. Anything that isn't a plain
- * object, or isn't one of `FEATURES`'s own keys with a boolean value, is dropped rather than
- * trusted — this only ever reads a value this app itself wrote, but a stale or hand-edited
- * row should degrade to "nothing chosen yet," not throw.
+ * Reads an arbitrary `household_settings.enabled_features` jsonb value into a typed map,
+ * dropping anything that isn't a recognized key with a boolean value. A missing row, an empty
+ * object, a hand-edit, or a value written by an older build all degrade to "nothing enabled"
+ * rather than throwing.
  */
 export function parseEnabledFeatures(value: unknown): EnabledFeatures {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
-  const record = value as Record<string, unknown>;
-  const result: EnabledFeatures = {};
-  for (const feature of FEATURES) {
-    const raw = record[feature.key];
-    if (typeof raw === "boolean") result[feature.key] = raw;
+  const out: EnabledFeatures = {};
+  for (const [key, flag] of Object.entries(value as Record<string, unknown>)) {
+    if (isFeatureKey(key) && typeof flag === "boolean") out[key] = flag;
   }
-  return result;
+  return out;
 }
+
+/** The five widgets a new household starts with — Design-Spec §8.1 and §8.11 step 6. */
+export const DEFAULT_WIDGETS = ["schedule", "dinner", "weather", "photos", "news"] as const;
+export type WidgetKey = (typeof DEFAULT_WIDGETS)[number];
