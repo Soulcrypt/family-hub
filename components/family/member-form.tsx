@@ -127,7 +127,7 @@ function DeactivateDialog({ memberId, displayName }: { memberId: string; display
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="destructive">
+        <Button type="button" variant="destructiveOutline" className="self-start">
           Remove from household
         </Button>
       </DialogTrigger>

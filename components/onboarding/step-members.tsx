@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ColorPicker } from "@/components/family/color-picker";
-import { DEFAULT_MEMBER_COLOR } from "@/lib/constants/member-color-swatches";
+import { nextAvailableMemberColor } from "@/lib/constants/member-color-swatches";
 import { ROLES, ROLE_LABELS, type MemberRole } from "@/lib/constants/roles";
 
 const INITIAL: ActionState = { error: null };
@@ -31,6 +31,11 @@ export type OnboardingMember = {
 };
 
 export function StepMembers({ members }: { members: OnboardingMember[] }) {
+  // Open the picker on a swatch nobody in this household has yet, so a parent adding several
+  // children in one sitting and accepting the default each time still gets people they can
+  // tell apart -- see `nextAvailableMemberColor`.
+  const usedColors = members.map((member) => member.color);
+
   const [open, setOpen] = useState(false);
   const [hasLogin, setHasLogin] = useState(false);
   const [state, formAction, pending] = useActionState(addMemberAction, INITIAL);
@@ -124,7 +129,12 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
               </Select>
             </div>
 
-            <ColorPicker idPrefix="onboarding-member" name="color" defaultValue={DEFAULT_MEMBER_COLOR} displayName="" />
+            <ColorPicker
+              idPrefix="onboarding-member"
+              name="color"
+              defaultValue={nextAvailableMemberColor(usedColors)}
+              displayName=""
+            />
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="birthday">Birthday</Label>

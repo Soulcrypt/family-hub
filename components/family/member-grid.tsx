@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MemberAvatar } from "@/components/family/member-avatar";
 import { ColorPicker } from "@/components/family/color-picker";
-import { DEFAULT_MEMBER_COLOR } from "@/lib/constants/member-color-swatches";
+import { nextAvailableMemberColor } from "@/lib/constants/member-color-swatches";
 import { ROLES, ROLE_LABELS, type MemberRole } from "@/lib/constants/roles";
 import { formatBirthday } from "@/lib/utils";
 
@@ -42,8 +42,13 @@ const CARD_CLASSNAME =
  * app/onboarding/actions.ts's StepMembers, but wired to this route's own `addMemberAction`
  * (app/(app)/family/actions.ts) so submitting it revalidates "/family", not "/onboarding".
  * Kept private to this file: nothing outside MemberGrid needs to trigger it.
+ *
+ * Takes `usedColors` so the colour picker OPENS on a swatch nobody has yet, rather than the
+ * same default every time -- see `nextAvailableMemberColor`. A parent adding three children in
+ * a row and accepting the default each time should end up with three children they can tell
+ * apart from across the kitchen.
  */
-function AddMemberDialog() {
+function AddMemberDialog({ usedColors }: { usedColors: string[] }) {
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(addMemberAction, INITIAL);
   const wasPending = useRef(false);
@@ -92,7 +97,12 @@ function AddMemberDialog() {
             </Select>
           </div>
 
-          <ColorPicker idPrefix="add-member" name="color" defaultValue={DEFAULT_MEMBER_COLOR} displayName="" />
+          <ColorPicker
+            idPrefix="add-member"
+            name="color"
+            defaultValue={nextAvailableMemberColor(usedColors)}
+            displayName=""
+          />
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="add-birthday">Birthday</Label>
@@ -124,12 +134,14 @@ function AddMemberDialog() {
  * allows this for anyone in the same household).
  */
 export function MemberGrid({ members, canManage }: { members: FamilyMember[]; canManage: boolean }) {
+  const usedColors = members.map((member) => member.color);
+
   if (members.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-[18px] border border-dashed border-border px-6 py-16 text-center">
         <h2 className="text-xl">No one here yet.</h2>
         <p className="text-muted-foreground">Add the people who live in your household.</p>
-        {canManage ? <AddMemberDialog /> : null}
+        {canManage ? <AddMemberDialog usedColors={usedColors} /> : null}
       </div>
     );
   }
@@ -163,7 +175,7 @@ export function MemberGrid({ members, canManage }: { members: FamilyMember[]; ca
         })}
       </ul>
 
-      {canManage ? <AddMemberDialog /> : null}
+      {canManage ? <AddMemberDialog usedColors={usedColors} /> : null}
     </div>
   );
 }

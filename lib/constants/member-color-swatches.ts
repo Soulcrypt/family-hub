@@ -34,7 +34,28 @@ export const MEMBER_COLOR_SWATCHES = [
   { name: "Raspberry", hex: "#8B4A5A" },
 ] as const satisfies readonly MemberColorSwatch[];
 
-/** The swatch a brand-new member (added via a dialog, before they've picked their own) starts
- * on -- the first palette entry, named rather than indexed so `noUncheckedIndexedAccess`
- * doesn't force a non-null assertion at every call site. */
+/** The swatch a brand-new member starts on when nothing is known about the rest of the
+ * household -- the first palette entry, named rather than indexed so
+ * `noUncheckedIndexedAccess` doesn't force a non-null assertion at every call site. */
 export const DEFAULT_MEMBER_COLOR: string = MEMBER_COLOR_SWATCHES[0].hex;
+
+/**
+ * The colour a newly-added member should START on, given who is already in the household.
+ *
+ * Defaulting every new member to the same swatch quietly defeats the only job member colour
+ * has. A parent adding three children in a row, accepting the default each time, ends up with
+ * three identical circles -- and the switcher, the family strip and the dashboard all lean on
+ * colour to tell people apart at a glance across a kitchen. So the default walks the palette
+ * instead: the first swatch nobody is using yet.
+ *
+ * Falls back to cycling once every swatch is taken (a household larger than the palette), so a
+ * ninth member gets a repeat rather than nothing -- a duplicate is worse than distinct, but far
+ * better than an empty or invalid colour, and they can still pick.
+ */
+export function nextAvailableMemberColor(usedColors: readonly string[]): string {
+  const used = new Set(usedColors.map((color) => color.toUpperCase()));
+  const free = MEMBER_COLOR_SWATCHES.find((swatch) => !used.has(swatch.hex.toUpperCase()));
+  if (free) return free.hex;
+  const cycled = MEMBER_COLOR_SWATCHES[usedColors.length % MEMBER_COLOR_SWATCHES.length];
+  return cycled ? cycled.hex : DEFAULT_MEMBER_COLOR;
+}

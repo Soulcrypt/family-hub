@@ -13,6 +13,13 @@ const buttonVariants = cva(
         outline: "border border-[var(--color-muted)] bg-surface text-ink hover:bg-sunken",
         ghost: "text-ink hover:bg-sunken",
         destructive: "bg-destructive text-on-destructive hover:brightness-95",
+        // A destructive TRIGGER, as distinct from a destructive confirmation. The filled
+        // variant above belongs on the button that actually does the deleting, inside a
+        // confirmation dialog; using it for the trigger makes "Remove from household" the
+        // loudest object on a page whose primary action is "Save changes". Destructive text on
+        // a plain surface measures 6.12:1 light / 6.11:1 dark, so the quieter treatment costs
+        // no legibility.
+        destructiveOutline: "border border-destructive/40 bg-surface text-destructive hover:bg-destructive-bg",
       },
       size: {
         default: "min-h-[44px] px-5 py-2",
