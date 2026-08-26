@@ -225,6 +225,42 @@ export type Database = {
           },
         ]
       }
+      member_dashboard_layouts: {
+        Row: {
+          household_id: string
+          member_id: string
+          updated_at: string
+          widgets: Json
+        }
+        Insert: {
+          household_id: string
+          member_id: string
+          updated_at?: string
+          widgets?: Json
+        }
+        Update: {
+          household_id?: string
+          member_id?: string
+          updated_at?: string
+          widgets?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_dashboard_layouts_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_dashboard_layouts_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "household_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

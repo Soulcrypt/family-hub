@@ -1,72 +1,65 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { DashboardGreeting } from "@/components/dashboard/greeting";
+import { DashboardGreeting, firstNameOf, greetingFor } from "@/components/dashboard/greeting";
 
-/**
- * SP1 Foundation design review: a wall-mounted kitchen tablet is the primary surface, glanced
- * at from ~1.5m away, so the greeting needs (a) its own larger type scale on wide viewports
- * (today it is identical at 390px and 1280px) and (b) to actually WRAP a long household name
- * instead of clipping it -- `truncate` (white-space: nowrap) sat alongside `break-words` and
- * won, rendering "Good afternoon, The Ri..." at 390px (measured: scrollWidth 473 vs
- * clientWidth 342). See this task's brief.
- */
-describe("DashboardGreeting", () => {
-  it("does not truncate the household name -- no `truncate` utility class on the heading", () => {
-    render(
-      <DashboardGreeting
-        householdName="The Riveras"
-        hour={14}
-        dateLabel="Tuesday, August 25"
-      />,
-    );
-    const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading.className).not.toContain("truncate");
+describe("greetingFor", () => {
+  it("returns Good morning for [5, 12)", () => {
+    expect(greetingFor(5)).toBe("Good morning");
+    expect(greetingFor(11)).toBe("Good morning");
   });
 
-  it("still wraps a long household name onto multiple lines rather than overflowing", () => {
-    render(
-      <DashboardGreeting
-        householdName="The Riveras"
-        hour={14}
-        dateLabel="Tuesday, August 25"
-      />,
-    );
+  it("returns Good afternoon for [12, 18)", () => {
+    expect(greetingFor(12)).toBe("Good afternoon");
+    expect(greetingFor(17)).toBe("Good afternoon");
+  });
+
+  it("returns Good evening for [18, 24) and [0, 5), wrapping across midnight", () => {
+    expect(greetingFor(18)).toBe("Good evening");
+    expect(greetingFor(23)).toBe("Good evening");
+    expect(greetingFor(0)).toBe("Good evening");
+    expect(greetingFor(4)).toBe("Good evening");
+  });
+});
+
+describe("firstNameOf", () => {
+  it("returns the first token of a multi-word name", () => {
+    expect(firstNameOf("Elizabeth Garthwaite")).toBe("Elizabeth");
+  });
+
+  it("returns the whole name when there is only one token", () => {
+    expect(firstNameOf("Cody")).toBe("Cody");
+  });
+
+  it("trims surrounding whitespace", () => {
+    expect(firstNameOf("  Ivy  ")).toBe("Ivy");
+  });
+});
+
+describe("DashboardGreeting", () => {
+  it("renders exactly one h1 greeting the first name, followed by a period", () => {
+    render(<DashboardGreeting firstName="Cody" hour={19} summary="Wednesday, August 26 · no events yet · dinner not planned yet" />);
     const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading.textContent).toContain("Good evening, Cody.");
+  });
+
+  it("renders the daily summary line below the heading", () => {
+    render(<DashboardGreeting firstName="Cody" hour={19} summary="Wednesday, August 26 · no events yet · dinner not planned yet" />);
+    expect(
+      screen.getByText("Wednesday, August 26 · no events yet · dinner not planned yet"),
+    ).toBeTruthy();
+  });
+
+  it("does not truncate the name -- no `truncate` utility class on the heading", () => {
+    render(<DashboardGreeting firstName="Elizabeth" hour={9} summary="x" />);
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading.className).not.toContain("truncate");
     expect(heading.className).toContain("break-words");
-    expect(heading.className).toContain("min-w-0");
-    // Wrapping without balancing strands a widow -- at 1280px "Good evening, The Rivera Family"
-    // broke after "Rivera" and left "Family" alone on a second line under a full-width first
-    // one. Balancing is what makes the two-line case look deliberate rather than broken.
     expect(heading.className).toContain("text-balance");
   });
 
-  it("renders the full household name even when it is very long", () => {
-    const longName = "The Extraordinarily Long Household Name That Goes On And On Riveras";
-    render(<DashboardGreeting householdName={longName} hour={14} dateLabel="Tuesday, August 25" />);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(longName);
-  });
-
   it("scales the heading up on wide viewports -- carries a `lg:` type-scale utility distinct from its base size", () => {
-    render(
-      <DashboardGreeting
-        householdName="The Riveras"
-        hour={14}
-        dateLabel="Tuesday, August 25"
-      />,
-    );
+    render(<DashboardGreeting firstName="Cody" hour={9} summary="x" />);
     const heading = screen.getByRole("heading", { level: 1 });
     expect(heading.className).toMatch(/\blg:text-\S+/);
-  });
-
-  it("scales the date line up on wide viewports too", () => {
-    render(
-      <DashboardGreeting
-        householdName="The Riveras"
-        hour={14}
-        dateLabel="Tuesday, August 25"
-      />,
-    );
-    const date = screen.getByText("Tuesday, August 25");
-    expect(date.className).toMatch(/\blg:text-\S+/);
   });
 });
