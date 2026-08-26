@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MemberAvatar } from "@/components/family/member-avatar";
 import { ROLES, ROLE_LABELS, type MemberRole } from "@/lib/constants/roles";
 
@@ -111,19 +112,22 @@ function InviteDialog({ member }: { member: InviteListMember }) {
             <input type="hidden" name="memberId" value={member.id} />
             <div className="flex flex-col gap-2">
               <Label htmlFor={`invite-role-${member.id}`}>Role once they log in</Label>
-              <select
-                id={`invite-role-${member.id}`}
-                name="role"
-                defaultValue={member.role}
-                required
-                className="min-h-[44px] w-full rounded-[12px] border border-[var(--color-muted)] bg-surface px-2.5 text-sm text-ink outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                {ROLES.map((role) => (
-                  <option key={role} value={role}>
-                    {ROLE_LABELS[role]}
-                  </option>
-                ))}
-              </select>
+              {/* The last raw `<select>` in the app. It sat outside the file partition of the
+                  design-review batch that replaced the other seven, so it kept the OS chevron
+                  and the OS dropdown while every other picker had moved to the app's own
+                  control -- one unstyled widget is enough to make a screen read as unfinished. */}
+              <Select name="role" defaultValue={member.role} required>
+                <SelectTrigger id={`invite-role-${member.id}`} className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {ROLE_LABELS[role]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {state.error ? (

@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { expect, test } from "@playwright/test";
+import { chooseRole } from "./support/controls";
 
 function unique(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
@@ -81,7 +82,7 @@ async function onboardHousehold(
   for (const member of options.members ?? []) {
     await page.getByRole("button", { name: "Add a family member" }).click();
     await page.getByLabel("Name").fill(member.name);
-    await page.getByLabel("Role").selectOption(member.role);
+    await chooseRole(page, member.role);
     if (member.birthday) await page.getByLabel("Birthday").fill(member.birthday);
     await page.getByRole("button", { name: "Add member" }).click();
     await expect(page.getByText(member.name, { exact: true })).toBeVisible();

@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { expect, test } from "@playwright/test";
+import { chooseOption, chooseRole } from "./support/controls";
 
 function unique(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
@@ -86,7 +87,7 @@ test("a login-less member with a points balance claims their own login via an in
 
   await page.getByRole("button", { name: "Add a family member" }).click();
   await page.getByLabel("Name").fill(childName);
-  await page.getByLabel("Role").selectOption("child");
+  await chooseRole(page, "child");
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(childName, { exact: true })).toBeVisible();
 
@@ -107,7 +108,7 @@ test("a login-less member with a points balance claims their own login via an in
 
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await dialog.getByLabel("Role once they log in").selectOption("teen");
+  await chooseOption(page, "Role once they log in", "Teen", dialog);
   await dialog.getByRole("button", { name: "Create invite link" }).click();
 
   const linkInput = dialog.getByLabel("Invitation link");
@@ -165,7 +166,7 @@ test("an already-used invite link shows a clear error instead of a broken page",
 
   await page.getByRole("button", { name: "Add a family member" }).click();
   await page.getByLabel("Name").fill(childName);
-  await page.getByLabel("Role").selectOption("child");
+  await chooseRole(page, "child");
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(childName, { exact: true })).toBeVisible();
 
@@ -248,7 +249,7 @@ test("an account that already belongs to a household cannot be attached to a str
 
   await page.getByRole("button", { name: "Add a family member" }).click();
   await page.getByLabel("Name").fill(targetChildName);
-  await page.getByLabel("Role").selectOption("child");
+  await chooseRole(page, "child");
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(targetChildName, { exact: true })).toBeVisible();
 
@@ -329,7 +330,7 @@ test("loading or reloading the invite confirm screen never claims it -- only pre
 
   await page.getByRole("button", { name: "Add a family member" }).click();
   await page.getByLabel("Name").fill(childName);
-  await page.getByLabel("Role").selectOption("child");
+  await chooseRole(page, "child");
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(childName, { exact: true })).toBeVisible();
 

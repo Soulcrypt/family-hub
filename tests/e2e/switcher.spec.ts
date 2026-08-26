@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { expect, test } from "@playwright/test";
+import { chooseRole } from "./support/controls";
 
 function unique(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
@@ -113,13 +114,13 @@ test("switching profiles changes attribution, gated by PIN for admin profiles ot
 
   await page.getByRole("button", { name: "Add a family member" }).click();
   await page.getByLabel("Name").fill(childName);
-  await page.getByLabel("Role").selectOption("child");
+  await chooseRole(page, "child");
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(childName)).toBeVisible();
 
   await page.getByRole("button", { name: "Add a family member" }).click();
   await page.getByLabel("Name").fill(parentName);
-  await page.getByLabel("Role").selectOption("parent");
+  await chooseRole(page, "parent");
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(parentName)).toBeVisible();
 
