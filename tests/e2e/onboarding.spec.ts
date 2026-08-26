@@ -48,9 +48,17 @@ test("a new user can complete onboarding and reach the dashboard", async ({ page
   // household/features steps' -- see the Web Interface Guidelines fix that made it a <Link> so
   // Cmd/Ctrl/middle-click work), so its accessible role is "link", not "button".
   await page.getByRole("link", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=location/);
+
+  // Reconciled flow (Design-Spec §8.11): household -> members -> location -> features ->
+  // widgets -> ready. Location is skippable/optional, so an empty submit is valid.
+  await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/step=features/);
 
   await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=widgets/);
+
+  await page.getByRole("button", { name: /finish setup/i }).click();
   await expect(page).toHaveURL(/step=ready/);
 
   // The wizard's last step confirms the household by name before handing off — this is

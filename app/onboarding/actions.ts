@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { Json } from "@/lib/supabase/types";
@@ -7,7 +8,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { householdSchema, memberSchema } from "@/lib/validation/schemas";
 import { getAccountMembership, requireAccountMembership, setActiveMember } from "@/lib/auth/active-member";
 import { canManageMembers } from "@/lib/auth/permissions";
-import { isFeatureKey, type EnabledFeatures } from "@/lib/constants/features";
+import { isFeatureKey, DEFAULT_WIDGETS, type EnabledFeatures, type WidgetKey } from "@/lib/constants/features";
 
 export type ActionState = { error: string | null };
 
@@ -26,7 +27,7 @@ const DUPLICATE_HOUSEHOLD_MESSAGE = "you already have a household";
  * in createHouseholdAction); everything else -- including anything unrecognized -- falls
  * through to this one generic, always-safe message per action.
  */
-function genericErrorFor(action: "household" | "member" | "features"): string {
+function genericErrorFor(action: "household" | "member" | "features" | "location" | "widgets"): string {
   switch (action) {
     case "household":
       return "We couldn't create your household. Please try again.";
@@ -34,6 +35,10 @@ function genericErrorFor(action: "household" | "member" | "features"): string {
       return "We couldn't add this family member. Please try again.";
     case "features":
       return "We couldn't save your features. Please try again.";
+    case "location":
+      return "We couldn't save your location. Please try again.";
+    case "widgets":
+      return "We couldn't save your widgets. Please try again.";
   }
 }
 
@@ -150,6 +155,92 @@ export async function saveFeaturesAction(_prev: ActionState, formData: FormData)
     .update({ enabled_features: enabled as Json })
     .eq("household_id", account.household_id);
   if (error) return { error: genericErrorFor("features") };
+
+  revalidatePath("/onboarding");
+  return { error: null };
+}
+
+// Local rather than in lib/validation/schemas.ts -- this task's brief scopes file edits to
+// app/onboarding/** and a short list of others, and lib/validation/schemas.ts isn't on it.
+// A single freeform label is genuinely all this step can collect for real right now (see
+// saveLocationAction's own doc comment), so a small local schema here doesn't cost the reuse
+// a dedicated shared schema would normally buy.
+const locationSchema = z.object({
+  label: z
+    .string()
+    .trim()
+    .max(100, "Keep it under 100 characters")
+    .optional()
+    .or(z.literal("")),
+});
+
+/**
+ * Onboarding step 3/5 (mock 4d, "calendars & location"). Google Calendar OAuth and HEY's ICS
+ * subscription (the other two controls the mock shows on this screen) don't exist in this
+ * codebase yet -- Google's OAuth app isn't configured, and there is no ICS-fetching backend at
+ * all -- so this action only ever persists the one piece of this step that's genuinely real: a
+ * free-text "home location" label, written to `household_settings.weather_location` (an
+ * existing, so-far-unused `Json` column -- this is what it was for). No lat/long, no geocoding,
+ * no "detected" badge the mock shows: there's no geocoding service wired up to produce one.
+ * An empty label is valid -- this step is skippable per spec, and "Skip for now"
+ * (components/onboarding/step-location.tsx) is a plain navigation Link that never calls this
+ * action at all, so a blank submit and a Skip both leave `weather_location` alone/empty.
+ */
+export async function saveLocationAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const account = await requireAccountMembership();
+  if (!canManageMembers(account.role)) return { error: "You do not have permission to change household settings" };
+
+  const parsed = locationSchema.safeParse({ label: formData.get("label") });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check your details" };
+
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("household_settings")
+    .update({ weather_location: (parsed.data.label ? { label: parsed.data.label } : null) as Json })
+    .eq("household_id", account.household_id);
+  if (error) return { error: genericErrorFor("location") };
+
+  revalidatePath("/onboarding");
+  return { error: null };
+}
+
+const WIDGET_KEYS: ReadonlySet<string> = new Set(DEFAULT_WIDGETS);
+
+function isWidgetKey(value: string): value is WidgetKey {
+  return WIDGET_KEYS.has(value);
+}
+
+/**
+ * Onboarding step 5/5 (mock 4e, "pick widgets"). Writes the caller's own starter dashboard
+ * layout into `member_dashboard_layouts` (supabase/migrations/0020_dashboard_widget_layout.sql)
+ * -- the real widget-layout table another concurrent task built, keyed by `member_id` rather
+ * than `household_id` (a shared kiosk can be attributed to a login-less child with no
+ * dashboard of their own, so layouts are genuinely per-member). This is an upsert, not an
+ * insert: the table's own column default already seeds every new row with the same five keys
+ * `DEFAULT_WIDGETS` names, so a household that lands here without ever having a row yet still
+ * gets a sane layout even if this action were skipped -- this just lets onboarding's own choice
+ * (the pre-checked five, editable) win instead.
+ *
+ * The table's own `guard_dashboard_widget_layout()` trigger independently rejects any key
+ * outside the same five and any duplicate -- `isWidgetKey` filtering here is a matching
+ * application-layer check, not a substitute for it.
+ */
+export async function saveWidgetsAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const account = await requireAccountMembership();
+
+  const widgets: WidgetKey[] = [];
+  for (const key of formData.getAll("widgets")) {
+    if (typeof key === "string" && isWidgetKey(key) && !widgets.includes(key)) widgets.push(key);
+  }
+
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("member_dashboard_layouts")
+    .upsert(
+      { member_id: account.id, household_id: account.household_id, widgets: widgets as Json },
+      { onConflict: "member_id" },
+    );
+  if (error) return { error: genericErrorFor("widgets") };
 
   revalidatePath("/onboarding");
   return { error: null };

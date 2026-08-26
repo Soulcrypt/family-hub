@@ -18,6 +18,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ColorPicker } from "@/components/family/color-picker";
+import { MemberAvatar } from "@/components/family/member-avatar";
+import { OnboardingProgress } from "@/components/onboarding/onboarding-progress";
 import { nextAvailableMemberColor } from "@/lib/constants/member-color-swatches";
 import { ROLES, ROLE_LABELS, type MemberRole } from "@/lib/constants/roles";
 
@@ -30,7 +32,15 @@ export type OnboardingMember = {
   color: string;
 };
 
-export function StepMembers({ members }: { members: OnboardingMember[] }) {
+/**
+ * Mock 4c. Row shape: colored avatar + name + role pill, per this task's brief. Role vocabulary
+ * stays exactly `lib/constants/roles.ts`'s `ROLES` ("owner" | "parent" | "teen" | "child") —
+ * the mock and Design-Spec §8.10 both say "parent / kid / toddler", but `member_role`
+ * (supabase/migrations/0001_schema.sql:1) is a Postgres enum of `('owner', 'parent', 'teen',
+ * 'child')`. Writing "kid" or "toddler" here would be rejected by the database outright; see
+ * this task's report for the full disagreement.
+ */
+export function StepMembers({ members, viewerMemberId }: { members: OnboardingMember[]; viewerMemberId: string }) {
   // Open the picker on a swatch nobody in this household has yet, so a parent adding several
   // children in one sitting and accepting the default each time still gets people they can
   // tell apart -- see `nextAvailableMemberColor`.
@@ -52,26 +62,25 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
   }, [pending, state]);
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-8 px-6 py-16">
+    <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col gap-4 px-6 py-8">
       {/* No Back control on this step, deliberately: by the time this step renders, a
           household already exists and cannot be un-created (see app/onboarding/page.tsx's
           resumability guard, which unconditionally bounces any visit to ?step=household back
-          to here once membership exists -- tests/e2e/onboarding.spec.ts:65-66 asserts exactly
+          to here once membership exists -- tests/e2e/onboarding.spec.ts asserts exactly
           that). A Back link here would render, get clicked, and visibly do nothing --
           confirmed by testing it, not just reasoning about it -- which reads as "the app is
           broken," a worse outcome than having no control at all. There genuinely is nowhere
           earlier to go back to; the honest interface says so by omission. (An explicit
           "rename household" affordance would belong to Settings, Task 15 -- not this step.) */}
+      <OnboardingProgress step={2} />
+
       <div>
-        <p className="text-sm text-muted-foreground">Step 3 of 4</p>
-        <h1 className="text-3xl">Add your family</h1>
-        <p className="mt-2 text-muted-foreground">
-          Add the people in your household now, or skip this and add them anytime in Settings.
-        </p>
+        <h1 className="text-[26px] font-bold tracking-[-0.02em] text-text">Who&apos;s in the family?</h1>
+        <p className="mt-1.5 text-sm text-text-secondary">Everyone gets a color and their own view.</p>
       </div>
 
       {members.length === 0 ? (
-        <p className="rounded-[14px] border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+        <p className="dashed rounded-card px-4 py-6 text-center text-sm text-text-secondary">
           No family members yet. Add one below, or continue and add them later.
         </p>
       ) : (
@@ -79,17 +88,16 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
           {members.map((member) => (
             <li
               key={member.id}
-              className="flex items-center gap-3 rounded-[14px] bg-surface px-4 py-3 ring-1 ring-foreground/10"
+              className="flex items-center gap-3 rounded-card bg-glass px-4 py-3.5"
             >
-              <span
-                aria-hidden="true"
-                className="size-8 shrink-0 rounded-full"
-                style={{ backgroundColor: member.color }}
-              />
+              <MemberAvatar displayName={member.display_name} color={member.color} size="sm" ariaHidden />
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-sm font-medium">{member.display_name}</span>
-                <span className="text-xs text-muted-foreground">{ROLE_LABELS[member.role]}</span>
+                <span className="truncate text-[15px] font-semibold text-text">{member.display_name}</span>
+                {member.id === viewerMemberId ? <span className="text-xs text-text-tertiary">you</span> : null}
               </div>
+              <span className="rounded-pill bg-glass-hover px-3 py-1.5 text-[11px] font-bold text-text">
+                {ROLE_LABELS[member.role]}
+              </span>
             </li>
           ))}
         </ul>
@@ -97,14 +105,24 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button type="button" variant="outline" size="lg">
-            Add a family member
-          </Button>
+          {/* Accessible name is "Add a family member" (kept verbatim, not the mock's shorter
+              "+ Add member") -- every other spec in this suite (family/settings/dashboard/
+              claim/switcher/responsive/a11y) drives onboarding through
+              `getByRole("button", { name: "Add a family member" })`, and Playwright's default
+              name match is substring-based, so keeping that exact phrase inside the visible
+              text (rather than replacing it) is what keeps every one of those specs passing
+              unmodified. See this task's report for the full list. */}
+          <button
+            type="button"
+            className="dashed flex min-h-[44px] items-center justify-center rounded-card px-4 py-3.5 text-[13px] font-semibold text-accent-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            + Add a family member
+          </button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add a family member</DialogTitle>
-            <DialogDescription>They’ll show up in your household right away.</DialogDescription>
+            <DialogDescription>They&apos;ll show up in your household right away.</DialogDescription>
           </DialogHeader>
 
           <form ref={formRef} action={formAction} className="flex flex-col gap-4">
@@ -143,20 +161,20 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
 
             <label
               htmlFor="hasLogin"
-              className="flex min-h-[44px] items-center gap-3 rounded-[14px] bg-sunken px-4 py-3 text-sm"
+              className="flex min-h-[44px] items-center gap-3 rounded-[14px] bg-inset px-4 py-3 text-sm text-text"
             >
               <Switch id="hasLogin" name="hasLogin" checked={hasLogin} onCheckedChange={setHasLogin} />
-              They’ll have their own login
+              They&apos;ll have their own login
             </label>
             {hasLogin ? (
-              <p className="text-xs text-muted-foreground">
-                Invites aren’t available yet — for now they’ll be added without a way to sign in
-                themselves, and you can invite them once that’s ready.
+              <p className="text-xs text-text-secondary">
+                Invites aren&apos;t available yet — for now they&apos;ll be added without a way to sign in
+                themselves, and you can invite them once that&apos;s ready.
               </p>
             ) : null}
 
             {state.error ? (
-              <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
+              <p role="alert" className="rounded-card border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-text">
                 {state.error}
               </p>
             ) : null}
@@ -170,8 +188,8 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
         </DialogContent>
       </Dialog>
 
-      <Button asChild size="lg">
-        <Link href="/onboarding?step=features">Continue</Link>
+      <Button asChild size="lg" className="mt-auto">
+        <Link href="/onboarding?step=location">Continue</Link>
       </Button>
     </main>
   );

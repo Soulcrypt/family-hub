@@ -6,9 +6,11 @@ import { getAccountMembership } from "@/lib/auth/active-member";
 import { finishOnboardingAction } from "./actions";
 import { StepHousehold } from "@/components/onboarding/step-household";
 import { StepMembers, type OnboardingMember } from "@/components/onboarding/step-members";
+import { StepLocation } from "@/components/onboarding/step-location";
 import { StepFeatures } from "@/components/onboarding/step-features";
+import { StepWidgets } from "@/components/onboarding/step-widgets";
 import { Button } from "@/components/ui/button";
-import { parseEnabledFeatures } from "@/lib/constants/features";
+import { DEFAULT_WIDGETS, parseEnabledFeatures, type WidgetKey } from "@/lib/constants/features";
 
 type Search = { step?: string };
 
@@ -36,8 +38,8 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
   if (step === "welcome") {
     return (
       <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-8 px-6 text-center">
-        <h1 className="text-4xl">Welcome to Family Hub</h1>
-        <p className="text-lg text-muted-foreground">Four short steps and your household is ready.</p>
+        <h1 className="text-4xl font-bold tracking-[-0.02em] text-text">Welcome to Family Hub</h1>
+        <p className="text-lg text-text-secondary">Five short steps and your household is ready.</p>
         <form method="get">
           <input type="hidden" name="step" value="household" />
           <Button type="submit" size="lg">
@@ -60,7 +62,22 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       .select("id, display_name, role, color")
       .eq("household_id", membership.household_id)
       .order("created_at");
-    return <StepMembers members={(members ?? []) as OnboardingMember[]} />;
+    return <StepMembers members={(members ?? []) as OnboardingMember[]} viewerMemberId={membership.id} />;
+  }
+
+  if (step === "location") {
+    const supabase = await createServerClient();
+    const { data: settings } = await supabase
+      .from("household_settings")
+      .select("weather_location")
+      .eq("household_id", membership.household_id)
+      .maybeSingle();
+    const location = settings?.weather_location;
+    const initialLabel =
+      location && typeof location === "object" && !Array.isArray(location) && typeof (location as { label?: unknown }).label === "string"
+        ? ((location as { label: string }).label)
+        : "";
+    return <StepLocation initialLabel={initialLabel} />;
   }
 
   if (step === "features") {
@@ -73,6 +90,19 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
     return <StepFeatures enabledFeatures={parseEnabledFeatures(settings?.enabled_features)} />;
   }
 
+  if (step === "widgets") {
+    const supabase = await createServerClient();
+    const { data: layout } = await supabase
+      .from("member_dashboard_layouts")
+      .select("widgets")
+      .eq("member_id", membership.id)
+      .maybeSingle();
+    const stored = Array.isArray(layout?.widgets) ? (layout.widgets as unknown[]).filter((key): key is WidgetKey =>
+      typeof key === "string" && (DEFAULT_WIDGETS as readonly string[]).includes(key),
+    ) : null;
+    return <StepWidgets initialWidgets={stored ?? DEFAULT_WIDGETS} />;
+  }
+
   const supabase = await createServerClient();
   const { data: household } = await supabase
     .from("households")
@@ -83,15 +113,15 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-8 px-6 text-center">
       <Link
-        href="/onboarding?step=features"
-        className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 self-start rounded-[12px] px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        href="/onboarding?step=widgets"
+        className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 self-start rounded-[12px] px-2 text-sm font-medium text-text-secondary transition-colors hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <ChevronLeft size={18} aria-hidden />
         Back
       </Link>
-      <h1 className="text-4xl">You’re ready</h1>
-      <p className="text-lg text-muted-foreground break-words">
-        {household?.name ?? "Your household"} is set up. You can change any of this later in Settings.
+      <h1 className="text-4xl font-bold tracking-[-0.02em] text-text">You&apos;re ready</h1>
+      <p className="text-lg text-text-secondary break-words">
+        {household?.name ?? "Your household"} is set up. You can change any of this later in settings.
       </p>
       <form action={finishOnboardingAction}>
         <Button type="submit" size="lg">

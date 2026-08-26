@@ -5,7 +5,14 @@ import type { AuthError } from "@supabase/supabase-js";
 import { createServerClient } from "@/lib/supabase/server";
 import { signInSchema, signUpSchema } from "@/lib/validation/schemas";
 
-export type AuthState = { error: string | null };
+/**
+ * `email` (and `displayName` for sign-up) echo the value the visitor actually typed back into
+ * the form on failure. Design task fix: submitting bad credentials used to wipe both fields —
+ * a punishing retype on a wall tablet's on-screen keyboard for what's often a one-character
+ * typo. Password is deliberately NOT echoed back (never re-populate a password field after a
+ * failed submit) — only the fields that are annoying, not sensitive, to retype.
+ */
+export type AuthState = { error: string | null; email: string | null; displayName: string | null };
 
 /**
  * `next` lets `/invite/[token]` (Task 14) send a signed-out visitor to `/signup?next=/invite/<token>`
@@ -47,13 +54,20 @@ function mapSignUpError(error: AuthError): string {
 }
 
 export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  // Raw, unvalidated echo values -- read straight off the submitted FormData so a failed
+  // submission (bad schema OR a rejected signUp() call below) can hand the visitor's own name
+  // and email straight back, not just re-derive them from `parsed.data` (which doesn't exist
+  // yet on the schema-failure branch).
+  const rawEmail = typeof formData.get("email") === "string" ? (formData.get("email") as string) : null;
+  const rawDisplayName = typeof formData.get("displayName") === "string" ? (formData.get("displayName") as string) : null;
+
   const parsed = signUpSchema.safeParse({
     displayName: formData.get("displayName"),
     email: formData.get("email"),
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Check your details" };
+    return { error: parsed.error.issues[0]?.message ?? "Check your details", email: rawEmail, displayName: rawDisplayName };
   }
 
   const supabase = await createServerClient();
@@ -62,23 +76,34 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
     password: parsed.data.password,
     options: { data: { display_name: parsed.data.displayName } },
   });
-  if (error) return { error: mapSignUpError(error) };
+  if (error) return { error: mapSignUpError(error), email: parsed.data.email, displayName: parsed.data.displayName };
 
   redirect(safeNextPath(formData.get("next")) ?? "/onboarding");
 }
 
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  // See signUp()'s identical comment: the raw, unvalidated email is what gets echoed back on
+  // any failure branch, so a bad-password resubmit doesn't also make the visitor retype an
+  // email address they typed correctly the first time.
+  const rawEmail = typeof formData.get("email") === "string" ? (formData.get("email") as string) : null;
+
   const parsed = signInSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Check your details" };
+    return { error: parsed.error.issues[0]?.message ?? "Check your details", email: rawEmail, displayName: null };
   }
 
   const supabase = await createServerClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) return { error: "Invalid email or password — check your details and try again." };
+  if (error) {
+    return {
+      error: "Invalid email or password — check your details and try again.",
+      email: parsed.data.email,
+      displayName: null,
+    };
+  }
 
   redirect(safeNextPath(formData.get("next")) ?? "/");
 }
