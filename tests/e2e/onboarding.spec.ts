@@ -4,6 +4,21 @@ function uniqueEmail(): string {
   return `owner-${Date.now()}-${Math.floor(Math.random() * 1e6)}@test.local`;
 }
 
+/**
+ * Chooses an option in the "Role" picker -- now `components/ui/select.tsx`'s Radix combobox
+ * (design-review fix: raw `<select>` -> the app's own styled Select), not a native `<select>`,
+ * so `locator.selectOption()` no longer applies: that method only drives a real
+ * `HTMLSelectElement`, and the visible control here is a `<button role="combobox">` (see
+ * @radix-ui/react-select's `SelectTrigger`). Opens the listbox via its labelled trigger, then
+ * clicks the option by its visible text -- `ROLE_LABELS` (lib/constants/roles.ts) capitalizes
+ * the raw enum value, so `"child"` -> `"Child"`.
+ */
+async function chooseRole(page: import("@playwright/test").Page, role: string): Promise<void> {
+  await page.getByLabel("Role").click();
+  const label = role.charAt(0).toUpperCase() + role.slice(1);
+  await page.getByRole("option", { name: label, exact: true }).click();
+}
+
 test("a new user can complete onboarding and reach the dashboard", async ({ page }) => {
   await page.goto("/signup");
   await page.getByLabel("Your name").fill("Dana Parent");
@@ -25,7 +40,7 @@ test("a new user can complete onboarding and reach the dashboard", async ({ page
   // A login-less child.
   await page.getByRole("button", { name: "Add a family member" }).click();
   await page.getByLabel("Name").fill("Ivy");
-  await page.getByLabel("Role").selectOption("child");
+  await chooseRole(page, "child");
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText("Ivy")).toBeVisible();
 

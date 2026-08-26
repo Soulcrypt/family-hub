@@ -15,7 +15,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MemberAvatar } from "@/components/family/member-avatar";
+import { ColorPicker } from "@/components/family/color-picker";
+import { DEFAULT_MEMBER_COLOR } from "@/lib/constants/member-color-swatches";
 import { ROLES, ROLE_LABELS, type MemberRole } from "@/lib/constants/roles";
 import { formatBirthday } from "@/lib/utils";
 
@@ -75,31 +78,21 @@ function AddMemberDialog() {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="add-role">Role</Label>
-            <select
-              id="add-role"
-              name="role"
-              defaultValue="child"
-              required
-              className="min-h-[44px] w-full rounded-[12px] border border-[var(--color-muted)] bg-surface px-2.5 text-sm text-ink outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              {ROLES.map((role) => (
-                <option key={role} value={role}>
-                  {ROLE_LABELS[role]}
-                </option>
-              ))}
-            </select>
+            <Select name="role" defaultValue="child" required>
+              <SelectTrigger id="add-role" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ROLES.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {ROLE_LABELS[role]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="add-color">Color</Label>
-            <input
-              id="add-color"
-              name="color"
-              type="color"
-              defaultValue="#C4643C"
-              className="h-11 w-16 cursor-pointer rounded-[12px] border border-[var(--color-muted)] bg-transparent p-1"
-            />
-          </div>
+          <ColorPicker idPrefix="add-member" name="color" defaultValue={DEFAULT_MEMBER_COLOR} displayName="" />
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="add-birthday">Birthday</Label>

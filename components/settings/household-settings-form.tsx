@@ -5,6 +5,8 @@ import { updateHouseholdAction, updateFeaturesAction, type SettingsState } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { FEATURES, isFeatureEnabled, type EnabledFeatures } from "@/lib/constants/features";
 
 const INITIAL: SettingsState = { error: null };
@@ -101,38 +103,34 @@ export function HouseholdSettingsForm({ household, enabledFeatures, timeZones, c
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="timezone">Timezone</Label>
-          <select
-            id="timezone"
-            name="timezone"
-            defaultValue={household.timezone}
-            required
-            disabled={householdPending}
-            className="min-h-[44px] w-full rounded-[12px] border border-[var(--color-muted)] bg-surface px-2.5 text-sm text-ink outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
-          >
-            {timeZones.map((zone) => (
-              <option key={zone} value={zone}>
-                {zone}
-              </option>
-            ))}
-          </select>
+          <Select name="timezone" defaultValue={household.timezone} required disabled={householdPending}>
+            <SelectTrigger id="timezone" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {timeZones.map((zone) => (
+                <SelectItem key={zone} value={zone}>
+                  {zone}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="weekStart">Week starts on</Label>
-          <select
-            id="weekStart"
-            name="weekStart"
-            defaultValue={String(household.weekStart)}
-            required
-            disabled={householdPending}
-            className="min-h-[44px] w-full rounded-[12px] border border-[var(--color-muted)] bg-surface px-2.5 text-sm text-ink outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
-          >
-            {WEEKDAYS.map((day) => (
-              <option key={day.value} value={day.value}>
-                {day.label}
-              </option>
-            ))}
-          </select>
+          <Select name="weekStart" defaultValue={String(household.weekStart)} required disabled={householdPending}>
+            <SelectTrigger id="weekStart" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {WEEKDAYS.map((day) => (
+                <SelectItem key={day.value} value={String(day.value)}>
+                  {day.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {householdState.error ? (
@@ -163,16 +161,7 @@ export function HouseholdSettingsForm({ household, enabledFeatures, timeZones, c
               key={feature.key}
               className="rounded-[14px] bg-sunken has-disabled:opacity-80"
             >
-              <label htmlFor={`feature-${feature.key}`} className="flex min-h-[44px] items-center gap-3 px-4 py-3">
-                <input
-                  type="checkbox"
-                  id={`feature-${feature.key}`}
-                  name="features"
-                  value={feature.key}
-                  defaultChecked={feature.locked || isFeatureEnabled(enabledFeatures, feature.key)}
-                  disabled={feature.locked || featuresPending}
-                  className="size-5 shrink-0 rounded border-[var(--color-muted)] disabled:opacity-60"
-                />
+              <label htmlFor={`feature-${feature.key}`} className="flex min-h-[44px] cursor-pointer items-center gap-3 px-4 py-3 has-disabled:cursor-not-allowed">
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="text-sm font-medium">
                     {feature.label}
@@ -180,6 +169,13 @@ export function HouseholdSettingsForm({ household, enabledFeatures, timeZones, c
                   </span>
                   <span className="text-xs text-muted-foreground">{feature.description}</span>
                 </span>
+                <Switch
+                  id={`feature-${feature.key}`}
+                  name="features"
+                  value={feature.key}
+                  defaultChecked={feature.locked || isFeatureEnabled(enabledFeatures, feature.key)}
+                  disabled={feature.locked || featuresPending}
+                />
               </label>
             </li>
           ))}

@@ -15,6 +15,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { ColorPicker } from "@/components/family/color-picker";
+import { DEFAULT_MEMBER_COLOR } from "@/lib/constants/member-color-swatches";
 import { ROLES, ROLE_LABELS, type MemberRole } from "@/lib/constants/roles";
 
 const INITIAL: ActionState = { error: null };
@@ -106,45 +110,32 @@ export function StepMembers({ members }: { members: OnboardingMember[] }) {
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="role">Role</Label>
-              <select
-                id="role"
-                name="role"
-                defaultValue="child"
-                required
-                className="min-h-[44px] w-full rounded-[12px] border border-[var(--color-muted)] bg-surface px-2.5 text-sm text-ink outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                {ROLES.map((role) => (
-                  <option key={role} value={role}>
-                    {ROLE_LABELS[role]}
-                  </option>
-                ))}
-              </select>
+              <Select name="role" defaultValue="child" required>
+                <SelectTrigger id="role" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {ROLE_LABELS[role]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="color">Color</Label>
-              <input
-                id="color"
-                name="color"
-                type="color"
-                defaultValue="#C4643C"
-                className="h-11 w-16 cursor-pointer rounded-[12px] border border-[var(--color-muted)] bg-transparent p-1"
-              />
-            </div>
+            <ColorPicker idPrefix="onboarding-member" name="color" defaultValue={DEFAULT_MEMBER_COLOR} displayName="" />
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="birthday">Birthday</Label>
               <Input id="birthday" name="birthday" type="date" />
             </div>
 
-            <label className="flex min-h-[44px] items-center gap-3 text-sm">
-              <input
-                type="checkbox"
-                name="hasLogin"
-                checked={hasLogin}
-                onChange={(event) => setHasLogin(event.target.checked)}
-                className="size-5 shrink-0 rounded border-[var(--color-muted)]"
-              />
+            <label
+              htmlFor="hasLogin"
+              className="flex min-h-[44px] items-center gap-3 rounded-[14px] bg-sunken px-4 py-3 text-sm"
+            >
+              <Switch id="hasLogin" name="hasLogin" checked={hasLogin} onCheckedChange={setHasLogin} />
               They’ll have their own login
             </label>
             {hasLogin ? (

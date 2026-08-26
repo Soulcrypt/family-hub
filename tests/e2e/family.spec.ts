@@ -5,6 +5,21 @@ function unique(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 }
 
+/**
+ * Chooses an option in the "Role" picker -- now `components/ui/select.tsx`'s Radix combobox
+ * (design-review fix: raw `<select>` -> the app's own styled Select), not a native `<select>`,
+ * so `locator.selectOption()` no longer applies: that method only drives a real
+ * `HTMLSelectElement`, and the visible control here is a `<button role="combobox">` (see
+ * @radix-ui/react-select's `SelectTrigger`). Opens the listbox via its labelled trigger, then
+ * clicks the option by its visible text -- `ROLE_LABELS` (lib/constants/roles.ts) capitalizes
+ * the raw enum value, so `"child"` -> `"Child"`.
+ */
+async function chooseRole(page: import("@playwright/test").Page, role: string): Promise<void> {
+  await page.getByLabel("Role").click();
+  const label = role.charAt(0).toUpperCase() + role.slice(1);
+  await page.getByRole("option", { name: label, exact: true }).click();
+}
+
 // See tests/e2e/switcher.spec.ts's identical helper for the full rationale: this shells out to
 // the local Supabase CLI's Postgres directly (as the `postgres` superuser, bypassing RLS
 // entirely), exactly the way this project's pgTAP suites (supabase/tests/*.sql) seed fixtures.
@@ -88,7 +103,7 @@ async function onboardHousehold(
   for (const member of options.members ?? []) {
     await page.getByRole("button", { name: "Add a family member" }).click();
     await page.getByLabel("Name").fill(member.name);
-    await page.getByLabel("Role").selectOption(member.role);
+    await chooseRole(page, member.role);
     if (member.birthday) await page.getByLabel("Birthday").fill(member.birthday);
     await page.getByRole("button", { name: "Add member" }).click();
     await expect(page.getByText(member.name, { exact: true })).toBeVisible();
@@ -139,7 +154,7 @@ test("a parent can view, edit, and deactivate family members", async ({ page }) 
   // since an admin gets the fully editable form regardless of whose page it is. ---
   await page.goto(`/family/${childRow.id}`);
   await expect(page.getByRole("heading", { name: childName, exact: true })).toBeVisible();
-  await expect(page.getByLabel("Role")).toHaveValue("child");
+  await expect(page.locator('select[name="role"]')).toHaveValue("child");
   await expect(page.getByLabel("Birthday")).toHaveValue("2015-03-03");
 
   // --- Editing the name persists after reload. ---
@@ -156,7 +171,7 @@ test("a parent can view, edit, and deactivate family members", async ({ page }) 
   // --- A member can be deactivated and disappears from the grid. ---
   await page.getByRole("button", { name: "Add a family member" }).click();
   await page.getByLabel("Name").fill(extraName);
-  await page.getByLabel("Role").selectOption("child");
+  await chooseRole(page, "child");
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(mainContent.getByText(extraName, { exact: true })).toBeVisible();
 

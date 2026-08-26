@@ -22,7 +22,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MemberAvatar } from "@/components/family/member-avatar";
+import { ColorPicker } from "@/components/family/color-picker";
 import { ROLES, ROLE_LABELS, type MemberRole } from "@/lib/constants/roles";
 import { requiresPin } from "@/lib/auth/permissions";
 import { formatBirthday } from "@/lib/utils";
@@ -206,53 +208,41 @@ export function MemberForm({ member, canManage, isSelf }: MemberFormProps) {
             <Input id="displayName" name="displayName" defaultValue={member.display_name} autoComplete="off" required maxLength={40} disabled={pending} />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="color">Color</Label>
-            <input
-              id="color"
-              name="color"
-              type="color"
-              defaultValue={member.color}
-              disabled={pending}
-              className="h-11 w-16 cursor-pointer rounded-[12px] border border-[var(--color-muted)] bg-transparent p-1 disabled:opacity-50"
-            />
-          </div>
+          <ColorPicker idPrefix="member" name="color" defaultValue={member.color} displayName={member.display_name} disabled={pending} />
 
           {canManage ? (
             <div className="flex flex-col gap-2">
               <Label htmlFor="role">Role</Label>
-              <select
-                id="role"
-                name="role"
-                defaultValue={member.role}
-                required
-                disabled={pending}
-                className="min-h-[44px] w-full rounded-[12px] border border-[var(--color-muted)] bg-surface px-2.5 text-sm text-ink outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
-              >
-                {ROLES.map((role) => (
-                  <option key={role} value={role}>
-                    {ROLE_LABELS[role]}
-                  </option>
-                ))}
-              </select>
+              <Select name="role" defaultValue={member.role} required disabled={pending}>
+                <SelectTrigger id="role" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {ROLE_LABELS[role]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
               <Label htmlFor="role">Role</Label>
               {/* Disabled controls are excluded from FormData on submit, so the real value
                   travels via the hidden input below -- the select here is display-only. */}
-              <select
-                id="role"
-                disabled
-                defaultValue={member.role}
-                className="min-h-[44px] w-full rounded-[12px] border border-[var(--color-muted)] bg-surface px-2.5 text-sm text-ink outline-none disabled:opacity-50"
-              >
-                {ROLES.map((role) => (
-                  <option key={role} value={role}>
-                    {ROLE_LABELS[role]}
-                  </option>
-                ))}
-              </select>
+              <Select defaultValue={member.role} disabled>
+                <SelectTrigger id="role" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {ROLE_LABELS[role]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <input type="hidden" name="role" value={member.role} />
               <p className="text-sm text-muted-foreground">Only a parent or owner can change this.</p>
             </div>
