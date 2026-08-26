@@ -7,6 +7,22 @@ function unique(prefix: string): string {
 type OnboardMember = { name: string; role: string };
 
 /**
+ * Chooses an option in the "Role" picker -- `components/ui/select.tsx`'s Radix combobox
+ * (design-review fix: raw `<select>` -> the app's own styled Select), not a native `<select>`,
+ * so `locator.selectOption()` no longer applies: that method only drives a real
+ * `HTMLSelectElement`, and the visible control here is a `<button role="combobox">` (see
+ * @radix-ui/react-select's `SelectTrigger`). Opens the listbox via its labelled trigger, then
+ * clicks the option by its visible text -- `ROLE_LABELS` (lib/constants/roles.ts) capitalizes
+ * the raw enum value, so `"child"` -> `"Child"`. Identical to tests/e2e/family.spec.ts and
+ * tests/e2e/onboarding.spec.ts's own `chooseRole` helper.
+ */
+async function chooseRole(page: import("@playwright/test").Page, role: string): Promise<void> {
+  await page.getByLabel("Role").click();
+  const label = role.charAt(0).toUpperCase() + role.slice(1);
+  await page.getByRole("option", { name: label, exact: true }).click();
+}
+
+/**
  * Drives the full signup -> household -> members -> features -> ready flow (mirroring
  * tests/e2e/family.spec.ts's identical helper) and lands on /dashboard, which 404s until
  * Task 16 -- only ever asserted by URL here, never by content, matching every other spec in
@@ -32,7 +48,7 @@ async function onboardHousehold(
   for (const member of options.members ?? []) {
     await page.getByRole("button", { name: "Add a family member" }).click();
     await page.getByLabel("Name").fill(member.name);
-    await page.getByLabel("Role").selectOption(member.role);
+    await chooseRole(page, member.role);
     await page.getByRole("button", { name: "Add member" }).click();
     await expect(page.getByText(member.name, { exact: true })).toBeVisible();
   }
@@ -148,4 +164,26 @@ test("a parent can rename the household, enable a feature, toggle the theme, and
   await expect(page.getByLabel("Household name")).not.toBeVisible();
   await expect(page.getByRole("button", { name: "Save changes" })).not.toBeVisible();
   await expect(page.getByRole("button", { name: "Save features" })).not.toBeVisible();
+
+  // --- SP1 design review Finding 1 (P0): admin-only surfaces must not be OFFERED to a
+  // non-admin ACTIVE PROFILE, even though the underlying authenticated account (the parent
+  // who is still signed in -- the switch above only changed attribution, never authority)
+  // really is an admin. /settings/household already rendered read-only above; the same
+  // isAdminProfile() display check (lib/auth/permissions.ts) must also apply one level up,
+  // at the settings index and on /family, or a child is handed a full control panel and only
+  // told "no" after tapping into it. What every non-admin profile keeps: Appearance (nobody's
+  // admin-gated) and their own "Your PIN" self-service control (set_member_pin allows anyone
+  // to set their own).
+  await page.goto("/settings");
+  await expect(page.getByRole("link", { name: "Appearance" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your PIN" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Household" })).not.toBeVisible();
+  await expect(page.getByRole("link", { name: "Members" })).not.toBeVisible();
+
+  // Scoped to #main-content: childName ALSO now matches in the sidebar (which shows the
+  // active profile's own name once switched -- "Kit Child" -- rather than the "Switch
+  // profile" fallback), so an unscoped locator would resolve to two elements.
+  await page.goto("/family");
+  await expect(mainContent.getByText(childName, { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add a family member" })).not.toBeVisible();
 });

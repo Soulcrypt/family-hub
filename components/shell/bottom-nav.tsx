@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ArrowLeftRight,
   CalendarDays,
   Home,
   ListChecks,
@@ -90,6 +91,30 @@ export function BottomNav({ items }: BottomNavProps) {
           </Link>
         );
       })}
+
+      {/*
+        SP1 design review Finding 2 (P2): the profile switcher (/switch) had no dedicated
+        entry point on phone at all -- it was reachable only by tapping a face in the
+        dashboard's family-strip tiles. Deliberately NOT one of `items`/navItemsFor()'s
+        results (mirroring Sidebar's own dedicated footer link, which similarly sits outside
+        its `items.map` loop): /switch is a utility affordance, not a feature screen, so it is
+        not subject to splitBottomNavItems's MAX_VISIBLE budget or the "every item is
+        reachable" invariant that guards navItemsFor()'s output in
+        lib/__tests__/bottom-nav-reachability.test.ts -- that invariant is about `items`,
+        which this leaves untouched. Always rendered directly rather than folded into
+        "More": today's real nav items cap out at 3 (Home, Family, Settings -- see
+        nav-items.ts), so this adds a 4th tab, comfortably within reach. If a future feature
+        screen ever pushes the visible count high enough to make a 5th/6th permanent tab
+        cramped, reconsider this against folding /switch into the overflow disclosure instead.
+      */}
+      <Link
+        href="/switch"
+        aria-current={isActive("/switch") ? "page" : undefined}
+        className={tabClassName(isActive("/switch"))}
+      >
+        <ArrowLeftRight size={22} aria-hidden />
+        Switch
+      </Link>
 
       {overflow.length > 0 && (
         <Dialog open={moreOpen} onOpenChange={setMoreOpen}>

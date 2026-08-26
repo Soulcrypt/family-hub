@@ -53,7 +53,11 @@ export function ThemeToggle() {
   }
 
   return (
-    <div role="radiogroup" aria-label="Color theme" className="inline-flex gap-1 rounded-[14px] bg-sunken p-1">
+    <div
+      role="radiogroup"
+      aria-label="Color theme"
+      className="inline-flex w-fit shrink-0 self-start gap-1 rounded-[14px] bg-sunken p-1"
+    >
       {OPTIONS.map(({ value, label, Icon }, index) => (
         <button
           key={value}

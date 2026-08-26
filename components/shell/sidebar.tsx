@@ -88,7 +88,7 @@ export function Sidebar({ items, householdName, activeMember }: SidebarProps) {
               ?
             </span>
           )}
-          <span className="truncate">{activeMember ? activeMember.display_name : "Who’s this?"}</span>
+          <span className="truncate">{activeMember ? activeMember.display_name : "Switch profile"}</span>
         </Link>
         <ThemeToggle />
       </div>
