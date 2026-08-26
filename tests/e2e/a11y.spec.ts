@@ -1,41 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-
-function unique(prefix: string): string {
-  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
-}
-
-/**
- * Drives the full signup -> household -> features -> ready flow (mirroring
- * tests/e2e/family.spec.ts's identical helper) and lands on /dashboard. Duplicated here
- * rather than imported: no spec file in this suite exports its helpers (confirmed across
- * family.spec.ts, settings.spec.ts, dashboard.spec.ts, switcher.spec.ts), so each file keeps
- * its own copy by established convention.
- */
-async function onboardHousehold(
-  page: Page,
-  options: { ownerName: string; householdName: string },
-): Promise<void> {
-  await page.goto("/signup");
-  await page.getByLabel("Your name").fill(options.ownerName);
-  await page.getByLabel("Email").fill(`${unique("owner")}@test.local`);
-  await page.getByLabel("Password").fill("correct-horse-battery");
-  await page.getByRole("button", { name: "Create account" }).click();
-
-  await expect(page.getByRole("heading", { name: /welcome to family hub/i })).toBeVisible();
-  await page.getByRole("button", { name: "Get started" }).click();
-
-  await page.getByLabel("Household name").fill(options.householdName);
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/step=members/);
-
-  await page.getByRole("link", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/step=features/);
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/step=ready/);
-  await page.getByRole("button", { name: /go to my dashboard/i }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
-}
+import { onboardHousehold, unique } from "./support/onboarding";
 
 type Scheme = "light" | "dark";
 

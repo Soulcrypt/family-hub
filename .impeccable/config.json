@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "bounce-easing",
+        "value": "hearth-edit-jiggle",
+        "createdAt": "2026-08-26T23:34:38.620Z",
+        "reason": "Detector matched the keyframe NAME, not an easing function: the animation is a 2deg alternating rotate on ease-in-out, with no bounce or elastic curve anywhere. The motion is spec-mandated -- Design-Spec 8.1, 'cards jiggle subtly (2deg rotate alternating)' -- and is the standard iOS edit-mode wiggle, which reads as 'these are draggable', not as decoration."
+      }
+    ]
+  }
+}

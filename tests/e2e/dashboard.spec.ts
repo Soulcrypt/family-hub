@@ -1,54 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-
-function unique(prefix: string): string {
-  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
-}
-
-/**
- * Drives the full signup -> household -> members -> features -> ready flow (mirroring
- * tests/e2e/family.spec.ts's identical helper) and lands on /dashboard. Duplicated here rather
- * than imported: no spec file in this suite exports its helpers (established convention -- see
- * a11y.spec.ts/responsive.spec.ts's identical copies).
- *
- * This suite creates its own household per test rather than depending on seeded member names
- * (a concurrent task is rewriting supabase/seed.sql to the Garthwaite household) -- see this
- * task's brief.
- */
-async function onboardHousehold(page: Page, options: { ownerName: string; householdName: string }): Promise<void> {
-  await page.goto("/signup");
-  await page.getByLabel("Your name").fill(options.ownerName);
-  await page.getByLabel("Email").fill(`${unique("owner")}@test.local`);
-  await page.getByLabel("Password").fill("correct-horse-battery");
-  await page.getByRole("button", { name: "Create account" }).click();
-
-  await expect(page.getByRole("heading", { name: /welcome to family hub/i })).toBeVisible();
-  await page.getByRole("button", { name: "Get started" }).click();
-
-  await page.getByLabel("Household name").fill(options.householdName);
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/step=members/);
-
-  await page.getByRole("link", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/step=location/);
-
-  // Step 3/5 (components/onboarding/step-location.tsx) -- out of this task's scope (a
-  // concurrent task's step); skipped rather than filled in, same as a real visitor who has no
-  // calendar to connect yet would.
-  await page.getByRole("link", { name: "Skip for now" }).click();
-  await expect(page).toHaveURL(/step=features/);
-
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/step=widgets/);
-
-  // Step 5/5 (components/onboarding/step-widgets.tsx) -- pre-checked to the five defaults;
-  // this suite exercises editing the layout AFTER landing on the dashboard, not during
-  // onboarding itself, so it just accepts the defaults here.
-  await page.getByRole("button", { name: "Finish setup" }).click();
-  await expect(page).toHaveURL(/step=ready/);
-
-  await page.getByRole("button", { name: /go to my dashboard/i }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
-}
+import { expect, test } from "@playwright/test";
+import { onboardHousehold, unique } from "./support/onboarding";
 
 test("greets the signed-in member by first name with a time-appropriate greeting and a daily summary line", async ({
   page,
