@@ -2,12 +2,10 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { createServerClient } from "@/lib/supabase/server";
 import { requireAccountMembership, getActiveMember } from "@/lib/auth/active-member";
-import { requiresPin } from "@/lib/auth/permissions";
-import { switchToMemberAction, type SwitchState } from "./actions";
+import { isMemberGated } from "@/lib/auth/pin-gate";
+import { directSwitchAction } from "./actions";
 import { MemberAvatar } from "@/components/family/member-avatar";
 import { PinDialog } from "@/components/switcher/pin-dialog";
-
-const INITIAL: SwitchState = { error: null };
 
 const TILE_CLASSNAME =
   "flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-[18px] bg-surface px-4 py-6 text-center shadow-elevation ring-1 ring-[color:var(--color-muted)] transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
@@ -19,7 +17,9 @@ const TILE_CLASSNAME =
  * `switchToMemberAction`'s doc comment (app/switch/actions.ts) for the full split this
  * screen exists to preserve.
  *
- * A tile opens `PinDialog` only when it is `gated`: its role `requiresPin()`, it isn't the
+ * A tile opens `PinDialog` only when it is `gated`, per `isMemberGated()` (lib/auth/pin-gate.ts
+ * -- shared with app/(app)/dashboard/page.tsx's one-tap family strip, SP1 Foundation, so both
+ * surfaces make this decision exactly one way): its role `requiresPin()`, it isn't the
  * caller's own row, AND `member_has_pin` (SECURITY DEFINER,
  * supabase/migrations/0019_member_pin_status_rpc.sql) says a PIN has genuinely been set.
  * `requiresPin()` alone used to be the whole test, which meant an admin profile that had
@@ -66,36 +66,19 @@ export default async function SwitchPage() {
     .eq("is_active", true)
     .order("created_at");
 
-  // `requiresPin(role)` alone says nothing about whether a PIN was ever actually SET --
-  // onboarding never sets one, so an admin profile with no PIN would otherwise show a dialog
-  // that can only ever reject every guess (the P0 dead end the SP1 Foundation design review
-  // found -- Jamie Rivera in the seed is exactly this case). `member_has_pin` (SECURITY
-  // DEFINER, supabase/migrations/0019_member_pin_status_rpc.sql) answers the real question;
-  // it's only worth asking for a member this UI would otherwise gate at all (an admin role,
-  // not the caller's own row) -- every other tile is unconditionally ungated regardless of the
-  // answer, so skipping the RPC call for those loses no correctness and saves a round trip.
+  // `isMemberGated` (lib/auth/pin-gate.ts) is the SAME gating decision
+  // app/(app)/dashboard/page.tsx's one-tap family strip now uses -- extracted so this screen
+  // and that one can't drift apart on what "gated" means. See its doc comment for the full
+  // three-part test (requiresPin(role), not the caller's own row, member_has_pin genuinely
+  // true) and why an admin profile that never had a PIN set (the P0 dead end the SP1
+  // Foundation design review found -- Jamie Rivera in the seed is exactly this case) must not
+  // count as gated.
   const membersWithPinStatus = await Promise.all(
-    (members ?? []).map(async (member) => {
-      const isOwnRow = member.user_id !== null && member.user_id === account.user_id;
-      const gateable = requiresPin(member.role) && !isOwnRow;
-      if (!gateable) return { member, isOwnRow, gated: false };
-      const { data: hasPin } = await supabase.rpc("member_has_pin", { p_member_id: member.id });
-      return { member, isOwnRow, gated: Boolean(hasPin) };
-    }),
+    (members ?? []).map(async (member) => ({
+      member,
+      gated: await isMemberGated(supabase, member, account.user_id),
+    })),
   );
-
-  // A plain <form action={...}> needs a `(formData) => void | Promise<void>` action, but
-  // switchToMemberAction resolves SwitchState (for PinDialog's useActionState) -- this thin
-  // wrapper adapts one to the other for the no-PIN tiles below. On the only non-redirect
-  // outcome ("That profile isn't available anymore", e.g. a member deactivated between render
-  // and submit), the result is discarded and the browser's default form navigation simply
-  // reloads /switch with current data; that's an acceptable degradation for a race this rare,
-  // and PIN-gated tiles (the path that actually needs inline error text) get full feedback
-  // via PinDialog's own useActionState below.
-  async function directSwitch(formData: FormData): Promise<void> {
-    "use server";
-    await switchToMemberAction(INITIAL, formData);
-  }
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center gap-10 px-6 py-16">
@@ -127,7 +110,7 @@ export default async function SwitchPage() {
                 }}
               />
             ) : (
-              <form action={directSwitch}>
+              <form action={directSwitchAction}>
                 <input type="hidden" name="memberId" value={member.id} />
                 <button type="submit" className={TILE_CLASSNAME}>
                   <MemberAvatar

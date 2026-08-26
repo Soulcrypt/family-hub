@@ -88,3 +88,23 @@ export async function switchToMemberAction(_prev: SwitchState, formData: FormDat
   // redirect() throws -- keep it outside any try/catch, or the switch silently does nothing.
   redirect("/dashboard");
 }
+
+const DIRECT_SWITCH_INITIAL: SwitchState = { error: null };
+
+/**
+ * Adapts `switchToMemberAction` (which resolves `SwitchState`, for `PinDialog`'s
+ * `useActionState`) to the plain `(formData) => Promise<void>` shape a `<form action={...}>`
+ * needs for a tile with no PIN gate and therefore nothing to show an inline error for. Shared
+ * by every direct-switch tile in the app -- app/switch/page.tsx's switcher grid and
+ * app/(app)/dashboard/page.tsx's one-tap family strip (SP1 Foundation's "one tap switches";
+ * see this task's brief) -- so there is exactly one wrapper of this shape, not one per screen.
+ *
+ * On the only non-redirect outcome ("That profile isn't available anymore", e.g. a member
+ * deactivated between render and submit), the result is discarded and the browser's default
+ * form navigation simply reloads the current page with fresh data; an acceptable degradation
+ * for a race this rare, since a PIN-gated tile (the path that actually needs inline error
+ * text) gets full feedback via PinDialog's own useActionState instead.
+ */
+export async function directSwitchAction(formData: FormData): Promise<void> {
+  await switchToMemberAction(DIRECT_SWITCH_INITIAL, formData);
+}

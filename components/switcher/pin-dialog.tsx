@@ -40,8 +40,15 @@ export type PinDialogMember = {
  * PIN-protected is visible before tapping, not only after -- an sr-only "PIN protected" suffix
  * on the tile's own text makes the same state part of its accessible name, not just a
  * decorative icon nothing but sighted users can perceive.
+ *
+ * `isActive` (default `false`, so every existing app/switch/page.tsx call site renders
+ * byte-for-byte as before) lets a caller ring-highlight this tile as the currently ATTRIBUTED
+ * member -- app/(app)/dashboard/page.tsx's family strip needs this (SP1 Foundation's one-tap
+ * dashboard reuses this exact component for its gated tiles rather than inventing a second
+ * gated-tile UI), because a PIN-gated profile CAN be the one currently active on this device
+ * (e.g. a co-parent already switched into it) and the ring is how the strip shows "you" today.
  */
-export function PinDialog({ member }: { member: PinDialogMember }) {
+export function PinDialog({ member, isActive = false }: { member: PinDialogMember; isActive?: boolean }) {
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(switchToMemberAction, INITIAL);
   const formRef = useRef<HTMLFormElement>(null);
@@ -99,7 +106,10 @@ export function PinDialog({ member }: { member: PinDialogMember }) {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-[18px] bg-surface px-4 py-6 text-center shadow-elevation ring-1 ring-[color:var(--color-muted)] transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className={cn(
+            "flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-[18px] px-4 py-6 text-center shadow-elevation transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+            isActive ? "bg-sunken ring-2 ring-accent" : "bg-surface ring-1 ring-[color:var(--color-muted)]",
+          )}
         >
           <span className="relative inline-flex">
             <MemberAvatar displayName={member.displayName} color={member.color} avatarUrl={member.avatarUrl} size="lg" ariaHidden />
@@ -116,7 +126,7 @@ export function PinDialog({ member }: { member: PinDialogMember }) {
           </span>
           <span className="line-clamp-2 w-full break-words text-base font-medium text-ink">
             {member.displayName}
-            <span className="sr-only"> — PIN protected</span>
+            <span className="sr-only"> — PIN protected{isActive ? " (you)" : ""}</span>
           </span>
         </button>
       </DialogTrigger>
