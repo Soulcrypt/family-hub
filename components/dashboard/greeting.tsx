@@ -13,6 +13,12 @@
  * is gone; `break-words`/`min-w-0` alone let a long name wrap onto a second line instead of
  * overflowing -- see tests/e2e/responsive.spec.ts's "nothing overflows horizontally" sweep,
  * which this must stay green against.
+ *
+ * `text-balance` because wrapping without it strands a widow: at 1280px "Good evening, The
+ * Rivera Family" broke after "Rivera", leaving "Family" alone on a second line directly under
+ * a full-width first line. It evens the two lines instead. This is the case the Vercel
+ * interface guidelines call out for headings, and a greeting that names the family is exactly
+ * the heading you do not want breaking badly.
  */
 
 export type Greeting = "Good morning" | "Good afternoon" | "Good evening";
@@ -44,7 +50,7 @@ export type DashboardGreetingProps = {
 export function DashboardGreeting({ householdName, hour, dateLabel }: DashboardGreetingProps) {
   return (
     <header className="mb-8 text-center">
-      <h1 className="min-w-0 break-words text-3xl sm:text-4xl lg:text-6xl">
+      <h1 className="min-w-0 text-balance break-words text-3xl sm:text-4xl lg:text-6xl">
         {greetingFor(hour)}, {householdName}
       </h1>
       <p className="mt-2 text-base text-muted-foreground sm:text-lg lg:mt-3 lg:text-2xl">{dateLabel}</p>

@@ -34,6 +34,10 @@ describe("DashboardGreeting", () => {
     const heading = screen.getByRole("heading", { level: 1 });
     expect(heading.className).toContain("break-words");
     expect(heading.className).toContain("min-w-0");
+    // Wrapping without balancing strands a widow -- at 1280px "Good evening, The Rivera Family"
+    // broke after "Rivera" and left "Family" alone on a second line under a full-width first
+    // one. Balancing is what makes the two-line case look deliberate rather than broken.
+    expect(heading.className).toContain("text-balance");
   });
 
   it("renders the full household name even when it is very long", () => {
