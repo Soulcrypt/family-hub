@@ -1,5 +1,5 @@
-import { requireAccountMembership } from "@/lib/auth/active-member";
-import { canInvite, canManageMembers } from "@/lib/auth/permissions";
+import { getActiveMember, requireAccountMembership } from "@/lib/auth/active-member";
+import { canInvite, canManageMembers, isAdminProfile } from "@/lib/auth/permissions";
 import { createServerClient } from "@/lib/supabase/server";
 import { MemberInviteList } from "@/components/settings/member-invite-list";
 import { RemovedMemberList } from "@/components/settings/removed-member-list";
@@ -22,8 +22,17 @@ import { RemovedMemberList } from "@/components/settings/removed-member-list";
  */
 export default async function SettingsMembersPage() {
   const account = await requireAccountMembership();
+  const activeMember = await getActiveMember();
   const supabase = await createServerClient();
-  const canManage = canManageMembers(account.role);
+
+  // Two independent things, combined exactly as app/(app)/settings/household/page.tsx does:
+  // `canManageMembers(account.role)` is the real boundary (the server actions re-check it
+  // themselves), and `isAdminProfile(...)` covers the shared-device case where an admin's
+  // session is currently attributed to a child. The settings index stopped LINKING here for a
+  // non-admin profile, but this page was still reachable by typing the URL, and on a shared
+  // tablet the person standing there is whoever the screen says they are.
+  const viewingAsAdmin = isAdminProfile(activeMember?.role ?? account.role);
+  const canManage = canManageMembers(account.role) && viewingAsAdmin;
 
   const { data: members } = await supabase
     .from("household_members")
@@ -32,11 +41,13 @@ export default async function SettingsMembersPage() {
     .eq("is_active", true)
     .order("created_at");
 
-  // Only an admin may even see who has been removed. `household_members`'s own
-  // `members_select_household` RLS policy does NOT filter by `is_active` or by admin status --
-  // an inactive row is just as visible to a plain member's SELECT as an active one -- so this
-  // `canManage` check is the ONLY thing standing between a removed member's continued
-  // existence and a non-admin viewer of this page. Never lift this query above that check.
+  // Only an admin may even see who has been removed. This used to be the ONLY control: the
+  // `members_select_household` RLS policy did not filter by `is_active`, so an inactive row was
+  // as visible to a plain member's SELECT as an active one. Task 15 closed that at the database
+  // (the policy now reads `is_active or household_role(...) in ('owner','parent')`), so the two
+  // agree -- but keep this check anyway rather than leaning on RLS alone: the account underneath
+  // a switched-to-child profile IS an admin as far as Postgres is concerned, so RLS would hand
+  // these rows over quite correctly. Never lift this query above the check.
   const { data: removedMembers } = canManage
     ? await supabase
         .from("household_members")
@@ -54,8 +65,14 @@ export default async function SettingsMembersPage() {
           Give a family member their own login without losing their points or history.
         </p>
       </header>
+      {viewingAsAdmin ? null : (
+        <p className="mb-8 rounded-[14px] bg-sunken px-4 py-3 text-sm text-muted-foreground">
+          You’re viewing as {activeMember?.display_name ?? "this profile"}. Switch to an adult’s
+          profile to invite or restore members.
+        </p>
+      )}
       <div className="flex flex-col gap-8">
-        <MemberInviteList members={members ?? []} canInvite={canInvite(account.role)} />
+        <MemberInviteList members={members ?? []} canInvite={canInvite(account.role) && viewingAsAdmin} />
         {canManage ? <RemovedMemberList members={removedMembers ?? []} /> : null}
       </div>
     </div>

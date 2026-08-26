@@ -186,4 +186,13 @@ test("a parent can rename the household, enable a feature, toggle the theme, and
   await page.goto("/family");
   await expect(mainContent.getByText(childName, { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Add a family member" })).not.toBeVisible();
+
+  // --- Removing the LINK is not the same as gating the PAGE. /settings/members checked only
+  // the authenticated account's role, so typing the URL while attributed to a child still
+  // rendered the invite controls -- and because authority genuinely comes from the account
+  // underneath, those controls would have WORKED. Hiding the entry point closed the normal
+  // path; this closes the URL. ---
+  await page.goto("/settings/members");
+  await expect(page.getByRole("button", { name: /invite them to log in/i })).not.toBeVisible();
+  await expect(page.getByText(/switch to an adult’s profile/i)).toBeVisible();
 });
