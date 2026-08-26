@@ -5,7 +5,7 @@ test("serves a valid web manifest", async ({ request }) => {
   expect(response.ok()).toBe(true);
 
   const manifest = await response.json();
-  expect(manifest.name).toBe("Family Hub");
+  expect(manifest.name).toBe("Hearth");
   expect(manifest.display).toBe("standalone");
   expect(manifest.start_url).toBe("/");
   expect(manifest.icons.length).toBeGreaterThanOrEqual(2);

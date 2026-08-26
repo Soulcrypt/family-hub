@@ -1,0 +1,22 @@
+<!--
+  Hearth mark — standalone source of truth for PWA icon rasterization.
+
+  KEEP IN SYNC WITH components/brand/hearth-mark.tsx. Same viewBox (0 0 64 64), same three
+  rects (the rounded-square plate + the two-stroke "H"), same coordinates. If one changes,
+  change the other — this file exists only because raster icons need a file ImageMagick can
+  render, not a React component; it is not a second design.
+
+  Rendered at full bleed (no extra padding) for the "any"-purpose icons: the rounded square
+  IS the icon, edge to edge. When rasterizing, flatten onto the same accent color
+  (`-background "#0A84FF" -alpha remove -alpha off`) so the four corners outside the rounded
+  rect come out fully opaque instead of transparent — see supabase/seed.sql sibling task's
+  report for why a transparent "any" icon is illegible on a matching launcher background.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="18" fill="#0A84FF" />
+  <g fill="#FFFFFF">
+    <rect x="18" y="16" width="7.5" height="32" rx="3.75" />
+    <rect x="38.5" y="16" width="7.5" height="32" rx="3.75" />
+    <rect x="18" y="28.25" width="28" height="7.5" rx="3.75" />
+  </g>
+</svg>

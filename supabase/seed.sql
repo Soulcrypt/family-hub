@@ -7,9 +7,13 @@
 -- there).
 create extension if not exists pgtap with schema extensions;
 
--- Task 18: demo household, so every screen has real content on `supabase db reset` instead of
--- an empty state. Fixed UUIDs throughout (prefix a10a0000, suffix ...0001-...0006) so the seed
--- is deterministic across resets.
+-- Task 18 (rebranded for the Hearth SP1 identity task): demo household, so every screen has
+-- real content on `supabase db reset` instead of an empty state. Fixed UUIDs throughout
+-- (prefix a10a0000, suffix ...0001-...0006) so the seed is deterministic across resets. This is
+-- now the real Garthwaite household (Design-Spec front matter) rather than the placeholder
+-- "Rivera Family" the app shipped SP1 against -- id suffix ...0005 (formerly a teen member,
+-- Sam Rivera) is deliberately left unused rather than renumbered, since the real household has
+-- only three people and nothing should have to know the gap exists.
 --
 -- One confirmed auth account -- 'demo@familyhub.local' / 'demo-password-123' -- so there is
 -- something to actually log into locally. Its profile row is deliberately NOT inserted by
@@ -48,7 +52,7 @@ insert into auth.users (
   now(),
   '', '', '', '',
   '{"provider":"email","providers":["email"]}'::jsonb,
-  '{"display_name":"Alex Rivera"}'::jsonb,
+  '{"display_name":"Cody Garthwaite"}'::jsonb,
   now(), now(), now()
 );
 
@@ -72,11 +76,12 @@ insert into auth.identities (
   now(), now(), now()
 );
 
--- 'America/Chicago' also doubles as a live positive case for
+-- 'America/Chicago' is the Garthwaites' real timezone (Whitewater, WI -- Design-Spec front
+-- matter), and also doubles as a live positive case for
 -- 0017_household_timezone_guard.sql's BEFORE INSERT trigger.
 insert into households (id, name, timezone, created_by) values (
   'a10a0000-0000-4000-8000-000000000002',
-  'The Rivera Family',
+  'The Garthwaites',
   'America/Chicago',
   'a10a0000-0000-4000-8000-000000000001'
 );
@@ -86,38 +91,24 @@ insert into household_settings (household_id, enabled_features) values (
   '{"family":true,"settings":true,"calendar":true}'::jsonb
 );
 
--- Four members: owner (has the one login above), parent, teen, and child -- the latter two
--- (and the parent) are login-less rows, `user_id` null, exactly like a real household that
--- hasn't sent every member an invite yet.
+-- Three members: owner (has the one login above) and a login-less parent and child, `user_id`
+-- null for the latter two, exactly like a real household that hasn't sent every member an
+-- invite yet. Colours are the fixed per-person identity colours from Design-Spec §2.2 -- not
+-- independently chosen here, so they are not re-derived or re-justified against a contrast
+-- formula the way the old Rivera placeholders were; they are pasted verbatim from the spec.
 --
--- Member color is how you tell your family apart at a glance across a kitchen, so these are
--- chosen to differ in VALUE as well as hue: two dark fills that take white text (terracotta,
--- teal) and two light ones that take ink (gold, dusty rose). An earlier all-dark set cleared
--- contrast comfortably and still failed the actual job -- four muddy brown circles that were
--- hard to tell apart at avatar size. Every value below was checked against the same formula
--- components/family/member-avatar.tsx's foregroundFor() uses, and clears 4.5:1 against the
--- foreground that function picks for it:
---   #7C4A6B plum       -> white 6.89:1
---   #2F6F7A teal       -> white 5.71:1
---   #E8B44A gold       -> ink   7.99:1
---   #C98A96 dusty rose -> ink   5.46:1
---
--- The owner was terracotta (#A9522F) until review pointed out that is literally
--- --color-accent-strong (app/globals.css) -- the fill behind the app's own primary buttons.
--- A person's identity colour should not be the same colour as the app's chrome, or a white
--- initial on that fill reads as a control rather than a face. Plum keeps the warmth and is
--- unmistakably not a button.
--- The schema's own default, #C4643C, is deliberately NOT reused: it only clears ~4.0:1 (see
--- foregroundFor's own comment).
-insert into household_members (id, household_id, user_id, display_name, role, color, points_balance) values
+-- Ivy's birthday is 2025-12-18. THIS IS A DELIBERATE CORRECTION, NOT A TYPO: the Design-Spec
+-- front matter and the imported mockups both describe her as "age 2 / born May 2024", but the
+-- real, correct birthdate is 2025-12-18 (she is 8 months old as of 2026-08-26, an infant, not a
+-- toddler). Every age-derived string in the app must compute from this column, not from the
+-- spec's prose. Do not "fix" this back to match the spec -- the spec is what's wrong here.
+insert into household_members (id, household_id, user_id, display_name, role, color, birthday, points_balance) values
   ('a10a0000-0000-4000-8000-000000000003', 'a10a0000-0000-4000-8000-000000000002',
-   'a10a0000-0000-4000-8000-000000000001', 'Alex Rivera', 'owner',  '#7C4A6B', 0),
+   'a10a0000-0000-4000-8000-000000000001', 'Cody Garthwaite',      'owner',  '#B6E6B0', null, 0),
   ('a10a0000-0000-4000-8000-000000000004', 'a10a0000-0000-4000-8000-000000000002',
-   null, 'Jamie Rivera', 'parent', '#2F6F7A', 0),
-  ('a10a0000-0000-4000-8000-000000000005', 'a10a0000-0000-4000-8000-000000000002',
-   null, 'Sam Rivera',   'teen',   '#E8B44A', 0),
+   null, 'Elizabeth Garthwaite', 'parent', '#F3B3D4', null, 0),
   ('a10a0000-0000-4000-8000-000000000006', 'a10a0000-0000-4000-8000-000000000002',
-   null, 'Ivy Rivera',   'child',  '#C98A96', 250);
+   null, 'Ivy Garthwaite',       'child',  '#FFD08A', date '2025-12-18', 0);
 
 -- The owner's PIN (1234), set through set_member_pin() (0011_member_pin_verification.sql)
 -- rather than a hand-rolled UPDATE ... set pin_hash, so it is hashed exactly the way production

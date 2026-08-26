@@ -1,0 +1,21 @@
+<!--
+  Hearth mark — maskable variant, derived from assets/brand/hearth-mark.svg (which must stay in
+  sync with components/brand/hearth-mark.tsx).
+
+  Difference from hearth-mark.svg: the backing plate has NO corner radius (rx removed) and
+  fills the full 0..64 viewBox edge to edge. A maskable icon's OS-applied mask (circle, squircle,
+  rounded square, ...) can crop right up to the canvas edge, so the plate must already be opaque
+  everywhere the mask might show — a rounded corner here would risk exposing a transparent
+  corner under an aggressive mask. The "H" glyph is untouched: its bounding box (x 18..46,
+  y 16..48) is already centered in the 64-unit canvas with half-diagonal ~21.3 units, safely
+  inside the required 80%-diameter safe-zone circle (radius 25.6 units at this scale, i.e. 204.8
+  of 512 once rasterized) — see the report for the measured render.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#0A84FF" />
+  <g fill="#FFFFFF">
+    <rect x="18" y="16" width="7.5" height="32" rx="3.75" />
+    <rect x="38.5" y="16" width="7.5" height="32" rx="3.75" />
+    <rect x="18" y="28.25" width="28" height="7.5" rx="3.75" />
+  </g>
+</svg>

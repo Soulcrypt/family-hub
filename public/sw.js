@@ -1,4 +1,4 @@
-const CACHE = "family-hub-shell-v1";
+const CACHE = "hearth-shell-v1";
 const SHELL = ["/offline", "/icons/icon-192.png", "/logo.svg"];
 
 self.addEventListener("install", (event) => {

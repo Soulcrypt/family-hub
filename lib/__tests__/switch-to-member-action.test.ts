@@ -4,8 +4,8 @@ import type { AuthorityRole } from "@/lib/constants/roles";
 /**
  * Focused test of `switchToMemberAction` (app/switch/actions.ts) -- specifically the fix for
  * the P0 dead end the SP1 Foundation design review found: `requiresPin()` is true for every
- * `owner`/`parent` role, but onboarding never sets a PIN for anyone, so a parent like Jamie
- * Rivera in the seed (no PIN ever set) was permanently unreachable -- the action demanded a
+ * `owner`/`parent` role, but onboarding never sets a PIN for anyone, so a parent like Elizabeth
+ * Garthwaite in the seed (no PIN ever set) was permanently unreachable -- the action demanded a
  * PIN that does not exist and rejected every guess as "Incorrect PIN".
  *
  * The fix: the action now calls `member_has_pin` (SECURITY DEFINER,

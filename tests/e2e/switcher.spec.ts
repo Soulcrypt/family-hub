@@ -239,14 +239,14 @@ test("switching profiles changes attribution, gated by PIN for admin profiles ot
 // was PERMANENTLY UNREACHABLE -- requiresPin() (lib/auth/permissions.ts) is true for the role
 // regardless of whether a pin_hash actually exists, and switchToMemberAction collapsed "wrong
 // pin"/"no pin set" into the same "Incorrect PIN" (see this task's report). The seeded demo
-// household (supabase/seed.sql) is the exact repro from the design review: Alex Rivera (owner)
-// has a PIN (1234); Jamie Rivera (parent) has never had one set.
+// household (supabase/seed.sql) is the exact repro from the design review: Cody Garthwaite
+// (owner) has a PIN (1234); Elizabeth Garthwaite (parent) has never had one set.
 const DEMO_EMAIL = "demo@familyhub.local";
 const DEMO_PASSWORD = "demo-password-123";
-const JAMIE_MEMBER_ID = "a10a0000-0000-4000-8000-000000000004"; // parent, no PIN ever set
+const ELIZABETH_MEMBER_ID = "a10a0000-0000-4000-8000-000000000004"; // parent, no PIN ever set
 
 // This spec reads the seeded household but never WRITES to it. An earlier version of the test
-// below inserted a second login-having member straight into the Rivera household to get a
+// below inserted a second login-having member straight into the Garthwaite household to get a
 // gated tile -- which meant every run, on every one of the four Playwright projects, left
 // another member behind in the demo data. The gated-tile assertions live in the test above
 // instead, against a household that test creates for itself.
@@ -258,7 +258,7 @@ async function signIn(page: import("@playwright/test").Page, email: string, pass
   await page.getByRole("button", { name: "Sign in" }).click();
 }
 
-test("a parent profile that has never had a PIN set (Jamie Rivera, seeded) switches straight through with no dialog", async ({
+test("a parent profile that has never had a PIN set (Elizabeth Garthwaite, seeded) switches straight through with no dialog", async ({
   page,
 }) => {
   await signIn(page, DEMO_EMAIL, DEMO_PASSWORD);
@@ -267,11 +267,11 @@ test("a parent profile that has never had a PIN set (Jamie Rivera, seeded) switc
   await page.goto("/switch");
   await expect(page.getByRole("heading", { name: /who[’']s this/i })).toBeVisible();
 
-  // Jamie's role (parent) otherwise `requiresPin()`, but no PIN has ever been set for this
+  // Elizabeth's role (parent) otherwise `requiresPin()`, but no PIN has ever been set for this
   // profile -- the tile must switch straight through exactly like a login-less teen/child tile
   // does, never opening a dialog that can only ever reject every guess.
-  await page.getByRole("button", { name: "Jamie Rivera" }).click();
+  await page.getByRole("button", { name: "Elizabeth Garthwaite" }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page).toHaveURL(/\/dashboard/);
-  await expect.poll(() => activeMemberId(page)).toBe(JAMIE_MEMBER_ID);
+  await expect.poll(() => activeMemberId(page)).toBe(ELIZABETH_MEMBER_ID);
 });
