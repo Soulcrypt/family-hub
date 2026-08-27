@@ -13,7 +13,12 @@ export default function WelcomePage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col px-6 py-10">
       <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-        <HearthMark size={76} />
+        {/* Sized in CSS rather than through the `size` prop so it can scale with the
+            viewport: a welcome screen on a 1280px kitchen display was rendering the same
+            76px mark as a phone. CSS width/height override an SVG's presentation
+            attributes, so the prop's default is just a floor. Deliberately larger than
+            mock 4a, which measures 76px -- the screen has the room and the mark earns it. */}
+        <HearthMark className="size-28 sm:size-32 lg:size-40" />
         <div>
           <h1 className="text-[34px] font-bold tracking-[-0.03em] text-text">Hearth</h1>
           <p className="mt-2 text-[15px] leading-relaxed text-text-secondary">

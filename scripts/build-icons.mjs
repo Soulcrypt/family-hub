@@ -31,7 +31,9 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ACCENT = "#0A84FF";
-const MARK = path.join(root, "assets/brand/hearth-mark.svg");
+// The plate is drawn by this script (full-bleed), so the source it rasterises is the
+// marks-only variant -- assets/brand/hearth-mark.svg carries its own rounded-square plate
+// and is what the app renders in-page.
 const MARKS_ONLY = path.join(root, "assets/brand/hearth-marks-only.svg");
 
 function magick(args) {
