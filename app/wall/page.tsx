@@ -3,6 +3,7 @@ import { Aurora } from "@/components/shell/aurora";
 import { MemberAvatar } from "@/components/family/member-avatar";
 import { getAccountMembership } from "@/lib/auth/active-member";
 import { createServerClient } from "@/lib/supabase/server";
+import { describeWeatherCode, getWeather } from "@/lib/dashboard/weather";
 import { WallClient } from "./wall-client";
 
 /**
@@ -27,6 +28,9 @@ export default async function WallPage() {
   if (!membership) redirect("/onboarding");
 
   const supabase = await createServerClient();
+  // Shares the dashboard's cached Open-Meteo fetch rather than issuing a second one -- a wall
+  // display left on all day would otherwise double the upstream calls for the same reading.
+  const weather = await getWeather();
   const [{ data: household }, { data: members }] = await Promise.all([
     supabase.from("households").select("name, timezone").eq("id", membership.household_id).maybeSingle(),
     supabase
@@ -40,7 +44,19 @@ export default async function WallPage() {
   return (
     <>
       <Aurora deep />
-      <WallClient timeZone={household?.timezone ?? "UTC"}>
+      <WallClient
+        timeZone={household?.timezone ?? "UTC"}
+        weather={
+          weather
+            ? {
+                temp: Math.round(weather.temp),
+                high: Math.round(weather.high),
+                low: Math.round(weather.low),
+                condition: describeWeatherCode(weather.code).label,
+              }
+            : null
+        }
+      >
         {/* §4: wall tiles use radius 26 and >= 56px targets. */}
         <div className="mt-10 grid gap-5 sm:grid-cols-3">
           {[

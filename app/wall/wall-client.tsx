@@ -17,12 +17,16 @@ const DIM_AFTER_MS = 5 * 60 * 1000;
  * stays readable from across the room at 35% while clearly being asleep — and any pointer,
  * key, or motion event brings it straight back.
  */
+export type WallWeather = { temp: number; high: number; low: number; condition: string };
+
 export function WallClient({
   children,
   timeZone,
+  weather,
 }: {
   children: React.ReactNode;
   timeZone: string;
+  weather: WallWeather | null;
 }) {
   const router = useRouter();
   const [now, setNow] = useState<Date | null>(null);
@@ -90,6 +94,20 @@ export function WallClient({
             {date}
           </p>
         </div>
+
+        {/* Mock 2i puts the weather opposite the clock. Rendered only when the reading actually
+            arrived -- Open-Meteo can be unreachable, and a wall display is exactly the wrong
+            place to show a stale or invented temperature to someone deciding what to wear. */}
+        {weather ? (
+          <div className="text-right">
+            <p className="tabular text-[42px] font-bold leading-none tracking-[-0.03em]">
+              {weather.temp}°
+            </p>
+            <p className="mt-2 text-[15px] text-text-secondary">
+              {weather.condition} · H{weather.high}° L{weather.low}°
+            </p>
+          </div>
+        ) : null}
       </header>
 
       {children}

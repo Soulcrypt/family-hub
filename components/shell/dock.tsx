@@ -101,7 +101,17 @@ export function Dock({ items }: { items: NavItem[] }) {
             className={cn(
               "flex size-12 flex-col items-center justify-center gap-0.5 rounded-full",
               "transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-              active ? "bg-accent text-white" : "text-white/50",
+              // `accent-strong`, not the identity `accent`: this circle is a FILL BEHIND
+              // WHITE TEXT (a 9px/700 label), so it is a text-bearing surface and needs
+              // 4.5:1. Raw #0A84FF measures 3.64:1 here -- axe caught it on phone, the
+              // only viewport that renders the dock. Same fix, same reason, as the
+              // primary button.
+              // Inactive is 60% white, not the spec's 50%. The dock is translucent, so its
+              // real surface differs per theme -- rgba(28,29,34,.85) composites to #3D3D42
+              // over the light page and #1A1B1F over the dark one -- and at 50% the label
+              // measures 4.03:1 against the lighter of the two, at 9px. 60% gives 5.06:1
+              // light / 6.90:1 dark and stays clearly quieter than the active label.
+              active ? "bg-accent-strong text-white" : "text-white/60",
             )}
           >
             <Icon size={active ? 18 : 17} aria-hidden="true" strokeWidth={2.2} />

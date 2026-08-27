@@ -37,7 +37,11 @@
   /* --- Accent (§2.1). One accent, three roles, because one value cannot serve all three:
          --color-accent      #0A84FF  identity: borders, rings, indicators, small fills.
                                       3.77:1 on glass -- clears WCAG 1.4.11's 3:1 for non-text
-                                      UI, fails 4.5:1 for text. Never use it AS text.
+                                      UI, fails 4.5:1 for text. Never use it AS text, and
+                                      never as a FILL BEHIND text either: the phone dock's
+                                      active circle did exactly that and measured 3.64:1
+                                      against its white 9px label. Text on top means the
+                                      surface is text-bearing -- use accent-strong.
          --color-accent-text #6FB4FF  links and text-weight accent. 6.31:1 on glass.
          --color-accent-strong #0073E8 fill behind WHITE text (the primary button).
                                       The spec asks for white 13/700 on #0A84FF, which measures

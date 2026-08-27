@@ -88,7 +88,11 @@ insert into households (id, name, timezone, created_by) values (
 
 insert into household_settings (household_id, enabled_features) values (
   'a10a0000-0000-4000-8000-000000000002',
-  '{"family":true,"settings":true,"calendar":true}'::jsonb
+  -- Every feature on, so the seeded household matches the shape mock 2a shows in the top bar
+  -- (Home . Meals . Calendar . Chores . Ivy . Photos . Budget). Each one resolves to a real
+  -- route; the unbuilt ones render an honest "not yet" screen rather than a 404, so turning
+  -- them all on advertises nothing that does not exist.
+  '{"family":true,"settings":true,"calendar":true,"meals":true,"chores":true,"ivy":true,"photos":true,"budget":true}'::jsonb
 );
 
 -- Three members: owner (has the one login above) and a login-less parent and child, `user_id`

@@ -80,8 +80,13 @@ export function WidgetGrid({ memberId, initialLayout, weather, news }: WidgetGri
   function widgetSlot(key: WidgetKey, index: number) {
     const meta = WIDGET_REGISTRY[key];
     return (
-      <WidgetEntrance key={key} index={index} className="relative">
-        <div className={cn(editMode && "hearth-edit-jiggle")}>{renderWidget(key, weather, news)}</div>
+      <WidgetEntrance key={key} index={index} className="relative h-full">
+        {/* `h-full` down the chain: without it a one-line widget (news with no headlines)
+            renders shorter than its row-mates and the row reads as broken rather than
+            sparse. Grid items stretch by default; each wrapper has to pass that height on. */}
+        <div className={cn("h-full", editMode && "hearth-edit-jiggle")}>
+          {renderWidget(key, weather, news)}
+        </div>
         {editMode ? (
           <>
             <button
@@ -137,13 +142,18 @@ export function WidgetGrid({ memberId, initialLayout, weather, news }: WidgetGri
       `}</style>
 
       {primary.length > 0 ? (
-        <div className={cn("grid gap-4 md:gap-5", primary.length >= 2 ? "md:grid-cols-[1.25fr_1fr]" : "grid-cols-1")}>
+        <div
+          className={cn(
+            "grid items-stretch gap-4 md:gap-5",
+            primary.length >= 2 ? "md:grid-cols-[1.25fr_1fr]" : "grid-cols-1",
+          )}
+        >
           {primary.map((key, i) => widgetSlot(key, i))}
         </div>
       ) : null}
 
       {secondary.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-3">
+        <div className="grid items-stretch gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-3">
           {secondary.map((key, i) => widgetSlot(key, primary.length + i))}
         </div>
       ) : null}

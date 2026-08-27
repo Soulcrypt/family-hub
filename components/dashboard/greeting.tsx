@@ -62,8 +62,11 @@ export type DashboardGreetingProps = {
 };
 
 export function DashboardGreeting({ firstName, hour, summary }: DashboardGreetingProps) {
+  // Left-aligned at every width. Mock 2f (phone) and 2a (desktop) both set the greeting flush
+  // left; centring it on phone only made the one string that carries the household's name
+  // behave differently from every other heading in the app.
   return (
-    <header className="mb-8 text-center md:mb-10 md:text-left">
+    <header className="mb-8 md:mb-10">
       <h1 className="min-w-0 text-balance break-words text-3xl font-bold tracking-tight sm:text-4xl lg:text-[42px]">
         {greetingFor(hour)}, {firstName}.
       </h1>
