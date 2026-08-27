@@ -60,7 +60,7 @@ export default async function InviteClaimPage({ params }: { params: Promise<{ to
           <Button asChild size="lg">
             <Link href={`/signup?next=${encodeURIComponent(next)}`}>Create your account</Link>
           </Button>
-          <Button asChild size="lg" variant="outline">
+          <Button asChild size="lg" variant="secondary">
             <Link href={`/login?next=${encodeURIComponent(next)}`}>I already have an account</Link>
           </Button>
         </div>

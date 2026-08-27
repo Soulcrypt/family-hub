@@ -59,7 +59,7 @@ export function ConfirmClaimForm({
           {pending ? "Joining…" : "Join the household"}
         </Button>
         {state.error ? (
-          <Button asChild size="lg" variant="outline">
+          <Button asChild size="lg" variant="secondary">
             <Link href="/">Continue</Link>
           </Button>
         ) : null}

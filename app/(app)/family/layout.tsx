@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { AmbientMotionEffect } from "@/components/settings/ambient-motion-effect";
 
 /**
  * Applies the "Ambient animations" preference (Settings > Appearance) to /family and
@@ -10,7 +9,6 @@ import { AmbientMotionEffect } from "@/components/settings/ambient-motion-effect
 export default function FamilyLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      <AmbientMotionEffect />
       {children}
     </>
   );

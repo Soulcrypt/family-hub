@@ -6,7 +6,6 @@ import { isMemberGated } from "@/lib/auth/pin-gate";
 import { directSwitchAction } from "./actions";
 import { MemberAvatar } from "@/components/family/member-avatar";
 import { PinDialog } from "@/components/switcher/pin-dialog";
-import { AmbientMotionEffect } from "@/components/settings/ambient-motion-effect";
 import { columnsForMemberCount } from "@/lib/switcher/grid-columns";
 
 const TILE_CLASSNAME =
@@ -98,7 +97,6 @@ export default async function SwitchPage() {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center gap-10 px-6 py-16">
-      <AmbientMotionEffect />
       {activeMember ? (
         <Link
           href="/dashboard"

@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Aurora } from "@/components/shell/aurora";
+import {
+  AmbientMotionEffect,
+  AmbientMotionScript,
+} from "@/components/settings/ambient-motion-effect";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import "./globals.css";
@@ -35,11 +39,17 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Before first paint, so ambient motion never flashes on for someone who turned it
+            off -- the same reasoning as next-themes' own blocking theme script. */}
+        <AmbientMotionScript />
+      </head>
       <body>
         <ThemeProvider>
           <Aurora />
           {children}
         </ThemeProvider>
+        <AmbientMotionEffect />
         <RegisterServiceWorker />
       </body>
     </html>

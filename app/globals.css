@@ -266,6 +266,21 @@
     }
   }
 
+  /* The "Ambient animations" preference (Settings > Appearance, mock 4h). A SECOND, additive
+     way to reach the same collapsed state as the rule above -- never an override of it. A
+     viewer whose OS asks for reduced motion always gets it; this only lets someone who has NOT
+     asked at OS level still quieten the app on, say, a wall-mounted tablet they want perfectly
+     still. Set before first paint by AmbientMotionScript (root layout), so ambient motion
+     never starts and then stops. */
+  html[data-ambient-motion="off"] *,
+  html[data-ambient-motion="off"] *::before,
+  html[data-ambient-motion="off"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
   /* §10: "Reduced transparency: glass surfaces fall back to solid #16171B / #FFFFFF."
      Without this, a viewer who has asked their OS to reduce transparency still gets blur and
      translucency everywhere -- the setting exists for people who find it hard to read. */

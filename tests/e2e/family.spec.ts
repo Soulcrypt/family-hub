@@ -1,24 +1,7 @@
 import { execFile } from "node:child_process";
 import { expect, test } from "@playwright/test";
-
-function unique(prefix: string): string {
-  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
-}
-
-/**
- * Chooses an option in the "Role" picker -- now `components/ui/select.tsx`'s Radix combobox
- * (design-review fix: raw `<select>` -> the app's own styled Select), not a native `<select>`,
- * so `locator.selectOption()` no longer applies: that method only drives a real
- * `HTMLSelectElement`, and the visible control here is a `<button role="combobox">` (see
- * @radix-ui/react-select's `SelectTrigger`). Opens the listbox via its labelled trigger, then
- * clicks the option by its visible text -- `ROLE_LABELS` (lib/constants/roles.ts) capitalizes
- * the raw enum value, so `"child"` -> `"Child"`.
- */
-async function chooseRole(page: import("@playwright/test").Page, role: string): Promise<void> {
-  await page.getByLabel("Role").click();
-  const label = role.charAt(0).toUpperCase() + role.slice(1);
-  await page.getByRole("option", { name: label, exact: true }).click();
-}
+import { chooseRole } from "./support/controls";
+import { onboardHousehold, unique } from "./support/onboarding";
 
 // See tests/e2e/switcher.spec.ts's identical helper for the full rationale: this shells out to
 // the local Supabase CLI's Postgres directly (as the `postgres` superuser, bypassing RLS
@@ -73,56 +56,6 @@ async function memberRowForEmail(email: string): Promise<{ id: string; household
   const [id, household_id] = stdout.trim().split(",");
   if (!id || !household_id) throw new Error(`no member row found for ${email}`);
   return { id, household_id };
-}
-
-type OnboardMember = { name: string; role: string; birthday?: string };
-
-/**
- * Drives the full signup -> household -> members -> features -> ready flow (mirroring
- * tests/e2e/onboarding.spec.ts and switcher.spec.ts) and lands on /dashboard, which 404s until
- * Task 16 -- only ever asserted by URL here, never by content, matching every other spec in
- * this suite.
- */
-async function onboardHousehold(
-  page: import("@playwright/test").Page,
-  options: { ownerName: string; householdName: string; members?: OnboardMember[]; features?: string[] },
-): Promise<void> {
-  await page.goto("/signup");
-  await page.getByLabel("Your name").fill(options.ownerName);
-  await page.getByLabel("Email").fill(`${unique("owner")}@test.local`);
-  await page.getByLabel("Password").fill("correct-horse-battery");
-  await page.getByRole("button", { name: "Create account" }).click();
-
-  await expect(page.getByRole("heading", { name: /welcome to family hub/i })).toBeVisible();
-  await page.getByRole("button", { name: "Get started" }).click();
-
-  await page.getByLabel("Household name").fill(options.householdName);
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/step=members/);
-
-  for (const member of options.members ?? []) {
-    await page.getByRole("button", { name: "Add a family member" }).click();
-    await page.getByLabel("Name").fill(member.name);
-    await chooseRole(page, member.role);
-    if (member.birthday) await page.getByLabel("Birthday").fill(member.birthday);
-    await page.getByRole("button", { name: "Add member" }).click();
-    await expect(page.getByText(member.name, { exact: true })).toBeVisible();
-  }
-
-  await page.getByRole("link", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/step=location/);
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/step=features/);
-
-  for (const key of options.features ?? []) {
-    await page.locator(`#feature-${key}`).check();
-  }
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/step=widgets/);
-  await page.getByRole("button", { name: /finish setup/i }).click();
-  await expect(page).toHaveURL(/step=ready/);
-  await page.getByRole("button", { name: /go to my dashboard/i }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
 }
 
 test("a parent can view, edit, and deactivate family members", async ({ page }) => {

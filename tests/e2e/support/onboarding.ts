@@ -23,7 +23,7 @@ import { chooseRole } from "./controls";
  *    `<Link>` so Cmd/Ctrl/middle-click work, which changes its implicit ARIA role. Every other
  *    step submits a form.
  */
-export type OnboardMember = { name: string; role: string };
+export type OnboardMember = { name: string; role: string; birthday?: string };
 
 export type OnboardOptions = {
   ownerName: string;
@@ -55,6 +55,7 @@ export async function onboardHousehold(page: Page, options: OnboardOptions): Pro
     await page.getByRole("button", { name: "Add a family member" }).click();
     await page.getByLabel("Name").fill(member.name);
     await chooseRole(page, member.role);
+    if (member.birthday) await page.getByLabel("Birthday").fill(member.birthday);
     await page.getByRole("button", { name: "Add member" }).click();
     await expect(page.getByText(member.name).first()).toBeVisible();
   }

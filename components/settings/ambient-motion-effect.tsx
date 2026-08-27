@@ -1,61 +1,52 @@
 "use client";
 
 import { useEffect } from "react";
-import { readAmbientMotionPreference } from "@/lib/settings/ambient-motion";
+import {
+  AMBIENT_MOTION_STORAGE_KEY,
+  readAmbientMotionPreference,
+} from "@/lib/settings/ambient-motion";
 
-const STYLE_ID = "hearth-ambient-motion-override";
 const ATTRIBUTE = "data-ambient-motion";
 
-/** The actual CSS that disables ambient motion + staggered entrances when the preference is
- * off — mirrors app/globals.css's own `prefers-reduced-motion: reduce` kill-switch (kept as an
- * INDEPENDENT, additive mechanism: this attribute selector never overrides a genuine OS-level
- * reduced-motion request, it only adds a second way to reach the same collapsed-to-0.01ms
- * state). Injected as a real `<style>` element rather than relying on a Tailwind utility, since
- * this file cannot edit app/globals.css (out of this task's scope — see components/shell/**'s
- * "do not touch" boundary) and a JS-set `data-*` attribute has no effect without a stylesheet
- * rule that reads it. */
-const OVERRIDE_CSS = `
-html[${ATTRIBUTE}="off"] *,
-html[${ATTRIBUTE}="off"] *::before,
-html[${ATTRIBUTE}="off"] *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
-  scroll-behavior: auto !important;
-}
-`;
+/**
+ * Runs BEFORE first paint, from the root layout, so ambient motion never starts and then stops.
+ *
+ * This is the same trick `next-themes` uses for the theme class, and for the same reason: the
+ * preference lives in `localStorage`, which the server cannot read, so without a blocking
+ * script the aurora would drift and the widgets would stagger in for one frame before an
+ * effect could switch them off. Someone who has turned ambient motion off is precisely the
+ * person most bothered by seeing it flash.
+ *
+ * Reads inline rather than importing the helper, because this string executes as raw JS in the
+ * document head before any bundle has loaded. The storage key is interpolated from the single
+ * source of truth so the two cannot drift apart.
+ */
+export function AmbientMotionScript() {
+  const script = `
+try {
+  var v = window.localStorage.getItem(${JSON.stringify(AMBIENT_MOTION_STORAGE_KEY)});
+  document.documentElement.setAttribute(${JSON.stringify(ATTRIBUTE)}, v === "off" ? "off" : "on");
+} catch (e) {
+  document.documentElement.setAttribute(${JSON.stringify(ATTRIBUTE)}, "on");
+}`.trim();
 
-function applyPreference(enabled: boolean): void {
-  document.documentElement.setAttribute(ATTRIBUTE, enabled ? "on" : "off");
-
-  if (document.getElementById(STYLE_ID)) return;
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = OVERRIDE_CSS;
-  document.head.appendChild(style);
+  return <script dangerouslySetInnerHTML={{ __html: script }} />;
 }
 
 /**
- * Applies the "Ambient animations" preference (Settings > Appearance) to whatever page it is
- * mounted on — no visible output, just an effect. Mounted once per top-level route this task
- * owns (app/(app)/settings/layout.tsx, app/(app)/family/layout.tsx, app/switch/page.tsx): the
- * attribute it sets on `<html>` and the stylesheet it injects into `<head>` both persist across
- * client-side navigation for the rest of the session (React does not unmount `<html>`/`<head>`
- * on a route change), so once a visitor has passed through any of this task's screens the
- * preference keeps holding even after they navigate elsewhere in the app.
+ * Keeps the attribute in sync after hydration — for a toggle flipped in ANOTHER tab or window.
+ * The tab that made the change applies it synchronously itself (`applyAmbientMotionPreference`
+ * below), because the `storage` event deliberately never fires in the originating tab.
  *
- * Reads via `readAmbientMotionPreference()` (lib/settings/ambient-motion.ts) on mount AND
- * re-reads on the `storage` event, so a toggle flipped in one tab (or on the Appearance pane,
- * whose own component also calls `applyPreference` synchronously on change — see
- * `AmbientMotionToggle`) takes effect without a reload.
+ * The CSS that reads this attribute lives in `app/globals.css`, next to the
+ * `prefers-reduced-motion` rule it mirrors, rather than being injected at runtime: they are the
+ * same mechanism reached two ways, and keeping them apart is how they drift.
  */
 export function AmbientMotionEffect() {
   useEffect(() => {
-    applyPreference(readAmbientMotionPreference());
-
     function onStorage(event: StorageEvent) {
-      if (event.key === null || event.key === "hearth:ambient-motion") {
-        applyPreference(readAmbientMotionPreference());
+      if (event.key === null || event.key === AMBIENT_MOTION_STORAGE_KEY) {
+        applyAmbientMotionPreference(readAmbientMotionPreference());
       }
     }
     window.addEventListener("storage", onStorage);
@@ -65,9 +56,8 @@ export function AmbientMotionEffect() {
   return null;
 }
 
-/** Exported so `AmbientMotionToggle` (the control that actually flips the preference) can apply
- * it to the CURRENT tab immediately — the `storage` event above only fires in OTHER tabs/
- * windows, never the one that made the change. */
+/** Exported so the toggle can apply its own change to the CURRENT tab immediately — the
+ * `storage` event only fires in other tabs, never the one that made the change. */
 export function applyAmbientMotionPreference(enabled: boolean): void {
-  applyPreference(enabled);
+  document.documentElement.setAttribute(ATTRIBUTE, enabled ? "on" : "off");
 }

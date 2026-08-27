@@ -103,7 +103,7 @@ function InviteToLoginDialog({ member }: { member: RosterMember }) {
           <DialogTitle className="break-words">Invite {member.display_name} to log in</DialogTitle>
           {state.token ? null : (
             <DialogDescription>
-              They&rsquo;ll keep every point and everything else already on their profile — this only gives them
+              They’ll keep every point and everything else already on their profile — this only gives them
               their own login.
             </DialogDescription>
           )}
@@ -294,7 +294,11 @@ export function FamilyRoster({
               {ROLE_LABELS[member.role]}
             </span>
             {member.hasPin ? (
-              <span className="hidden shrink-0 text-[13px] tracking-[0.08em] text-text-tertiary sm:inline">
+              // `text-secondary`, not `text-tertiary`: this states whether a profile is
+              // PIN-protected, which is real information, and tertiary measures 3.02:1. It
+              // escaped the axe sweep only because a freshly-onboarded household has no PINs
+              // set, so this element never rendered while the scan ran.
+              <span className="hidden shrink-0 text-[13px] tracking-[0.08em] text-text-secondary sm:inline">
                 PIN &bull;&bull;&bull;&bull;
               </span>
             ) : null}

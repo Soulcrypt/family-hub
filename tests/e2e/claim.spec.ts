@@ -100,11 +100,13 @@ test("a login-less member with a points balance claims their own login via an in
   // --- Dana creates a claim invitation for Ivy, assigning her the "teen" role once she logs
   // in (deliberately different from her current "child" role, so the role update is also
   // provably applied by the claim, not just carried over). ---
-  await page.goto("/settings/members");
-  await expect(page.getByRole("heading", { name: "Members", exact: true })).toBeVisible();
+  await page.goto("/settings");
+  // The Family pane is headed by the household's own name (mock 4h), so "Members" is no
+  // longer a heading. Waiting on the row this test is about is a better guard anyway: it
+  // proves the roster actually rendered, not merely that some page loaded.
 
   const ivyRow = page.getByRole("listitem").filter({ hasText: childName });
-  await ivyRow.getByRole("button", { name: "Invite them to log in" }).click();
+  await ivyRow.getByRole("button", { name: "Invite to log in" }).click();
 
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
@@ -170,9 +172,9 @@ test("an already-used invite link shows a clear error instead of a broken page",
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(childName, { exact: true })).toBeVisible();
 
-  await page.goto("/settings/members");
+  await page.goto("/settings");
   const remyRow = page.getByRole("listitem").filter({ hasText: childName });
-  await remyRow.getByRole("button", { name: "Invite them to log in" }).click();
+  await remyRow.getByRole("button", { name: "Invite to log in" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("button", { name: "Create invite link" }).click();
   const inviteLink = await dialog.getByLabel("Invitation link").inputValue();
@@ -253,9 +255,9 @@ test("an account that already belongs to a household cannot be attached to a str
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(targetChildName, { exact: true })).toBeVisible();
 
-  await page.goto("/settings/members");
+  await page.goto("/settings");
   const charlieRow = page.getByRole("listitem").filter({ hasText: targetChildName });
-  await charlieRow.getByRole("button", { name: "Invite them to log in" }).click();
+  await charlieRow.getByRole("button", { name: "Invite to log in" }).click();
   const blairDialog = page.getByRole("dialog");
   await blairDialog.getByRole("button", { name: "Create invite link" }).click();
   const inviteLink = await blairDialog.getByLabel("Invitation link").inputValue();
@@ -334,9 +336,9 @@ test("loading or reloading the invite confirm screen never claims it -- only pre
   await page.getByRole("button", { name: "Add member" }).click();
   await expect(page.getByText(childName, { exact: true })).toBeVisible();
 
-  await page.goto("/settings/members");
+  await page.goto("/settings");
   const samRow = page.getByRole("listitem").filter({ hasText: childName });
-  await samRow.getByRole("button", { name: "Invite them to log in" }).click();
+  await samRow.getByRole("button", { name: "Invite to log in" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("button", { name: "Create invite link" }).click();
   const inviteLink = await dialog.getByLabel("Invitation link").inputValue();

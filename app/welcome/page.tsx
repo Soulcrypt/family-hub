@@ -22,7 +22,7 @@ export default function WelcomePage() {
             calm place.
           </p>
         </div>
-        <p className="text-xs text-text-tertiary">Meals · calendar · chores · Ivy · photos</p>
+        <p className="text-xs text-text-secondary">Meals · calendar · chores · Ivy · photos</p>
       </div>
 
       <div className="flex flex-col gap-2.5">
@@ -32,7 +32,13 @@ export default function WelcomePage() {
         <Button asChild size="lg" variant="secondary">
           <Link href="/login">Sign in</Link>
         </Button>
-        <p className="mt-1 text-center text-[11.5px] text-text-tertiary">Works offline · installs like an app</p>
+        {/* `text-secondary`, not `text-tertiary`. Tertiary is 3.29:1 light / 3.18:1 dark and cannot
+            carry text at all — app/globals.css documents it as non-essential meta only, and the
+            token test asserts it stays below 4.5:1 precisely so it does not creep into copy
+            like this. axe caught both of these lines on /welcome. */}
+        <p className="mt-1 text-center text-[11.5px] text-text-secondary">
+          Works offline · installs like an app
+        </p>
       </div>
     </main>
   );
