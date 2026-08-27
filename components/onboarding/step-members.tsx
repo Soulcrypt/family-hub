@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BirthdayPicker } from "@/components/family/birthday-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ColorPicker } from "@/components/family/color-picker";
@@ -155,8 +156,7 @@ export function StepMembers({ members, viewerMemberId }: { members: OnboardingMe
             />
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="birthday">Birthday</Label>
-              <Input id="birthday" name="birthday" type="date" />
+<BirthdayPicker idPrefix="onboarding-birthday" />
             </div>
 
             <label

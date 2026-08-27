@@ -79,12 +79,14 @@ export function WidgetGrid({ memberId, initialLayout, weather, news }: WidgetGri
 
   function widgetSlot(key: WidgetKey, index: number) {
     const meta = WIDGET_REGISTRY[key];
+    // A flex COLUMN, not a plain block with `h-full` on the widget. Grid items stretch, and the
+    // widget has to fill that height or a one-line card (news with no headlines) sits visibly
+    // short beside weather -- but edit mode renders its move buttons as a sibling BELOW the
+    // widget, so giving the widget the full height pushes them outside the card and they stop
+    // being clickable. `flex-1` lets the widget take whatever is left after the buttons.
     return (
-      <WidgetEntrance key={key} index={index} className="relative h-full">
-        {/* `h-full` down the chain: without it a one-line widget (news with no headlines)
-            renders shorter than its row-mates and the row reads as broken rather than
-            sparse. Grid items stretch by default; each wrapper has to pass that height on. */}
-        <div className={cn("h-full", editMode && "hearth-edit-jiggle")}>
+      <WidgetEntrance key={key} index={index} className="relative flex h-full flex-col">
+        <div className={cn("min-h-0 flex-1", editMode && "hearth-edit-jiggle")}>
           {renderWidget(key, weather, news)}
         </div>
         {editMode ? (
@@ -97,7 +99,7 @@ export function WidgetGrid({ memberId, initialLayout, weather, news }: WidgetGri
             >
               <X aria-hidden className="size-4" strokeWidth={2.5} />
             </button>
-            <div className="mt-2 flex justify-center gap-2">
+            <div className="mt-2 flex shrink-0 justify-center gap-2">
               <Button
                 type="button"
                 variant="secondary"

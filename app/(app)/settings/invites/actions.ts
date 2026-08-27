@@ -6,6 +6,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { requireAccountMembership } from "@/lib/auth/active-member";
 import { canInvite } from "@/lib/auth/permissions";
 import { roleSchema } from "@/lib/validation/schemas";
+import { formField } from "@/lib/validation/form-field";
 
 export type InviteState = { error: string | null; token: string | null };
 
@@ -32,13 +33,13 @@ export async function createInviteAction(_prev: InviteState, formData: FormData)
   // construction here -- narrowed (not asserted) for the created_by FK this insert needs.
   if (!account.user_id) return { error: "You do not have permission to invite", token: null };
 
-  const parsedRole = roleSchema.safeParse(formData.get("role"));
+  const parsedRole = roleSchema.safeParse(formField(formData, "role"));
   if (!parsedRole.success) return { error: "Choose a role", token: null };
 
-  const rawMemberId = formData.get("memberId");
+  const rawMemberId = formField(formData, "memberId");
   const memberId = typeof rawMemberId === "string" && rawMemberId ? rawMemberId : null;
 
-  const rawEmail = formData.get("email");
+  const rawEmail = formField(formData, "email");
   const email = typeof rawEmail === "string" && rawEmail.trim() ? rawEmail.trim() : null;
 
   const supabase = await createServerClient();

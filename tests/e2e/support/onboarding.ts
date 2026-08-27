@@ -37,6 +37,37 @@ function unique(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 }
 
+/**
+ * Fills the month / day / year birthday picker (components/family/birthday-picker.tsx), which
+ * replaced `<input type="date">`. There is no single field to `.fill()` any more: the three
+ * controls compose into one hidden ISO value, which is what the form actually posts.
+ */
+export async function fillBirthday(page: Page, iso: string): Promise<void> {
+  const [year, month, day] = iso.split("-") as [string, string, string];
+  const monthName = MONTH_NAMES[Number(month) - 1] as string;
+
+  await page.getByLabel("Birth month").click();
+  await page.getByRole("option", { name: monthName, exact: true }).click();
+  await page.getByLabel("Birth day").click();
+  await page.getByRole("option", { name: String(Number(day)), exact: true }).click();
+  await page.getByLabel("Birth year").fill(year);
+}
+
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
+
 export async function onboardHousehold(page: Page, options: OnboardOptions): Promise<void> {
   await page.goto("/signup");
   await page.getByLabel("Your name").fill(options.ownerName);
@@ -55,7 +86,7 @@ export async function onboardHousehold(page: Page, options: OnboardOptions): Pro
     await page.getByRole("button", { name: "Add a family member" }).click();
     await page.getByLabel("Name").fill(member.name);
     await chooseRole(page, member.role);
-    if (member.birthday) await page.getByLabel("Birthday").fill(member.birthday);
+    if (member.birthday) await fillBirthday(page, member.birthday);
     await page.getByRole("button", { name: "Add member" }).click();
     await expect(page.getByText(member.name).first()).toBeVisible();
   }

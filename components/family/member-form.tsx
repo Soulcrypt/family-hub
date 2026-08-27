@@ -27,6 +27,7 @@ import { MemberAvatar } from "@/components/family/member-avatar";
 import { ColorPicker } from "@/components/family/color-picker";
 import { ROLES, ROLE_LABELS, type MemberRole } from "@/lib/constants/roles";
 import { requiresPin } from "@/lib/auth/permissions";
+import { BirthdayPicker, BirthdayReadOnly } from "@/components/family/birthday-picker";
 import { formatBirthday } from "@/lib/utils";
 
 export type FamilyMemberDetail = {
@@ -249,14 +250,12 @@ export function MemberForm({ member, canManage, isSelf }: MemberFormProps) {
           )}
 
           {canManage ? (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="birthday">Birthday</Label>
-              <Input id="birthday" name="birthday" type="date" defaultValue={member.birthday ?? ""} disabled={pending} />
-            </div>
+            <BirthdayPicker defaultValue={member.birthday} disabled={pending} />
           ) : (
             <div className="flex flex-col gap-2">
-              <Label htmlFor="birthday">Birthday</Label>
-              <Input id="birthday" type="date" defaultValue={member.birthday ?? ""} disabled />
+              <BirthdayReadOnly value={member.birthday} />
+              {/* Still posted, so a non-admin submitting the rest of the form cannot silently
+                  blank a birthday they were never allowed to edit. */}
               <input type="hidden" name="birthday" value={member.birthday ?? ""} />
               <p className="text-[13px] text-text-secondary">Only a parent or owner can change this.</p>
             </div>

@@ -92,7 +92,11 @@ test("a parent can view, edit, and deactivate family members", async ({ page }) 
   await page.goto(`/family/${childRow.id}`);
   await expect(page.getByRole("heading", { name: childName, exact: true })).toBeVisible();
   await expect(page.locator('select[name="role"]')).toHaveValue("child");
-  await expect(page.getByLabel("Birthday")).toHaveValue("2015-03-03");
+  // The birthday now round-trips through three controls rather than one native date input,
+  // so it is asserted the way a person would read it back off the screen.
+  await expect(page.getByLabel("Birth month")).toHaveText("March");
+  await expect(page.getByLabel("Birth day")).toHaveText("3");
+  await expect(page.getByLabel("Birth year")).toHaveValue("2015");
 
   // --- Editing the name persists after reload. ---
   await page.getByLabel("Name").fill("Ivy Renamed");

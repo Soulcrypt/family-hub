@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import type { AuthError } from "@supabase/supabase-js";
 import { createServerClient } from "@/lib/supabase/server";
 import { signInSchema, signUpSchema } from "@/lib/validation/schemas";
+import { formField } from "@/lib/validation/form-field";
 
 /**
  * `email` (and `displayName` for sign-up) echo the value the visitor actually typed back into
@@ -58,13 +59,13 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   // submission (bad schema OR a rejected signUp() call below) can hand the visitor's own name
   // and email straight back, not just re-derive them from `parsed.data` (which doesn't exist
   // yet on the schema-failure branch).
-  const rawEmail = typeof formData.get("email") === "string" ? (formData.get("email") as string) : null;
-  const rawDisplayName = typeof formData.get("displayName") === "string" ? (formData.get("displayName") as string) : null;
+  const rawEmail = typeof formData.get("email") === "string" ? (formField(formData, "email") as string) : null;
+  const rawDisplayName = typeof formData.get("displayName") === "string" ? (formField(formData, "displayName") as string) : null;
 
   const parsed = signUpSchema.safeParse({
-    displayName: formData.get("displayName"),
-    email: formData.get("email"),
-    password: formData.get("password"),
+    displayName: formField(formData, "displayName"),
+    email: formField(formData, "email"),
+    password: formField(formData, "password"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Check your details", email: rawEmail, displayName: rawDisplayName };
@@ -78,18 +79,18 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   });
   if (error) return { error: mapSignUpError(error), email: parsed.data.email, displayName: parsed.data.displayName };
 
-  redirect(safeNextPath(formData.get("next")) ?? "/onboarding");
+  redirect(safeNextPath(formField(formData, "next")) ?? "/onboarding");
 }
 
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
   // See signUp()'s identical comment: the raw, unvalidated email is what gets echoed back on
   // any failure branch, so a bad-password resubmit doesn't also make the visitor retype an
   // email address they typed correctly the first time.
-  const rawEmail = typeof formData.get("email") === "string" ? (formData.get("email") as string) : null;
+  const rawEmail = typeof formData.get("email") === "string" ? (formField(formData, "email") as string) : null;
 
   const parsed = signInSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
+    email: formField(formData, "email"),
+    password: formField(formData, "password"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Check your details", email: rawEmail, displayName: null };
@@ -105,5 +106,5 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
     };
   }
 
-  redirect(safeNextPath(formData.get("next")) ?? "/");
+  redirect(safeNextPath(formField(formData, "next")) ?? "/");
 }

@@ -9,6 +9,7 @@ import { householdSchema, memberSchema } from "@/lib/validation/schemas";
 import { getAccountMembership, requireAccountMembership, setActiveMember } from "@/lib/auth/active-member";
 import { canManageMembers } from "@/lib/auth/permissions";
 import { isFeatureKey, DEFAULT_WIDGETS, type EnabledFeatures, type WidgetKey } from "@/lib/constants/features";
+import { formField } from "@/lib/validation/form-field";
 
 export type ActionState = { error: string | null };
 
@@ -59,7 +60,7 @@ export async function createHouseholdAction(_prev: ActionState, formData: FormDa
   }
 
   const parsed = householdSchema.safeParse({
-    name: formData.get("name"),
+    name: formField(formData, "name"),
     timezone: formData.get("timezone") || "UTC",
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check your details" };
@@ -106,8 +107,8 @@ export async function createHouseholdAction(_prev: ActionState, formData: FormDa
 
 export async function addMemberAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = memberSchema.safeParse({
-    displayName: formData.get("displayName"),
-    role: formData.get("role"),
+    displayName: formField(formData, "displayName"),
+    role: formField(formData, "role"),
     color: formData.get("color") || "#C4643C",
     birthday: formData.get("birthday") || "",
     hasLogin: formData.get("hasLogin") === "on",
@@ -190,7 +191,7 @@ export async function saveLocationAction(_prev: ActionState, formData: FormData)
   const account = await requireAccountMembership();
   if (!canManageMembers(account.role)) return { error: "You do not have permission to change household settings" };
 
-  const parsed = locationSchema.safeParse({ label: formData.get("label") });
+  const parsed = locationSchema.safeParse({ label: formField(formData, "label") });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check your details" };
 
   const supabase = await createServerClient();

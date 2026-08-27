@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MemberAvatar } from "@/components/family/member-avatar";
+import { BirthdayPicker } from "@/components/family/birthday-picker";
 import { ColorPicker } from "@/components/family/color-picker";
 import { nextAvailableMemberColor } from "@/lib/constants/member-color-swatches";
 import { ROLES, ROLE_LABELS, type MemberRole } from "@/lib/constants/roles";
@@ -105,8 +106,7 @@ function AddMemberDialog({ usedColors }: { usedColors: string[] }) {
           />
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="add-birthday">Birthday</Label>
-            <Input id="add-birthday" name="birthday" type="date" />
+<BirthdayPicker idPrefix="add-birthday" />
           </div>
 
           {state.error ? (

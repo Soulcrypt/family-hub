@@ -5,6 +5,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { requireAccountMembership } from "@/lib/auth/active-member";
 import { canManageMembers } from "@/lib/auth/permissions";
 import { memberSchema, pinSchema } from "@/lib/validation/schemas";
+import { formField } from "@/lib/validation/form-field";
 
 export type MemberState = { error: string | null };
 
@@ -47,9 +48,9 @@ function genericErrorFor(action: "update" | "add" | "deactivate" | "pin"): strin
 export async function updateMemberAction(_prev: MemberState, formData: FormData): Promise<MemberState> {
   const memberId = String(formData.get("memberId") ?? "");
   const parsed = memberSchema.omit({ hasLogin: true, email: true }).safeParse({
-    displayName: formData.get("displayName"),
-    role: formData.get("role"),
-    color: formData.get("color"),
+    displayName: formField(formData, "displayName"),
+    role: formField(formData, "role"),
+    color: formField(formData, "color"),
     birthday: formData.get("birthday") || "",
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check your details" };
@@ -92,8 +93,8 @@ export async function updateMemberAction(_prev: MemberState, formData: FormData)
  * `accept_invite` (Task 14). */
 export async function addMemberAction(_prev: MemberState, formData: FormData): Promise<MemberState> {
   const parsed = memberSchema.safeParse({
-    displayName: formData.get("displayName"),
-    role: formData.get("role"),
+    displayName: formField(formData, "displayName"),
+    role: formField(formData, "role"),
     color: formData.get("color") || "#C4643C",
     birthday: formData.get("birthday") || "",
     hasLogin: false,
@@ -170,7 +171,7 @@ export async function deactivateMemberAction(_prev: MemberState, formData: FormD
  */
 export async function setPinAction(_prev: MemberState, formData: FormData): Promise<MemberState> {
   const memberId = String(formData.get("memberId") ?? "");
-  const parsed = pinSchema.safeParse({ pin: formData.get("pin") });
+  const parsed = pinSchema.safeParse({ pin: formField(formData, "pin") });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Enter a 4-digit PIN" };
 
   await requireAccountMembership();

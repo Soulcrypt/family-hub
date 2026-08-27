@@ -7,6 +7,7 @@ import { canEditSettings } from "@/lib/auth/permissions";
 import { householdSchema } from "@/lib/validation/schemas";
 import { isFeatureKey, type EnabledFeatures } from "@/lib/constants/features";
 import type { Json } from "@/lib/supabase/types";
+import { formField } from "@/lib/validation/form-field";
 
 export type SettingsState = { error: string | null };
 
@@ -35,7 +36,7 @@ function genericErrorFor(action: "household" | "features"): string {
  */
 export async function updateHouseholdAction(_prev: SettingsState, formData: FormData): Promise<SettingsState> {
   const parsed = householdSchema.safeParse({
-    name: formData.get("name"),
+    name: formField(formData, "name"),
     timezone: formData.get("timezone") || "UTC",
     weekStart: formData.get("weekStart") ?? 0,
   });
