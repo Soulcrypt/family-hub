@@ -16,3 +16,6 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Impeccable design-hook scan cache -- machine-local, regenerated on every scan.
+.impeccable/hook.cache.json
