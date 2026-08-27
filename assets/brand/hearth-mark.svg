@@ -1,22 +1,10 @@
-<!--
-  Hearth mark — standalone source of truth for PWA icon rasterization.
-
-  KEEP IN SYNC WITH components/brand/hearth-mark.tsx. Same viewBox (0 0 64 64), same three
-  rects (the rounded-square plate + the two-stroke "H"), same coordinates. If one changes,
-  change the other — this file exists only because raster icons need a file ImageMagick can
-  render, not a React component; it is not a second design.
-
-  Rendered at full bleed (no extra padding) for the "any"-purpose icons: the rounded square
-  IS the icon, edge to edge. When rasterizing, flatten onto the same accent color
-  (`-background "#0A84FF" -alpha remove -alpha off`) so the four corners outside the rounded
-  rect come out fully opaque instead of transparent — see supabase/seed.sql sibling task's
-  report for why a transparent "any" icon is illegible on a matching launcher background.
--->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="18" fill="#0A84FF" />
-  <g fill="#FFFFFF">
-    <rect x="18" y="16" width="7.5" height="32" rx="3.75" />
-    <rect x="38.5" y="16" width="7.5" height="32" rx="3.75" />
-    <rect x="18" y="28.25" width="28" height="7.5" rx="3.75" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254" width="1254" height="1254">
+  <!-- Hearth mark. Traced from the artwork in assets/brand/hearth-logo.png, recoloured from
+       its original #0167FD to the design system's single accent #0A84FF (Design-Spec 2.1) so
+       the app never shows two blues. Keep this file and components/brand/hearth-mark.tsx in
+       sync: both carry the same two paths. -->
+  <g transform="translate(0.000000,1254.000000) scale(0.100000,-0.100000)" fill-rule="evenodd">
+    <path fill="#0A84FF" d="M3790 10275 c-253 -31 -536 -137 -755 -283 -405 -271 -672 -698 -747 -1192 -10 -68 -13 -573 -13 -2470 l0 -2385 22 -117 c99 -515 413 -948 873 -1206 137 -77 349 -152 530 -189 79 -16 263 -17 2500 -21 1697 -2 2447 0 2523 8 143 14 308 57 464 120 144 58 223 101 367 203 318 225 562 580 660 962 57 223 56 157 56 2645 0 1427 -4 2321 -10 2380 -53 507 -318 954 -740 1252 -146 102 -358 200 -543 249 -233 61 -133 59 -2722 58 -1847 -1 -2383 -4 -2465 -14z"/>
+    <path fill="#FFFFFF" d="M2919 9923 c-13 -16 -12 -17 4 -4 9 7 17 15 17 17 0 8 -8 3 -21 -13z M9610 9926 c0 -2 8 -10 18 -17 15 -13 16 -12 3 4 -13 16 -21 21 -21 13z M2784 9828 l-19 -23 23 19 c21 18 27 26 19 26 -2 0 -12 -10 -23 -22z M4065 8822 c-120 -41 -205 -117 -258 -230 l-32 -67 -3 -2235 c-2 -2208 -2 -2236 18 -2300 34 -113 122 -205 237 -251 54 -22 75 -24 316 -27 237 -3 264 -2 325 17 125 38 216 120 264 238 l23 58 5 870 5 870 28 88 c49 158 129 287 250 404 118 114 242 189 392 236 145 45 198 49 680 45 425 -4 454 -5 530 -26 111 -30 285 -119 378 -193 150 -120 279 -313 329 -494 22 -79 22 -91 28 -950 l5 -870 32 -66 c41 -82 111 -150 201 -192 l67 -32 250 -3 c270 -4 323 2 410 45 107 55 170 130 206 244 18 59 19 130 19 2263 0 2380 3 2253 -51 2358 -33 65 -120 145 -196 181 l-68 32 -411 0 -410 0 -76 -38 c-82 -40 -162 -116 -199 -189 -46 -89 -49 -138 -49 -755 l0 -582 -24 -28 -24 -28 -991 0 -990 0 -23 23 -23 23 -5 617 c-6 601 -6 618 -27 674 -52 139 -159 237 -298 274 -38 10 -142 14 -420 14 -325 -1 -376 -3 -420 -18z M10272 6300 c0 -14 2 -19 5 -12 2 6 2 18 0 25 -3 6 -5 1 -5 -13z M6187 5989 c-11 -15 -13 -37 -10 -78 10 -110 -28 -247 -97 -345 -15 -23 -63 -75 -107 -116 -261 -250 -311 -315 -357 -460 -73 -229 -19 -462 147 -636 67 -72 128 -114 161 -114 29 0 45 41 36 90 -37 186 28 388 171 531 69 69 104 83 131 49 10 -12 18 -39 18 -59 1 -56 32 -113 111 -197 96 -104 140 -196 147 -302 7 -116 33 -134 128 -87 106 53 181 142 225 266 32 89 32 308 1 451 -59 271 -153 487 -300 688 -104 142 -322 340 -374 340 -9 0 -23 -9 -31 -21z M10273 5820 c0 -30 2 -43 4 -27 2 15 2 39 0 55 -2 15 -4 2 -4 -28z M2262 5070 c0 -14 2 -19 5 -12 2 6 2 18 0 25 -3 6 -5 1 -5 -13z M5277 4126 c-87 -32 -117 -83 -117 -203 0 -100 13 -132 76 -179 l37 -29 973 -3 973 -2 47 21 c70 33 98 83 103 180 4 98 -20 156 -82 197 l-41 27 -965 2 c-801 2 -973 0 -1004 -11z M9779 2903 c-13 -16 -12 -17 4 -4 16 13 21 21 13 21 -2 0 -10 -8 -17 -17z M2760 2886 c0 -2 8 -10 18 -17 15 -13 16 -12 3 4 -13 16 -21 21 -21 13z M4753 2393 c9 -2 23 -2 30 0 6 3 -1 5 -18 5 -16 0 -22 -2 -12 -5z M5663 2393 c9 -2 23 -2 30 0 6 3 -1 5 -18 5 -16 0 -22 -2 -12 -5z"/>
   </g>
 </svg>
