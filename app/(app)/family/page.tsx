@@ -36,8 +36,8 @@ export default async function FamilyPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-6 py-10">
       <header className="mb-8">
-        <h1 className="text-3xl">Family</h1>
-        <p className="mt-1 text-muted-foreground">Everyone in your household.</p>
+        <h1 className="text-[30px] font-bold tracking-[-0.02em] text-text">Family</h1>
+        <p className="mt-1 text-[14px] text-text-secondary">Everyone in your household.</p>
       </header>
       <MemberGrid
         members={members ?? []}

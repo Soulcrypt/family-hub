@@ -34,10 +34,10 @@ export function SetPinForm({ memberId }: { memberId: string }) {
   }, [pending, state]);
 
   return (
-    <div className="flex flex-col gap-3 rounded-[18px] bg-surface px-5 py-5 shadow-elevation ring-1 ring-[color:var(--color-muted)]">
+    <div className="glass flex flex-col gap-3 rounded-card px-5 py-5">
       <div>
-        <h2 className="text-lg font-medium text-ink">Your PIN</h2>
-        <p className="text-sm text-muted-foreground">Used to switch into your profile on a shared device.</p>
+        <h3 className="text-[15px] font-semibold text-text">Your PIN</h3>
+        <p className="text-[13px] text-text-secondary">Used to switch into your profile on a shared device.</p>
       </div>
       <form ref={formRef} action={formAction} className="flex flex-col gap-3">
         <input type="hidden" name="memberId" value={memberId} />
@@ -56,12 +56,12 @@ export function SetPinForm({ memberId }: { memberId: string }) {
           />
         </div>
         {state.error ? (
-          <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
+          <p role="alert" className="rounded-inset bg-danger/10 px-4 py-3 text-[13px] text-danger-text">
             {state.error}
           </p>
         ) : null}
         <div>
-          <Button type="submit" variant="outline" disabled={pending}>
+          <Button type="submit" variant="secondary" disabled={pending}>
             {pending ? "Saving…" : "Save PIN"}
           </Button>
         </div>

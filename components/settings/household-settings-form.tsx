@@ -52,24 +52,24 @@ function ReadOnlyHousehold({
   ).map((feature) => feature.label);
 
   return (
-    <dl className="flex flex-col gap-3 rounded-[18px] bg-surface px-5 py-5 shadow-elevation ring-1 ring-[color:var(--color-muted)]">
+    <dl className="glass flex flex-col gap-3 rounded-card px-5 py-5">
       <div>
-        <dt className="text-sm text-muted-foreground">Name</dt>
-        <dd className="min-w-0 truncate break-words text-base text-ink">{household.name}</dd>
+        <dt className="text-[13px] text-text-secondary">Name</dt>
+        <dd className="min-w-0 truncate text-[15px] text-text">{household.name}</dd>
       </div>
       <div>
-        <dt className="text-sm text-muted-foreground">Timezone</dt>
-        <dd className="text-base text-ink">{household.timezone}</dd>
+        <dt className="text-[13px] text-text-secondary">Timezone</dt>
+        <dd className="text-[15px] text-text">{household.timezone}</dd>
       </div>
       <div>
-        <dt className="text-sm text-muted-foreground">Week starts on</dt>
-        <dd className="text-base text-ink">{weekdayLabel(household.weekStart)}</dd>
+        <dt className="text-[13px] text-text-secondary">Week starts on</dt>
+        <dd className="text-[15px] text-text">{weekdayLabel(household.weekStart)}</dd>
       </div>
       <div>
-        <dt className="text-sm text-muted-foreground">Features</dt>
-        <dd className="text-base text-ink">{enabledLabels.join(", ")}</dd>
+        <dt className="text-[13px] text-text-secondary">Features</dt>
+        <dd className="text-[15px] text-text">{enabledLabels.join(", ")}</dd>
       </div>
-      <p className="text-sm text-muted-foreground">Only a parent or owner can change these.</p>
+      <p className="text-[13px] text-text-secondary">Only a parent or owner can change these.</p>
     </dl>
   );
 }
@@ -84,10 +84,7 @@ export function HouseholdSettingsForm({ household, enabledFeatures, timeZones, c
 
   return (
     <div className="flex flex-col gap-6">
-      <form
-        action={householdAction}
-        className="flex flex-col gap-4 rounded-[18px] bg-surface px-5 py-5 shadow-elevation ring-1 ring-[color:var(--color-muted)]"
-      >
+      <form action={householdAction} className="glass flex flex-col gap-4 rounded-card px-5 py-5">
         <div className="flex flex-col gap-2">
           <Label htmlFor="name">Household name</Label>
           <Input
@@ -134,7 +131,7 @@ export function HouseholdSettingsForm({ household, enabledFeatures, timeZones, c
         </div>
 
         {householdState.error ? (
-          <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
+          <p role="alert" className="rounded-inset bg-danger/10 px-4 py-3 text-[13px] text-danger-text">
             {householdState.error}
           </p>
         ) : null}
@@ -146,28 +143,25 @@ export function HouseholdSettingsForm({ household, enabledFeatures, timeZones, c
         </div>
       </form>
 
-      <form
-        action={featuresAction}
-        className="flex flex-col gap-4 rounded-[18px] bg-surface px-5 py-5 shadow-elevation ring-1 ring-[color:var(--color-muted)]"
-      >
+      <form action={featuresAction} className="glass flex flex-col gap-4 rounded-card px-5 py-5">
         <div>
-          <h2 className="text-lg font-medium text-ink">Features</h2>
-          <p className="text-sm text-muted-foreground">Turn on what your family will use.</p>
+          <h3 className="text-[15px] font-semibold text-text">Features</h3>
+          <p className="text-[13px] text-text-secondary">Turn on what your family will use.</p>
         </div>
 
         <ul className="flex flex-col gap-2">
           {FEATURES.map((feature) => (
-            <li
-              key={feature.key}
-              className="rounded-[14px] bg-sunken has-disabled:opacity-80"
-            >
-              <label htmlFor={`feature-${feature.key}`} className="flex min-h-[44px] cursor-pointer items-center gap-3 px-4 py-3 has-disabled:cursor-not-allowed">
+            <li key={feature.key} className="rounded-inset bg-inset has-disabled:opacity-80">
+              <label
+                htmlFor={`feature-${feature.key}`}
+                className="flex min-h-[44px] cursor-pointer items-center gap-3 px-4 py-3 has-disabled:cursor-not-allowed"
+              >
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-sm font-medium">
+                  <span className="text-[14px] font-medium text-text">
                     {feature.label}
-                    {feature.locked ? <span className="ml-2 text-xs text-muted-foreground">Always on</span> : null}
+                    {feature.locked ? <span className="ml-2 text-[12px] text-text-tertiary">Always on</span> : null}
                   </span>
-                  <span className="text-xs text-muted-foreground">{feature.description}</span>
+                  <span className="text-[12px] text-text-secondary">{feature.description}</span>
                 </span>
                 <Switch
                   id={`feature-${feature.key}`}
@@ -182,7 +176,7 @@ export function HouseholdSettingsForm({ household, enabledFeatures, timeZones, c
         </ul>
 
         {featuresState.error ? (
-          <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
+          <p role="alert" className="rounded-inset bg-danger/10 px-4 py-3 text-[13px] text-danger-text">
             {featuresState.error}
           </p>
         ) : null}

@@ -110,12 +110,16 @@ async function onboardHousehold(
   }
 
   await page.getByRole("link", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=location/);
+  await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/step=features/);
 
   for (const key of options.features ?? []) {
     await page.locator(`#feature-${key}`).check();
   }
   await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=widgets/);
+  await page.getByRole("button", { name: /finish setup/i }).click();
   await expect(page).toHaveURL(/step=ready/);
   await page.getByRole("button", { name: /go to my dashboard/i }).click();
   await expect(page).toHaveURL(/\/dashboard/);
@@ -236,58 +240,70 @@ test("a non-admin sees no edit controls on another member's profile", async ({ p
   await expect(page.getByLabel("New pin")).not.toBeVisible();
 });
 
-test("the app shell shows the sidebar on wide viewports and the bottom navigation on phone, marking the active item", async ({
+test("the app shell shows the top bar on wide viewports and the floating dock on phone, marking the active item", async ({
   page,
 }, testInfo) => {
   const householdName = unique("The Shell Family");
   await onboardHousehold(page, { ownerName: "Sasha Owner", householdName });
 
-  await page.goto("/family");
+  // /dashboard, not /family: the concurrent Hearth shell rebuild
+  // (components/shell/nav-items.ts, out of this task's touchable set) deliberately took
+  // Family and Settings OUT of the primary top bar/dock nav -- Design-Spec §5 puts them behind
+  // the profile avatar's account overflow (`/account`) instead, so there is no longer a
+  // "Family" link in either nav to mark current. Home is unconditionally in both, so it's
+  // what this test uses to prove the active-item marking still works.
+  await page.goto("/dashboard");
 
-  const sidebar = page.locator("aside");
-  // The bottom nav's own top-level element is the only <nav> carrying Tailwind's literal
-  // `fixed` utility class on this page -- the sidebar's internal <nav aria-label="Main"> does
-  // not, so this selector cannot accidentally match it.
-  const bottomNav = page.locator("nav.fixed");
+  // The concurrent Hearth shell rebuild (commit b544a7e, components/shell/**, out of this
+  // task's touchable set) replaced the old `<aside>` sidebar + separate bottom-nav pair with
+  // Design-Spec §5's top bar (desktop) and floating dock (phone) -- both are real elements on
+  // every viewport, toggled by CSS (`hidden md:block` / `md:hidden`), not two different navs.
+  // `getByRole("banner")`, not a plain `header` tag locator, for the top bar: this page's OWN
+  // `<header>` (app/(app)/family/page.tsx) would otherwise match too, since a bare tag
+  // selector doesn't know one is the page's top-level banner and the other is nested content.
+  // The implicit ARIA `banner` role is exactly that distinction, computed by the browser
+  // itself (a `<header>` only gets it when it is NOT a descendant of article/aside/main/nav/
+  // section -- this page's own header is inside `<main>`, so it never qualifies). The dock is
+  // the only `<nav>` on this page carrying Tailwind's literal `fixed` utility class, so a
+  // class-scoped locator is unambiguous without needing the same distinction.
+  const topBar = page.getByRole("banner");
+  const dock = page.locator("nav.fixed");
 
   if (testInfo.project.name === "phone") {
-    await expect(sidebar).not.toBeVisible();
-    await expect(bottomNav).toBeVisible();
+    await expect(topBar).not.toBeVisible();
+    await expect(dock).toBeVisible();
   } else {
-    await expect(sidebar).toBeVisible();
-    await expect(bottomNav).not.toBeVisible();
+    await expect(topBar).toBeVisible();
+    await expect(dock).not.toBeVisible();
   }
 
-  // Whichever copy of the nav is actually on screen marks Family as current -- `display:none`
-  // removes the OTHER copy from the accessibility tree entirely, so exactly one match is
-  // expected regardless of viewport.
-  const familyLink = page.getByRole("link", { name: "Family", exact: true });
-  await expect(familyLink).toHaveCount(1);
-  await expect(familyLink).toHaveAttribute("aria-current", "page");
+  // Whichever copy of the nav is actually on screen marks Home as current -- `display:none`
+  // removes the OTHER copy from the accessibility tree entirely (Playwright's role queries
+  // exclude CSS-hidden elements by default), so exactly one match is expected regardless of
+  // viewport.
+  const homeLink = page.getByRole("link", { name: "Home", exact: true });
+  await expect(homeLink).toHaveCount(1);
+  await expect(homeLink).toHaveAttribute("aria-current", "page");
 });
 
 test("the bottom navigation's overflow disclosure opens, traps focus, and navigates", async ({ page }, testInfo) => {
   // Currently unreachable in the real app: this task's fix gates every nav link on
   // `hasScreen` (lib/constants/features.ts, components/shell/nav-items.ts), and today only
-  // Home, Family and Settings have one -- 3 items, nowhere near bottom-nav.tsx's MAX_VISIBLE
-  // (5). Before the fix, enabling all 4 optional features produced 7 (fake) nav items and
-  // forced this overflow to appear; now no real household configuration can, until SP2+ ships
-  // a screen for an optional feature. The slicing logic itself (splitBottomNavItems) stays
-  // covered directly with synthetic data in lib/__tests__/bottom-nav-reachability.test.ts, so
-  // this UI-interaction test is skipped rather than deleted or faked -- re-enable it (with a
-  // features list drawn from whatever ships a real screen first) once that stops being true.
-  test.skip(true, "no optional feature has a screen yet, so the bottom nav can never overflow for a real household");
+  // Home, Family and Settings have one. The concurrent Hearth shell rebuild
+  // (components/shell/dock.tsx, out of this task's touchable set) also removed the "More"
+  // overflow disclosure entirely -- the dock renders every item directly with no MAX_VISIBLE
+  // slicing today -- so this UI-interaction test is skipped rather than deleted or faked:
+  // re-enable it (against whatever overflow mechanism, if any, the dock grows) once a real
+  // household configuration can actually produce more items than it can show.
+  test.skip(true, "the current dock has no overflow disclosure, so it can never overflow for a real household");
 
-  test.skip(testInfo.project.name !== "phone", 'the "More" overflow disclosure only exists in the phone bottom nav');
+  test.skip(testInfo.project.name !== "phone", 'the "More" overflow disclosure only exists in the phone dock');
 
   const householdName = unique("The Overflow Family");
-  // 7 total nav items (Home + all 4 optional features + the always-on Family/Settings)
-  // exceeds bottom-nav.tsx's MAX_VISIBLE (5) -- see splitBottomNavItems -- so Family and
-  // Settings land behind "More".
   await onboardHousehold(page, {
     ownerName: "Taylor Owner",
     householdName,
-    features: ["calendar", "meals", "chores", "habits"],
+    features: ["calendar", "meals", "chores", "ivy", "photos", "budget"],
   });
 
   await page.goto("/family");
@@ -328,10 +344,10 @@ test("the bottom navigation's overflow disclosure opens, traps focus, and naviga
 
 /**
  * Regression coverage for the shipping bug this task fixes: a household that enables every
- * optional feature in onboarding got a sidebar/bottom-nav link straight to a 404, because
- * lib/constants/features.ts listed calendar/meals/chores/habits as choosable long before any
- * of SP2-SP5 built a screen for them, and navItemsFor() (components/shell/nav-items.ts) gated
- * links purely on the enabled flag, not on whether a screen exists to receive them.
+ * optional feature in onboarding got a nav link straight to a 404, because
+ * lib/constants/features.ts listed features as choosable long before any of SP2+ built a
+ * screen for them, and navItemsFor() (components/shell/nav-items.ts) gated links purely on the
+ * enabled flag, not on whether a screen exists to receive them.
  *
  * A test that hardcodes `/calendar` only catches THIS feature going stale -- the same bug
  * reappears the day `/meals` is enabled by a real household. So this test doesn't hardcode a
@@ -341,10 +357,10 @@ test("the bottom navigation's overflow disclosure opens, traps focus, and naviga
  * link that doesn't resolve -- and it stays valid regardless of which feature ships next.
  *
  * Enumeration source depends on viewport, matching how the two nav surfaces actually render
- * (see the "shows the sidebar on wide viewports..." test above): the bottom nav's own visible
- * tabs plus whatever "More" discloses on phone, and the sidebar's full, never-overflowed list
- * everywhere else (sidebar.tsx has no MAX_VISIBLE slicing -- see bottom-nav.tsx's
- * splitBottomNavItems() doc comment for why only the bottom nav needs one).
+ * (see the "shows the top bar on wide viewports..." test above): the floating dock's own
+ * tabs on phone (components/shell/dock.tsx renders every item directly, with no overflow
+ * disclosure of its own today -- unlike the "More" sheet an earlier bottom-nav design had),
+ * and the top bar's full link list everywhere else (components/shell/top-bar.tsx).
  *
  * Trustworthiness: this asserts the enumerated list is non-empty before checking anything
  * else. Home is unconditionally in navItemsFor()'s output (see nav-items.ts), so a correctly
@@ -356,10 +372,12 @@ test("the navigation never offers a link that doesn't resolve, for a household w
 }, testInfo) => {
   const householdName = unique("The Fully Featured Family");
 
+  // The full CURRENT optional-feature catalogue (lib/constants/features.ts) -- `family` and
+  // `settings` are always-on and excluded, matching that file's own `locked: true` entries.
   await onboardHousehold(page, {
     ownerName: "Riley Owner",
     householdName,
-    features: ["calendar", "meals", "chores", "habits"],
+    features: ["calendar", "meals", "chores", "ivy", "photos", "budget"],
   });
 
   await page.goto("/dashboard");
@@ -371,9 +389,12 @@ test("the navigation never offers a link that doesn't resolve, for a household w
 
   let hrefs: string[];
   if (testInfo.project.name === "phone") {
-    const bottomNav = page.locator("nav.fixed");
-    const visible = await hrefsFromLocator(bottomNav.locator("a[href]"));
+    const dock = page.locator("nav.fixed");
+    const visible = await hrefsFromLocator(dock.locator("a[href]"));
 
+    // The dock has no overflow disclosure of its own today (see the doc comment above); kept
+    // as a no-op fallback rather than removed outright, so this test starts covering it again
+    // for free the day one is added, instead of silently going blind to an overflow regression.
     const moreButton = page.getByRole("button", { name: "More" });
     let overflow: string[] = [];
     if (await moreButton.isVisible()) {
@@ -386,8 +407,8 @@ test("the navigation never offers a link that doesn't resolve, for a household w
     }
     hrefs = [...visible, ...overflow];
   } else {
-    const sidebarNav = page.locator("aside nav[aria-label='Main']");
-    hrefs = await hrefsFromLocator(sidebarNav.locator("a[href]"));
+    const topBarNav = page.locator("header nav[aria-label='Main']");
+    hrefs = await hrefsFromLocator(topBarNav.locator("a[href]"));
   }
 
   expect(hrefs.length, "the navigation enumeration must find at least one link (Home)").toBeGreaterThan(0);

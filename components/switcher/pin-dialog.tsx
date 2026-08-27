@@ -12,10 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { MemberAvatar } from "@/components/family/member-avatar";
+import { PinPad, type PinPadHandle } from "@/components/switcher/pin-pad";
 import { cn } from "@/lib/utils";
 
 const INITIAL: SwitchState = { error: null };
@@ -52,7 +50,7 @@ export function PinDialog({ member, isActive = false }: { member: PinDialogMembe
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(switchToMemberAction, INITIAL);
   const formRef = useRef<HTMLFormElement>(null);
-  const pinRef = useRef<HTMLInputElement>(null);
+  const padRef = useRef<PinPadHandle>(null);
 
   // `state` lives on this component, which stays mounted for the switcher's whole lifetime --
   // useActionState has no way to reset it directly -- so without this, closing the dialog on
@@ -69,24 +67,22 @@ export function PinDialog({ member, isActive = false }: { member: PinDialogMembe
   const wasPending = useRef(pending);
 
   useEffect(() => {
-    // Falling edge of `open`: the dialog just closed. Reset the form and forget any leftover
-    // error so reopening starts clean.
+    // Falling edge of `open`: the dialog just closed. Reset the form (and the pad's own typed
+    // digits/dots) and forget any leftover error so reopening starts clean.
     if (wasOpen.current && !open) {
       formRef.current?.reset();
+      padRef.current?.reset();
       setDisplayedError("");
     }
     wasOpen.current = open;
 
     // Falling edge of `pending`: a submission just resolved. Show its error, if any, and clear
-    // + refocus the PIN field -- maxLength={4} means a wrong 4-digit guess otherwise can't be
-    // typed over, and refocusing keeps the "just start typing" affordance autoFocus gave on
-    // open.
+    // + refocus the pad -- a wrong 4-digit guess otherwise can't be typed over, and refocusing
+    // keeps the "just start typing" affordance Radix's own dialog-open focus gave.
     if (wasPending.current && !pending && state.error) {
       setDisplayedError(state.error);
-      if (pinRef.current) {
-        pinRef.current.value = "";
-        pinRef.current.focus();
-      }
+      padRef.current?.reset();
+      padRef.current?.focus();
     }
 
     // Rising edge of `pending`: a new attempt just started. Clear the displayed error
@@ -107,8 +103,8 @@ export function PinDialog({ member, isActive = false }: { member: PinDialogMembe
         <button
           type="button"
           className={cn(
-            "flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-[18px] px-4 py-6 text-center shadow-elevation transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-            isActive ? "bg-sunken ring-2 ring-accent" : "bg-surface ring-1 ring-[color:var(--color-muted)]",
+            "glass flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-card px-4 py-6 text-center transition-colors hover:bg-glass-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+            isActive ? "bg-glass-hover ring-2 ring-accent" : "",
           )}
         >
           <span className="relative inline-flex">
@@ -119,12 +115,12 @@ export function PinDialog({ member, isActive = false }: { member: PinDialogMembe
                 not only after a dialog opens. */}
             <span
               aria-hidden
-              className="absolute -right-1 -bottom-1 inline-flex size-6 items-center justify-center rounded-full bg-surface text-muted-foreground ring-1 ring-[color:var(--color-muted)]"
+              className="glass absolute -right-1 -bottom-1 inline-flex size-6 items-center justify-center rounded-full text-text-secondary"
             >
               <Lock size={13} />
             </span>
           </span>
-          <span className="line-clamp-2 w-full break-words text-base font-medium text-ink">
+          <span className="line-clamp-2 w-full break-words text-[15px] font-semibold text-text">
             {member.displayName}
             <span className="sr-only"> — PIN protected{isActive ? " (you)" : ""}</span>
           </span>
@@ -139,36 +135,31 @@ export function PinDialog({ member, isActive = false }: { member: PinDialogMembe
         <form ref={formRef} action={formAction} className="flex flex-col gap-4">
           <input type="hidden" name="memberId" value={member.id} />
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="pin">PIN</Label>
-            <Input
-              ref={pinRef}
-              id="pin"
-              name="pin"
-              type="password"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              autoComplete="off"
-              maxLength={4}
-              required
-            />
-          </div>
+          <PinPad
+            ref={padRef}
+            ariaLabel="PIN"
+            disabled={pending}
+            onComplete={() => formRef.current?.requestSubmit()}
+          />
 
           {/* Always mounted -- an alert region that only appears once an error exists can't
               serve as a persistent live region, which is what a SECOND identical error needs
               to be re-announced (see the effect above). Empty renders as no visible box. */}
           <p
             role="alert"
-            className={cn("rounded-[12px] text-sm text-destructive", displayedError ? "bg-destructive-bg px-4 py-3" : "")}
+            className={cn(
+              "text-center rounded-inset text-[13px] text-danger-text",
+              displayedError ? "bg-danger/10 px-4 py-3" : "",
+            )}
           >
             {displayedError}
           </p>
 
-          <DialogFooter showCloseButton>
-            <Button type="submit" disabled={pending}>
-              {pending ? "Unlocking…" : "Unlock"}
-            </Button>
-          </DialogFooter>
+          {/* No visible submit button -- Design-Spec §6's PIN pad is meant to auto-verify once
+              the 4th digit lands (`PinPad`'s `onComplete`), or on Enter with 4 digits already
+              typed. "Cancel" (from `showCloseButton`) is the only other action a PIN dialog
+              needs. */}
+          <DialogFooter showCloseButton />
         </form>
       </DialogContent>
     </Dialog>

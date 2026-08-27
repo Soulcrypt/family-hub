@@ -6,9 +6,20 @@ import { isMemberGated } from "@/lib/auth/pin-gate";
 import { directSwitchAction } from "./actions";
 import { MemberAvatar } from "@/components/family/member-avatar";
 import { PinDialog } from "@/components/switcher/pin-dialog";
+import { AmbientMotionEffect } from "@/components/settings/ambient-motion-effect";
+import { columnsForMemberCount } from "@/lib/switcher/grid-columns";
 
 const TILE_CLASSNAME =
-  "flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-[18px] bg-surface px-4 py-6 text-center shadow-elevation ring-1 ring-[color:var(--color-muted)] transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "glass flex min-h-[120px] w-full flex-col items-center justify-center gap-3 rounded-card px-4 py-6 text-center transition-colors hover:bg-glass-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
+/** Tailwind needs each class it emits to appear as a literal string somewhere in source --
+ * `grid-cols-${n}` built at runtime never would. `columnsForMemberCount` only ever returns
+ * 1, 2, or 3 (lib/switcher/grid-columns.ts), so this lookup covers its whole range. */
+const GRID_COLUMNS_CLASS: Record<number, string> = {
+  1: "grid-cols-1",
+  2: "grid-cols-2",
+  3: "grid-cols-3",
+};
 
 /**
  * The profile switcher -- a full-screen takeover (deliberately outside the `(app)` route
@@ -80,12 +91,18 @@ export default async function SwitchPage() {
     })),
   );
 
+  // Design-Spec §6/mock: a balanced tile grid rather than a fixed 2-then-3 breakpoint, which
+  // leaves a lone orphaned tile on its own row at 4 members (3 + 1) -- this task's brief calls
+  // that ragged layout out by name. See lib/switcher/grid-columns.ts's doc comment.
+  const columns = columnsForMemberCount(membersWithPinStatus.length);
+
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center gap-10 px-6 py-16">
+      <AmbientMotionEffect />
       {activeMember ? (
         <Link
           href="/dashboard"
-          className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 self-start rounded-[12px] px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 self-start rounded-inset px-2 text-[13px] font-medium text-text-secondary transition-colors hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           <ChevronLeft size={18} aria-hidden />
           Cancel
@@ -93,11 +110,11 @@ export default async function SwitchPage() {
       ) : null}
 
       <div className="text-center">
-        <h1 className="text-3xl">Who’s this?</h1>
-        <p className="mt-2 text-muted-foreground">Tap your name to switch profiles.</p>
+        <h1 className="text-[30px] font-bold tracking-[-0.02em] text-text">Who’s this?</h1>
+        <p className="mt-2 text-[14px] text-text-secondary">Tap your name to switch profiles.</p>
       </div>
 
-      <ul className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3">
+      <ul className={`grid w-full max-w-2xl gap-4 ${GRID_COLUMNS_CLASS[columns] ?? "grid-cols-3"}`}>
         {membersWithPinStatus.map(({ member, gated }) => (
           <li key={member.id}>
             {gated ? (
@@ -120,7 +137,7 @@ export default async function SwitchPage() {
                     size="lg"
                     ariaHidden
                   />
-                  <span className="line-clamp-2 w-full break-words text-base font-medium text-ink">
+                  <span className="line-clamp-2 w-full break-words text-[15px] font-semibold text-text">
                     {member.display_name}
                   </span>
                 </button>

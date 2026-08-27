@@ -35,7 +35,7 @@ export type FamilyMember = {
 const INITIAL: MemberState = { error: null };
 
 const CARD_CLASSNAME =
-  "flex min-h-[120px] flex-col items-center gap-3 rounded-[18px] bg-surface px-4 py-6 text-center shadow-elevation ring-1 ring-[color:var(--color-muted)] transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "glass flex min-h-[120px] flex-col items-center gap-3 rounded-card px-4 py-6 text-center transition-colors hover:bg-glass-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 /**
  * The "Add a family member" affordance -- a dialog housing the same shape of form as
@@ -110,7 +110,7 @@ function AddMemberDialog({ usedColors }: { usedColors: string[] }) {
           </div>
 
           {state.error ? (
-            <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
+            <p role="alert" className="rounded-inset bg-danger/10 px-4 py-3 text-[13px] text-danger-text">
               {state.error}
             </p>
           ) : null}
@@ -138,9 +138,9 @@ export function MemberGrid({ members, canManage }: { members: FamilyMember[]; ca
 
   if (members.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-[18px] border border-dashed border-border px-6 py-16 text-center">
-        <h2 className="text-xl">No one here yet.</h2>
-        <p className="text-muted-foreground">Add the people who live in your household.</p>
+      <div className="dashed flex flex-col items-center gap-4 rounded-card px-6 py-16 text-center">
+        <h2 className="text-[20px] font-bold tracking-[-0.01em] text-text">No one here yet.</h2>
+        <p className="text-[14px] text-text-secondary">Add the people who live in your household.</p>
         {canManage ? <AddMemberDialog usedColors={usedColors} /> : null}
       </div>
     );
@@ -162,12 +162,12 @@ export function MemberGrid({ members, canManage }: { members: FamilyMember[]; ca
                   ariaHidden
                 />
                 <div className="flex min-w-0 w-full flex-col gap-0.5">
-                  <span className="line-clamp-2 w-full break-words text-base font-medium text-ink">
+                  <span className="line-clamp-2 w-full break-words text-[15px] font-semibold text-text">
                     {member.display_name}
                   </span>
-                  <span className="text-sm text-muted-foreground">{ROLE_LABELS[member.role]}</span>
-                  {birthday ? <span className="text-xs text-muted-foreground">{birthday}</span> : null}
-                  <span className="text-xs text-muted-foreground">{member.points_balance} points</span>
+                  <span className="text-[13px] text-text-secondary">{ROLE_LABELS[member.role]}</span>
+                  {birthday ? <span className="text-[12px] text-text-tertiary">{birthday}</span> : null}
+                  <span className="text-[12px] text-text-tertiary">{member.points_balance} points</span>
                 </div>
               </Link>
             </li>

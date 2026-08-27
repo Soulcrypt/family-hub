@@ -87,6 +87,20 @@ async function activeMemberId(page: import("@playwright/test").Page): Promise<st
   return dot > 0 ? cookie.value.slice(0, dot) : null;
 }
 
+/**
+ * Types a PIN into `components/switcher/pin-pad.tsx`'s 12-key grid by clicking each digit's own
+ * button in turn -- there is no `<input>` to `.fill()` any more (Design-Spec §6's PIN pad is a
+ * real keypad, not a text field: see this task's brief on why a text field means summoning an
+ * on-screen keyboard on the wall-mounted tablet this is the primary interaction for). The pad
+ * auto-submits the surrounding form once the 4th digit lands, so this alone is a complete
+ * "enter a PIN and submit" step -- no separate "Unlock" click follows it.
+ */
+async function enterPin(dialog: import("@playwright/test").Locator, pin: string): Promise<void> {
+  for (const digit of pin) {
+    await dialog.getByRole("button", { name: digit, exact: true }).click();
+  }
+}
+
 test("switching profiles changes attribution, gated by PIN for admin profiles other than your own", async ({
   page,
 }) => {
@@ -127,8 +141,12 @@ test("switching profiles changes attribution, gated by PIN for admin profiles ot
   // This step's "Continue" is a plain navigation Link, not a form-submit button -- see
   // onboarding.spec.ts's identical note.
   await page.getByRole("link", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=location/);
+  await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/step=features/);
   await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=widgets/);
+  await page.getByRole("button", { name: /finish setup/i }).click();
   await expect(page).toHaveURL(/step=ready/);
   await page.getByRole("button", { name: /go to my dashboard/i }).click();
   // /dashboard doesn't exist until Task 16 and 404s today -- same reasoning as
@@ -189,19 +207,29 @@ test("switching profiles changes attribution, gated by PIN for admin profiles ot
   await page.getByRole("button", { name: parentName }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await expect(page.getByLabel("PIN")).toBeVisible();
+  const pinPad = dialog.getByRole("group", { name: "PIN" });
+  await expect(pinPad).toBeVisible();
+  const filledDots = dialog.locator('[data-filled="true"]');
 
-  // --- A wrong PIN shows an error and does not switch (attribution stays the child's). ---
-  await page.getByLabel("PIN").fill("0000");
-  await page.getByRole("button", { name: "Unlock" }).click();
+  // --- A wrong PIN shows an error and does not switch (attribution stays the child's). Typed
+  // via PHYSICAL keys, not button clicks, to prove the pad is genuinely keyboard-operable
+  // (this task's brief) -- digits, Backspace (correcting a typo before it's submitted), and
+  // the pad's own auto-submit on the 4th digit landing. Radix's dialog-open focus already
+  // lands on one of the pad's own buttons, so these presses need no extra focus call. ---
+  await page.keyboard.press("0");
+  await page.keyboard.press("0");
+  await page.keyboard.press("Backspace");
+  await page.keyboard.press("0");
+  await page.keyboard.press("0");
+  await page.keyboard.press("0");
   await expect(page.getByRole("alert").filter({ hasText: "Incorrect PIN" })).toBeVisible();
   await expect(page).toHaveURL(/\/switch/);
   expect(await activeMemberId(page)).toBe(childRow.id);
 
-  // --- The PIN field is cleared (and refocused) after a wrong guess -- maxLength={4}
-  // otherwise means a rejected 4-digit guess can never be typed over. ---
-  await expect(page.getByLabel("PIN")).toHaveValue("");
-  await expect(page.getByLabel("PIN")).toBeFocused();
+  // --- The pad's typed digits (and dot feedback) are cleared, and it's refocused, after a
+  // wrong guess -- otherwise a rejected 4-digit guess could never be typed over. ---
+  await expect(filledDots).toHaveCount(0);
+  await expect(pinPad).toBeFocused();
 
   // --- Closing the dialog on an error and reopening the SAME tile starts clean: the stale
   // "Incorrect PIN" from the attempt above must not reappear before a new attempt is made.
@@ -212,11 +240,10 @@ test("switching profiles changes attribution, gated by PIN for admin profiles ot
   await page.getByRole("button", { name: parentName }).click();
   await expect(dialog).toBeVisible();
   await expect(page.getByRole("alert").filter({ hasText: "Incorrect PIN" })).not.toBeVisible();
-  await expect(page.getByLabel("PIN")).toHaveValue("");
+  await expect(filledDots).toHaveCount(0);
 
   // --- The correct PIN switches attribution to Pat Parent. ---
-  await page.getByLabel("PIN").fill(PARENT_PIN);
-  await page.getByRole("button", { name: "Unlock" }).click();
+  await enterPin(dialog, PARENT_PIN);
   await expect(page).toHaveURL(/\/dashboard/);
   await expect.poll(() => activeMemberId(page)).toBe(parentRow.id);
 
@@ -233,6 +260,55 @@ test("switching profiles changes attribution, gated by PIN for admin profiles ot
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page).toHaveURL(/\/dashboard/);
   await expect.poll(() => activeMemberId(page)).toBe(ownerRow.id);
+});
+
+/**
+ * The switcher's old fixed `grid-cols-2 sm:grid-cols-3` left a single orphaned tile on its own
+ * row at exactly 4 members (3 + 1) -- the ragged layout this task's brief calls out by name.
+ * `lib/switcher/grid-columns.ts`'s `columnsForMemberCount` is unit-tested for the full 2-6
+ * range; this proves the real page actually uses it, for the specific count that used to break.
+ */
+test("the switcher grid stays balanced (a 2x2, not 3+1) at exactly 4 members", async ({ page }) => {
+  const householdName = unique("The Balanced Grid Family");
+  const ownerName = "Quinn Owner";
+
+  await page.goto("/signup");
+  await page.getByLabel("Your name").fill(ownerName);
+  await page.getByLabel("Email").fill(`${unique("owner")}@test.local`);
+  await page.getByLabel("Password").fill("correct-horse-battery");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.getByRole("heading", { name: /welcome to family hub/i })).toBeVisible();
+  await page.getByRole("button", { name: "Get started" }).click();
+
+  await page.getByLabel("Household name").fill(householdName);
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=members/);
+
+  for (const name of ["Member Two", "Member Three", "Member Four"]) {
+    await page.getByRole("button", { name: "Add a family member" }).click();
+    await page.getByLabel("Name").fill(name);
+    await chooseRole(page, "child");
+    await page.getByRole("button", { name: "Add member" }).click();
+    await expect(page.getByText(name, { exact: true })).toBeVisible();
+  }
+
+  await page.getByRole("link", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=location/);
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=features/);
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/step=widgets/);
+  await page.getByRole("button", { name: /finish setup/i }).click();
+  await expect(page).toHaveURL(/step=ready/);
+  await page.getByRole("button", { name: /go to my dashboard/i }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
+
+  await page.goto("/switch");
+  // /switch renders exactly one tile grid -- its own top-level <ul>.
+  const grid = page.locator("main > ul");
+  await expect(grid).toHaveCount(1);
+  await expect(grid).toHaveClass(/grid-cols-2\b/);
+  await expect(grid).not.toHaveClass(/grid-cols-3\b/);
 });
 
 // --- P0 fix: onboarding never sets a PIN for anyone, so a parent/owner who never had one set

@@ -71,10 +71,10 @@ function SetPinForm({ memberId }: { memberId: string }) {
   }, [pending, state]);
 
   return (
-    <div className="flex flex-col gap-3 rounded-[18px] bg-surface px-5 py-5 shadow-elevation ring-1 ring-[color:var(--color-muted)]">
+    <div className="flex flex-col gap-3 glass rounded-card px-5 py-5">
       <div>
-        <h2 className="text-lg font-medium text-ink">Pin</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-[15px] font-semibold text-text">Pin</h2>
+        <p className="text-[13px] text-text-secondary">
           Used to switch into this profile on a shared device.
         </p>
       </div>
@@ -95,7 +95,7 @@ function SetPinForm({ memberId }: { memberId: string }) {
           />
         </div>
         {state.error ? (
-          <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
+          <p role="alert" className="rounded-inset bg-danger/10 px-4 py-3 text-[13px] text-danger-text">
             {state.error}
           </p>
         ) : null}
@@ -141,7 +141,7 @@ function DeactivateDialog({ memberId, displayName }: { memberId: string; display
         <form action={formAction} className="flex flex-col gap-4">
           <input type="hidden" name="memberId" value={memberId} />
           {state.error ? (
-            <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
+            <p role="alert" className="rounded-inset bg-danger/10 px-4 py-3 text-[13px] text-danger-text">
               {state.error}
             </p>
           ) : null}
@@ -161,18 +161,18 @@ function DeactivateDialog({ memberId, displayName }: { memberId: string; display
 function ReadOnlyDetails({ member }: { member: FamilyMemberDetail }) {
   const birthday = formatBirthday(member.birthday);
   return (
-    <dl className="flex flex-col gap-3 rounded-[18px] bg-surface px-5 py-5 shadow-elevation ring-1 ring-[color:var(--color-muted)]">
+    <dl className="flex flex-col gap-3 glass rounded-card px-5 py-5">
       <div>
-        <dt className="text-sm text-muted-foreground">Role</dt>
-        <dd className="text-base text-ink">{ROLE_LABELS[member.role]}</dd>
+        <dt className="text-[13px] text-text-secondary">Role</dt>
+        <dd className="text-[15px] text-text">{ROLE_LABELS[member.role]}</dd>
       </div>
       <div>
-        <dt className="text-sm text-muted-foreground">Birthday</dt>
-        <dd className="text-base text-ink">{birthday ?? "Not set"}</dd>
+        <dt className="text-[13px] text-text-secondary">Birthday</dt>
+        <dd className="text-[15px] text-text">{birthday ?? "Not set"}</dd>
       </div>
       <div>
-        <dt className="text-sm text-muted-foreground">Points</dt>
-        <dd className="text-base text-ink">{member.points_balance}</dd>
+        <dt className="text-[13px] text-text-secondary">Points</dt>
+        <dd className="text-[15px] text-text">{member.points_balance}</dd>
       </div>
     </dl>
   );
@@ -188,7 +188,7 @@ export function MemberForm({ member, canManage, isSelf }: MemberFormProps) {
     <div className="flex flex-col gap-6">
       <Link
         href="/family"
-        className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 self-start rounded-[12px] px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="-ml-2 inline-flex min-h-[44px] w-fit items-center gap-1 self-start rounded-inset px-2 text-[13px] font-medium text-text-secondary transition-colors hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <ChevronLeft size={18} aria-hidden />
         Back to family
@@ -200,7 +200,7 @@ export function MemberForm({ member, canManage, isSelf }: MemberFormProps) {
       </div>
 
       {canEdit ? (
-        <form action={formAction} className="flex flex-col gap-4 rounded-[18px] bg-surface px-5 py-5 shadow-elevation ring-1 ring-[color:var(--color-muted)]">
+        <form action={formAction} className="flex flex-col gap-4 glass rounded-card px-5 py-5">
           <input type="hidden" name="memberId" value={member.id} />
 
           <div className="flex flex-col gap-2">
@@ -244,7 +244,7 @@ export function MemberForm({ member, canManage, isSelf }: MemberFormProps) {
                 </SelectContent>
               </Select>
               <input type="hidden" name="role" value={member.role} />
-              <p className="text-sm text-muted-foreground">Only a parent or owner can change this.</p>
+              <p className="text-[13px] text-text-secondary">Only a parent or owner can change this.</p>
             </div>
           )}
 
@@ -258,12 +258,12 @@ export function MemberForm({ member, canManage, isSelf }: MemberFormProps) {
               <Label htmlFor="birthday">Birthday</Label>
               <Input id="birthday" type="date" defaultValue={member.birthday ?? ""} disabled />
               <input type="hidden" name="birthday" value={member.birthday ?? ""} />
-              <p className="text-sm text-muted-foreground">Only a parent or owner can change this.</p>
+              <p className="text-[13px] text-text-secondary">Only a parent or owner can change this.</p>
             </div>
           )}
 
           {state.error ? (
-            <p role="alert" className="rounded-[12px] bg-destructive-bg px-4 py-3 text-sm text-destructive">
+            <p role="alert" className="rounded-inset bg-danger/10 px-4 py-3 text-[13px] text-danger-text">
               {state.error}
             </p>
           ) : null}

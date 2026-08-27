@@ -58,12 +58,12 @@ export function ColorPicker({ idPrefix, name, defaultValue, displayName, disable
               aria-label={swatch.name}
               style={{ backgroundColor: swatch.hex }}
               className={cn(
-                "relative flex size-11 items-center justify-center rounded-full ring-1 ring-black/10 transition-transform hover:scale-105 data-[state=checked]:ring-2 data-[state=checked]:ring-accent-strong data-[state=checked]:ring-offset-2 data-[state=checked]:ring-offset-surface",
+                "relative flex size-11 items-center justify-center rounded-full ring-1 ring-black/10 transition-transform hover:scale-105 data-[state=checked]:ring-2 data-[state=checked]:ring-accent-strong data-[state=checked]:ring-offset-2 data-[state=checked]:ring-offset-[var(--color-base)]",
               )}
             >
               <RadioGroupIndicator>
                 <span className="flex size-5 items-center justify-center rounded-full bg-white shadow-xs">
-                  <Check className="size-3.5 text-ink" aria-hidden />
+                  <Check className="size-3.5 text-[#2A2520]" aria-hidden />
                 </span>
               </RadioGroupIndicator>
             </RadioGroupItem>

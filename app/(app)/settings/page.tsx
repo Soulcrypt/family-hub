@@ -1,82 +1,81 @@
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import { requireAccountMembership, getActiveMember } from "@/lib/auth/active-member";
-import { canEditSettings, isAdminProfile } from "@/lib/auth/permissions";
+import { canInvite, canManageMembers, isAdminProfile, requiresPin } from "@/lib/auth/permissions";
+import { createServerClient } from "@/lib/supabase/server";
+import { FamilyRoster, type RemovedRosterMember, type RosterMember } from "@/components/settings/family-roster";
 import { SetPinForm } from "@/components/settings/set-pin-form";
 
-const CARDS = [
-  {
-    href: "/settings/household",
-    label: "Household",
-    description: "Name, timezone, week start, and features",
-    adminOnly: true,
-  },
-  {
-    href: "/settings/appearance",
-    label: "Appearance",
-    description: "Light, dark, or match your device",
-    adminOnly: false,
-  },
-  {
-    href: "/settings/members",
-    label: "Members",
-    description: "Invite family members to log in, or restore one you removed",
-    adminOnly: true,
-  },
-] as const;
-
 /**
- * The Settings landing page: an index of cards linking onward, plus a self-service "set your
- * PIN" control.
+ * The Family section of Settings (mock 4h, Design-Spec §8.10) — now the default `/settings`
+ * pane. Replaces the old index-of-cards page (Household/Appearance/Members) and absorbs what
+ * used to live at `/settings/members`: the member roster, the invite affordances, and the
+ * removed-members restore list all move here, matching the left section nav
+ * (components/settings/settings-nav.tsx) this task's brief specifies.
  *
- * `adminOnly` cards (Household, Members) are OFFERED only when the currently-displayed
- * profile reads as an admin -- `isAdminProfile(activeMember?.role ?? account.role)`, the same
- * UI-only display check app/(app)/settings/household/page.tsx already uses for its `canEdit`
- * derivation. This is a UI-honesty fix, not a new security boundary: hiding the card here does
- * not replace either destination page's own gate (Household already renders read-only via
- * that identical check; Members' `canManage`/`canInvite` still come from the authenticated
- * account's real `canEditSettings`/`canManageMembers`), and a household switched to a
- * non-admin profile must not be handed a full control panel it will only be told "no" after
- * tapping into (SP1 Foundation design review, Finding 1). Combined with
- * `canEditSettings(account.role)` -- the real authority check -- so a non-admin ACCOUNT (not
- * just a non-admin attributed profile) sees the same thing. Appearance is never gated (nobody
- * is admin-restricted from picking a theme) and the PIN control below is self-service for
- * anyone -- see SetPinForm's doc comment -- so this needs no authority check of its own.
+ * Admin gating is combined exactly the way every other privileged view in this app already
+ * does: `canManageMembers(account.role)`/`canInvite(account.role)` — the AUTHENTICATED
+ * account's real authority, which `createInviteAction`/`reactivateMemberAction` re-check
+ * themselves regardless of what this page renders — AND `isAdminProfile(activeMember?.role ??
+ * account.role)`, the display-only check for a shared device currently switched to a non-admin
+ * profile (see lib/auth/permissions.ts's `isAdminProfile` doc comment). A household viewed as a
+ * child must not be OFFERED "+ Invite member" or the removed-members list, even though the
+ * account underneath genuinely could use them.
  */
-export default async function SettingsIndexPage() {
+export default async function SettingsFamilyPage() {
   const account = await requireAccountMembership();
   const activeMember = await getActiveMember();
+  const supabase = await createServerClient();
+
+  const viewingAsAdmin = isAdminProfile(activeMember?.role ?? account.role);
+  const canManage = canManageMembers(account.role) && viewingAsAdmin;
+  const canInviteHere = canInvite(account.role) && viewingAsAdmin;
+
+  const [{ data: household }, { data: members }] = await Promise.all([
+    supabase.from("households").select("name").eq("id", account.household_id).maybeSingle(),
+    supabase
+      .from("household_members")
+      .select("id, display_name, role, color, avatar_url, user_id, birthday")
+      .eq("household_id", account.household_id)
+      .eq("is_active", true)
+      .order("created_at"),
+  ]);
+
+  // Real "does this profile genuinely have a PIN set?" per member, not merely "could this role
+  // have one" — mirrors app/switch/page.tsx's own reasoning (lib/auth/pin-gate.ts): claiming a
+  // member is PIN-protected when no PIN was ever set would be the exact P0 the switcher's
+  // gating logic exists to avoid, just relocated to a settings row instead of a switcher tile.
+  const rosterMembers: RosterMember[] = await Promise.all(
+    (members ?? []).map(async (member) => {
+      let hasPin = false;
+      if (requiresPin(member.role)) {
+        const { data } = await supabase.rpc("member_has_pin", { p_member_id: member.id });
+        hasPin = Boolean(data);
+      }
+      return { ...member, hasPin };
+    }),
+  );
+
+  const { data: removedMembers } = canManage
+    ? await supabase
+        .from("household_members")
+        .select("id, display_name, role, color, avatar_url")
+        .eq("household_id", account.household_id)
+        .eq("is_active", false)
+        .order("created_at")
+    : { data: [] as RemovedRosterMember[] };
+
   const pinMemberId = activeMember?.id ?? account.id;
-  const canSeeAdminCards = canEditSettings(account.role) && isAdminProfile(activeMember?.role ?? account.role);
-  const cards = CARDS.filter((card) => !card.adminOnly || canSeeAdminCards);
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-6 py-10">
-      <header className="mb-8">
-        <h1 className="text-3xl">Settings</h1>
-        <p className="mt-1 text-muted-foreground">Manage your household.</p>
-      </header>
-
-      <ul className="flex flex-col gap-3">
-        {cards.map((card) => (
-          <li key={card.href}>
-            <Link
-              href={card.href}
-              className="flex min-h-[44px] items-center gap-3 rounded-[18px] bg-surface px-5 py-4 shadow-elevation ring-1 ring-[color:var(--color-muted)] transition-colors hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-            >
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="text-base font-medium text-ink">{card.label}</span>
-                <span className="truncate text-sm text-muted-foreground">{card.description}</span>
-              </span>
-              <ChevronRight size={20} aria-hidden className="shrink-0 text-muted-foreground" />
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      <div className="mt-8">
-        <SetPinForm memberId={pinMemberId} />
-      </div>
+    <div className="flex flex-col gap-8">
+      <FamilyRoster
+        householdName={household?.name ?? "Your household"}
+        members={rosterMembers}
+        removedMembers={removedMembers ?? []}
+        canInvite={canInviteHere}
+        canManage={canManage}
+        viewingAsAdmin={viewingAsAdmin}
+      />
+      <SetPinForm memberId={pinMemberId} />
     </div>
   );
 }

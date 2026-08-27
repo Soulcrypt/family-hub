@@ -37,10 +37,10 @@ export default async function SettingsHouseholdPage() {
   const canEdit = canEditSettings(account.role) && isAdminProfile(activeMember?.role ?? account.role);
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-6 py-10">
-      <header className="mb-8">
-        <h1 className="text-3xl">Household</h1>
-        <p className="mt-1 text-muted-foreground">Your household&rsquo;s name, timezone, and features.</p>
+    <div className="flex flex-col gap-6">
+      <header>
+        <h2 className="text-[20px] font-bold tracking-[-0.01em] text-text">Household</h2>
+        <p className="mt-1 text-[14px] text-text-secondary">Your household&rsquo;s name, timezone, and features.</p>
         {/* &rsquo; renders the same curly apostrophe (’) this codebase's regular UI copy uses
             elsewhere (e.g. components/family/member-form.tsx's "They’ll no longer appear…") --
             see AGENTS.md Task 15 context #7: only MAPPED ERROR STRINGS use a straight ASCII
